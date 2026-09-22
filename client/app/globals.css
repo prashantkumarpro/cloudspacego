@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+
+@theme {
+  --color-m-blue-light: #0066b1;
+  --color-m-blue-dark: #1c69d4;
+  --color-m-red: #e22718;
+
+  /* System colors mapped to CSS variables */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card-bg: var(--card-bg);
+  --color-card-border: var(--card-border);
+  --color-sidebar-bg: var(--sidebar-bg);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-active-bg: var(--sidebar-active-bg);
+  --color-sidebar-active-text: var(--sidebar-active-text);
+  --color-text-muted: var(--text-muted);
+  --color-text-secondary: var(--text-secondary);
+  --color-input-bg: var(--input-bg);
+  --color-divider: var(--divider);
+
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+:root {
+  /* Soft off-white and muted lavender light mode */
+  --background: #FAF9F7;
+  /* clean, soft warm off-white canvas */
+  --foreground: #1E1B24;
+  /* soft deep charcoal text */
+  --card-bg: #FFFFFF;
+  /* pure white containers */
+  --card-border: #ECEAF0;
+  /* subtle neutral border */
+  --sidebar-bg: #FFFFFF;
+  /* pure white sidebar */
+  --sidebar-border: #ECEAF0;
+  /* subtle neutral sidebar border */
+  --sidebar-active-bg: #F2EFFF;
+  /* calm soft lavender active pill */
+  --sidebar-active-text: #6E60EE;
+  /* brand violet text */
+  --text-muted: #8A8594;
+  /* slate-gray-muted text */
+  --text-secondary: #585361;
+  /* deep slate-gray text */
+  --input-bg: #F8F7FB;
+  /* soft small controls background */
+  --divider: #ECEAF0;
+}
+
+.dark {
+  /* Sleek Leonardo.ai Style Dark Mode */
+  --background: #000000;
+  /* pure black canvas */
+  --foreground: #FFFFFF;
+  /* absolute white text */
+  --card-bg: #0A0A0E;
+  /* ultra dark card background */
+  --card-border: #16161C;
+  /* subtle dark card border */
+  --sidebar-bg: #08080A;
+  /* very dark sidebar */
+  --sidebar-border: #121216;
+  --sidebar-active-bg: #15151F;
+  /* active navigation item background with violet hue */
+  --sidebar-active-text: #ffffff;
+  --text-muted: #686875;
+  /* clean gray-muted text */
+  --text-secondary: #9A9AAB;
+  /* secondary text */
+  --input-bg: #0E0E12;
+  /* dark input bg */
+  --divider: #121216;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  transition-property: color, background-color;
+  transition-duration: 250ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Ensure the main content container and header sit completely flush against the sidebar divider */
+main, header {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+
+/* Keyboard focus accessibility states */
+*:focus-visible:not(input):not(select):not(textarea) {
+  outline: 2px solid #6E60EE !important;
+  outline-offset: 2px !important;
+}
+
+/* Custom scrollbars matching theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--divider);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Preserve theme background/text colors for browser autofilled inputs */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 100px var(--input-bg) inset !important;
+  -webkit-text-fill-color: var(--foreground) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
