@@ -127,7 +127,7 @@ export function TrashView() {
           files={deletedFiles}
           onFileClick={file => setPreviewFile(file)}
           customActions={getTrashDropdownItems}
-          showLocation={false}
+          showOwner={false}
           showDate={true}
           showSize={true}
           dateLabel='Deleted Date'

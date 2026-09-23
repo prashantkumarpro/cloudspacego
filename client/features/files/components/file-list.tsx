@@ -231,16 +231,6 @@ export function FileList({
     return result
   }, [customFiles, globalFiles, currentSection, activeFolderId, searchQuery, limit])
 
-  const getLocationName = (file: UnifiedFileItem) => {
-    const parentId = file.parentFolderId || file.parentDirId
-    if (parentId) {
-      const parent = (globalFiles as UnifiedFileItem[]).find(
-        f => (f.id || f._id) === parentId
-      )
-      if (parent) return parent.name
-    }
-    return 'My Files'
-  }
 
   const handleOpenFile = (file: UnifiedFileItem) => {
     const fileType = deriveFileType(file)
