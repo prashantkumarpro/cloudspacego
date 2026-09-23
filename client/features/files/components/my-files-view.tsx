@@ -21,48 +21,92 @@ export default function MyFilesView () {
     enabled: !activeFolderId
   })
 
+  // Stateful breadcrumb trail to track full hierarchy (My Files › Images › Projects › 2026)
+  const [folderTrail, setFolderTrail] = React.useState<{ id: string; name: string }[]>([])
+
+  React.useEffect(() => {
+    if (!activeFolderId) {
+      setFolderTrail([])
+      return
+    }
+
+    if (directory?.name) {
+      setFolderTrail(prev => {
+        // 1. If activeFolderId is already in trail, truncate back to it and update name (handles back navigation and rename)
+        const existingIdx = prev.findIndex(item => item.id === activeFolderId)
+        if (existingIdx !== -1) {
+          const updated = prev.slice(0, existingIdx + 1)
+          updated[existingIdx] = { id: activeFolderId, name: directory.name }
+          return updated
+        }
+
+        // 2. If directory has parentDirId matching the previous folder in trail, append child
+        const parentId = directory.parentDirId ? directory.parentDirId.toString() : null
+        if (parentId && prev.length > 0 && prev[prev.length - 1].id === parentId) {
+          return [...prev, { id: activeFolderId, name: directory.name }]
+        }
+
+        // 3. If parentDirId is found earlier in the trail, truncate to parent and append
+        if (parentId) {
+          const parentIdx = prev.findIndex(item => item.id === parentId)
+          if (parentIdx !== -1) {
+            return [...prev.slice(0, parentIdx + 1), { id: activeFolderId, name: directory.name }]
+          }
+        }
+
+        // 4. Default: single folder depth
+        return [{ id: activeFolderId, name: directory.name }]
+      })
+    }
+  }, [activeFolderId, directory?.name, directory?.parentDirId])
+
   const breadcrumbs = useMemo(() => {
     const crumbs: { id: string | null; name: string }[] = [{ id: null, name: 'My Files' }]
-    if (activeFolderId && directory?.name) {
+    if (folderTrail.length > 0) {
+      crumbs.push(...folderTrail)
+    } else if (activeFolderId && directory?.name) {
       crumbs.push({ id: activeFolderId, name: directory.name })
     }
     return crumbs
-  }, [activeFolderId, directory?.name])
+  }, [folderTrail, activeFolderId, directory?.name])
 
   const filesToDisplay = activeFolderId ? directory?.files : infiniteFiles
   const isListLoading = activeFolderId ? isDirLoading : isFilesLoading
 
   return (
     <div className='flex flex-col gap-6'>
-      {/* Header Breadcrumbs Row */}
-      <div className='flex items-center justify-between border-b border-card-border pb-4 shrink-0 select-none'>
-        <div className='flex items-center gap-2 flex-wrap'>
+      {/* Current Location Header Breadcrumb */}
+      <div className='flex items-center justify-between border-b border-card-border pb-3 shrink-0 select-none'>
+        <h1 className='text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2 flex-wrap'>
           {breadcrumbs.map((crumb, idx) => {
             const isLast = idx === breadcrumbs.length - 1
             return (
-              <React.Fragment key={idx}>
-                {idx > 0 && <span className='text-text-muted text-xs'>/</span>}
-                <button
-                  disabled={isLast}
-                  onClick={() => setActiveFolderId(crumb.id)}
-                  className={cn(
-                    'text-xs font-bold transition-colors focus:outline-none',
-                    isLast
-                      ? 'text-[#6E60EE] cursor-default'
-                      : 'text-text-secondary hover:text-foreground cursor-pointer'
-                  )}
-                >
-                  {crumb.name}
-                </button>
+              <React.Fragment key={crumb.id ?? 'root'}>
+                {idx > 0 && (
+                  <span className='text-text-muted text-lg sm:text-xl font-normal select-none px-0.5'>
+                    ›
+                  </span>
+                )}
+                {isLast ? (
+                  <span className='text-foreground truncate max-w-[300px]'>
+                    {crumb.name}
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => setActiveFolderId(crumb.id)}
+                    className='text-text-secondary hover:text-foreground cursor-pointer transition-colors focus:outline-none truncate max-w-[300px]'
+                    title={crumb.name}
+                  >
+                    {crumb.name}
+                  </button>
+                )}
               </React.Fragment>
             )
           })}
-        </div>
-
-        <span className='text-[10px] font-bold uppercase tracking-[1px] text-text-muted'>
-          Active Folder Workspace
-        </span>
+        </h1>
       </div>
+
+
 
       {/* Folders block */}
       <FolderGrid
