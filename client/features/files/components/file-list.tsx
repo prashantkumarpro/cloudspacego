@@ -72,6 +72,10 @@ export interface FileListProps {
   emptySubtitle?: string
   onFileClick?: (file: UnifiedFileItem) => void
   onFolderClick?: (folderId: string) => void
+  isLoading?: boolean
+  isLoadingMore?: boolean
+  hasMore?: boolean
+  onLoadMore?: () => void
 }
 
 function deriveFileType(file: UnifiedFileItem): FileType {
@@ -103,7 +107,11 @@ export function FileList({
   emptyMessage,
   emptySubtitle,
   onFileClick,
-  onFolderClick
+  onFolderClick,
+  isLoading = false,
+  isLoadingMore = false,
+  hasMore = false,
+  onLoadMore
 }: FileListProps) {
   const {
     files: globalFiles,
@@ -145,10 +153,44 @@ export function FileList({
     }
   }
 
+  // Infinite scroll observer using IntersectionObserver
+  const observerTarget = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    if (!onLoadMore || !hasMore) return
+
+    const target = observerTarget.current
+    if (!target) return
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore && !isLoading) {
+          onLoadMore()
+        }
+      },
+      {
+        root: null,
+        rootMargin: '200px',
+        threshold: 0.1
+      }
+    )
+
+    observer.observe(target)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [onLoadMore, hasMore, isLoadingMore, isLoading])
+
   // Filter files if customFiles is explicitly passed
   const displayList = React.useMemo(() => {
     if (customFiles !== undefined) {
-      const list = (customFiles as UnifiedFileItem[]) || []
+      let list = (customFiles as UnifiedFileItem[]) || []
+      if (searchQuery) {
+        list = list.filter(f =>
+          f.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      }
       return limit ? list.slice(0, limit) : list
     }
 
@@ -160,6 +202,7 @@ export function FileList({
       )
       return limit ? result.slice(0, limit) : result
     }
+
 
     if (currentSection === 'Dashboard' || currentSection === 'Recent') {
       result = result.sort(
@@ -372,8 +415,28 @@ export function FileList({
         </div>
       )}
 
-      {/* Empty State */}
-      {displayList.length === 0 ? (
+      {/* Empty State vs Loading vs Content */}
+      {isLoading && displayList.length === 0 ? (
+        activeViewMode === 'grid' ? (
+          <div className='grid grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-3 sm:gap-4'>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className='h-44 bg-card-bg/60 border border-card-border rounded-xl animate-pulse p-3'
+              />
+            ))}
+          </div>
+        ) : (
+          <div className='w-full flex flex-col gap-2 py-2'>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className='h-12 w-full bg-card-bg/60 border border-card-border rounded-lg animate-pulse'
+              />
+            ))}
+          </div>
+        )
+      ) : displayList.length === 0 ? (
         <div className='w-full py-12 flex flex-col items-center justify-center text-center select-none bg-card-bg border border-dashed border-card-border p-6 rounded-xl'>
           <div className='w-10 h-10 rounded-full bg-input-bg flex items-center justify-center text-text-muted mb-2.5'>
             {searchQuery ? (
@@ -389,35 +452,53 @@ export function FileList({
             {defaultEmptySubtitle}
           </p>
         </div>
-      ) : activeViewMode === 'grid' ? (
-        /* GRID VIEW */
-        <FileGrid
-          files={displayList}
-          onFileClick={handleOpenFile}
-          onDownload={handleDownload}
-          onShare={file => {
-            const fId = file.id || file._id || ''
-            setSelectedFileId(fId)
-            setActiveModal('share')
-          }}
-          onRename={file => setRenameTarget(file)}
-          onMove={file => setMoveTarget(file)}
-          onDetails={file => setDetailsTarget(file)}
-          onToggleStar={fileId => toggleStar(fileId)}
-          onDelete={file => handleDeleteItem(file)}
-        />
       ) : (
-        /* REFINED LIST / TABLE VIEW (Clean, unboxed workspace table using reusable FileTable) */
-        <FileTable
-          files={displayList}
-          onFileClick={handleOpenFile}
-          onFolderClick={onFolderClick ? onFolderClick : setActiveFolderId}
-          onToggleStar={fileId => toggleStar(fileId)}
-          customActions={getDropdownItems}
-          showHeader={showHeader}
-          allFiles={globalFiles as UnifiedFileItem[]}
-        />
+        <>
+          {activeViewMode === 'grid' ? (
+            /* GRID VIEW */
+            <FileGrid
+              files={displayList}
+              onFileClick={handleOpenFile}
+              onDownload={handleDownload}
+              onShare={file => {
+                const fId = file.id || file._id || ''
+                setSelectedFileId(fId)
+                setActiveModal('share')
+              }}
+              onRename={file => setRenameTarget(file)}
+              onMove={file => setMoveTarget(file)}
+              onDetails={file => setDetailsTarget(file)}
+              onToggleStar={fileId => toggleStar(fileId)}
+              onDelete={file => handleDeleteItem(file)}
+            />
+          ) : (
+            /* REFINED LIST / TABLE VIEW (Clean, unboxed workspace table using reusable FileTable) */
+            <FileTable
+              files={displayList}
+              onFileClick={handleOpenFile}
+              onFolderClick={onFolderClick ? onFolderClick : setActiveFolderId}
+              onToggleStar={fileId => toggleStar(fileId)}
+              customActions={getDropdownItems}
+              showHeader={showHeader}
+              allFiles={globalFiles as UnifiedFileItem[]}
+            />
+          )}
+
+          {/* Sentinel for Infinite Scrolling */}
+          {hasMore && (
+            <div ref={observerTarget} className='h-4 w-full shrink-0' />
+          )}
+
+          {/* Loading More Indicator */}
+          {isLoadingMore && (
+            <div className='w-full py-4 flex items-center justify-center gap-2 text-text-secondary text-xs select-none'>
+              <div className='w-4 h-4 rounded-full border-2 border-[#6E60EE] border-t-transparent animate-spin' />
+              <span>Loading more files...</span>
+            </div>
+          )}
+        </>
       )}
+
 
       {/* Bottom View all action reusing SectionAction */}
       {showViewAll && currentSection === 'Dashboard' && displayList.length > 0 && (

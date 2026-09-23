@@ -1,9 +1,64 @@
 import { apiClient } from "@/lib/api/client";
 import type {
     FileApiResponse,
+    GetFilesParams,
+    GetFilesResponse,
     RenameFileData,
     UploadFileData,
 } from "./types";
+
+export const getFiles = async (
+    params?: GetFilesParams
+): Promise<GetFilesResponse> => {
+    const response = await apiClient.get<{
+        data: Array<{
+            id?: string;
+            _id?: string;
+            name: string;
+            extension: string;
+            parentDirId?: string;
+            userId?: string;
+            createdAt?: string;
+            updatedAt?: string;
+            size?: number;
+            directory?: {
+                id?: string;
+                _id?: string;
+                name: string;
+            };
+        }>;
+        pagination: {
+            limit: number;
+            hasMore: boolean;
+            nextCursor: string | null;
+        };
+    }>("/file", {
+        params,
+    });
+
+    const normalizedData = (response.data.data || []).map((item) => ({
+        id: (item.id || item._id || "").toString(),
+        name: item.name,
+        extension: item.extension,
+        parentDirId: item.parentDirId,
+        userId: item.userId,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        size: item.size,
+        directory: item.directory
+            ? {
+                  id: (item.directory.id || item.directory._id || "").toString(),
+                  name: item.directory.name,
+              }
+            : undefined,
+    }));
+
+    return {
+        data: normalizedData,
+        pagination: response.data.pagination,
+    };
+};
+
 
 export const uploadFile = async (
     data: UploadFileData,

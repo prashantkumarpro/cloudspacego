@@ -5,11 +5,21 @@ import { useApp } from '@/providers/app-provider'
 import { FolderGrid } from '@/features/directory/components/folder-grid'
 import { FileList } from '@/features/files/components/file-list'
 import { useDirectory } from '@/features/directory/hooks/use-directory'
+import { useInfiniteFiles } from '@/features/files/hooks/use-files'
 import { cn } from '@/lib/utils/cn'
 
 export default function MyFilesView () {
   const { activeFolderId, setActiveFolderId } = useApp()
-  const { directory, isLoading, rename, remove } = useDirectory(activeFolderId ?? undefined)
+  const { directory, isLoading: isDirLoading, rename, remove } = useDirectory(activeFolderId ?? undefined)
+  const {
+    files: infiniteFiles,
+    isLoading: isFilesLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore
+  } = useInfiniteFiles({
+    enabled: !activeFolderId
+  })
 
   const breadcrumbs = useMemo(() => {
     const crumbs: { id: string | null; name: string }[] = [{ id: null, name: 'My Files' }]
@@ -18,6 +28,9 @@ export default function MyFilesView () {
     }
     return crumbs
   }, [activeFolderId, directory?.name])
+
+  const filesToDisplay = activeFolderId ? directory?.files : infiniteFiles
+  const isListLoading = activeFolderId ? isDirLoading : isFilesLoading
 
   return (
     <div className='flex flex-col gap-6'>
@@ -54,16 +67,21 @@ export default function MyFilesView () {
       {/* Folders block */}
       <FolderGrid
         folders={directory?.directories}
-        isLoading={isLoading}
+        isLoading={isDirLoading}
         onRename={rename}
         onDelete={remove}
       />
 
-      {/* Files block */}
+      {/* Files block with real cursor pagination & infinite scrolling */}
       <FileList
-        files={directory?.files}
+        files={filesToDisplay}
+        isLoading={isListLoading}
+        isLoadingMore={isLoadingMore}
+        hasMore={!activeFolderId && hasMore}
+        onLoadMore={loadMore}
         title='Files'
       />
     </div>
   )
 }
+

@@ -59,6 +59,9 @@ export function FileTable({
   allFiles = []
 }: FileTableProps) {
   const getLocationName = (file: UnifiedFileItem) => {
+    if ((file as { directory?: { name?: string } }).directory?.name) {
+      return (file as { directory?: { name?: string } }).directory!.name!
+    }
     const parentId = file.parentFolderId || file.parentDirId
     if (parentId) {
       const parent = allFiles.find(f => (f.id || f._id) === parentId)
@@ -66,6 +69,7 @@ export function FileTable({
     }
     return 'My Files'
   }
+
 
   const handleRowClick = (file: UnifiedFileItem) => {
     const fileType = deriveFileType(file)

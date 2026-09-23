@@ -1,13 +1,37 @@
+export interface DirectoryReference {
+    id: string;
+    _id?: string;
+    name: string;
+}
+
 export interface FileItem {
     id: string;
     _id?: string;
     name: string;
     extension: string;
-    parentDirId: string;
-    userId: string;
+    parentDirId?: string;
+    userId?: string;
     createdAt?: string;
     updatedAt?: string;
     size?: number;
+    directory?: DirectoryReference;
+}
+
+
+export interface PaginationData {
+    limit: number;
+    hasMore: boolean;
+    nextCursor: string | null;
+}
+
+export interface GetFilesResponse {
+    data: FileItem[];
+    pagination: PaginationData;
+}
+
+export interface GetFilesParams {
+    cursor?: string;
+    limit?: number;
 }
 
 export interface UploadFileData {
@@ -22,4 +46,4 @@ export interface RenameFileData {
 export interface FileApiResponse {
     message?: string;
     error?: string;
-}
+}
