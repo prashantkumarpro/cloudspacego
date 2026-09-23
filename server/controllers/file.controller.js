@@ -1,3 +1,5 @@
+import mongoose from 'mongoose'
+import { createCursor, decodeCursor } from '../utils/cursor.js'
 import path from 'path'
 import { createWriteStream } from 'fs'
 import { rm } from 'fs/promises'
@@ -63,24 +65,138 @@ export const getFiles = async (req, res, next) => {
       })
     }
 
-    const files = await File.find({
+    const cursor = req.query.cursor
+
+    const query = {
       userId: req.user._id
-    })
-      .sort({
-        createdAt: -1,
-        _id: -1
-      })
-      .limit(limit + 1)
-      .lean()
+    }
+
+    if (cursor) {
+      let decodedCursor
+
+      try {
+        decodedCursor = decodeCursor(cursor)
+      } catch {
+        return res.status(400).json({
+          error: 'Invalid cursor'
+        })
+      }
+
+      const { createdAt, id } = decodedCursor
+
+      if (
+        !createdAt ||
+        !id ||
+        !mongoose.isValidObjectId(id) ||
+        Number.isNaN(new Date(createdAt).getTime())
+      ) {
+        return res.status(400).json({
+          error: 'Invalid cursor'
+        })
+      }
+
+      query.$or = [
+        {
+          createdAt: {
+            $lt: new Date(createdAt)
+          }
+        },
+        {
+          createdAt: new Date(createdAt),
+          _id: {
+            $lt: new mongoose.Types.ObjectId(id)
+          }
+        }
+      ]
+    }
+
+    const files = await File.aggregate([
+      {
+        $match: query
+      },
+      {
+        $sort: {
+          createdAt: -1,
+          _id: -1
+        }
+      },
+      {
+        $limit: limit + 1
+      },
+      {
+        $lookup: {
+          from: 'directories',
+          let: {
+            parentDirId: '$parentDirId',
+            userId: '$userId'
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {
+                      $eq: ['$_id', '$$parentDirId']
+                    },
+                    {
+                      $eq: ['$userId', '$$userId']
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              $project: {
+                _id: 1,
+                name: 1
+              }
+            }
+          ],
+          as: 'directory'
+        }
+      },
+      {
+        $unwind: {
+          path: '$directory',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          extension: 1,
+          parentDirId: 1,
+          createdAt: 1,
+          directory: {
+            _id: '$directory._id',
+            name: '$directory.name'
+          }
+        }
+      }
+    ])
 
     const hasMore = files.length > limit
+
     const data = files.slice(0, limit)
+
+    let nextCursor = null
+
+    if (hasMore) {
+      const lastFile = data[data.length - 1]
+
+      nextCursor = createCursor({
+        createdAt: lastFile.createdAt,
+        id: lastFile._id.toString()
+      })
+    }
 
     return res.status(200).json({
       data,
       pagination: {
         limit,
-        hasMore
+        hasMore,
+        nextCursor
       }
     })
   } catch (error) {

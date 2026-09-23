@@ -8,9 +8,14 @@ import fileRoutes from './routes/file.routes.js'
 import userRoutes from './routes/user.routes.js'
 import authRoutes from './routes/auth.routes.js'
 import checkAuth from './middlewares/auth.middleware.js'
+import fs from 'fs'
+import path from 'path'
 import connectDB from './config/db.js'
 
 const mySecretKey = 'My-cloudeStorage-123$#'
+
+// Ensure local storage directory exists
+fs.mkdirSync(path.resolve('./storage'), { recursive: true })
 
 try {
   connectDB()

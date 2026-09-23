@@ -16,8 +16,8 @@ server/dist/
 # Logs
 **/*.log
 
-# Temporary frontend backup
-client-backup/
+# Storage
+server/storage/
 
 # IDE
 .vscode/

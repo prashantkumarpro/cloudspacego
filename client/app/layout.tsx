@@ -10,7 +10,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'CloudE Cloud Storage',
+  title: 'cloudspacego',
   description: 'A Cloud Storage Website.'
 }
 

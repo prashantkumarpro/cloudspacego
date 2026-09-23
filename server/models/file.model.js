@@ -5,12 +5,12 @@ const fileSchema = new Schema(
     name: {
       type: String,
       required: true,
-      trim: true,
+      trim: true
     },
 
     extension: {
       type: String,
-      required: true,
+      required: true
     },
 
     parentDirId: {
@@ -25,7 +25,8 @@ const fileSchema = new Schema(
     }
   },
   {
-    versionKey: false
+    versionKey: false,
+    timestamps: true
   }
 )
 
