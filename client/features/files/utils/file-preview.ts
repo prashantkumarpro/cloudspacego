@@ -254,6 +254,163 @@ export function getFileTypeInfo(
 }
 
 /**
+ * Standard MIME type lookup mapping
+ */
+export const EXTENSION_MIME_MAP: Record<string, string> = {
+  // Images
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  gif: 'image/gif',
+  webp: 'image/webp',
+  svg: 'image/svg+xml',
+  ico: 'image/x-icon',
+  bmp: 'image/bmp',
+  tiff: 'image/tiff',
+  tif: 'image/tiff',
+  avif: 'image/avif',
+
+  // Documents & PDFs
+  pdf: 'application/pdf',
+  doc: 'application/msword',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  xls: 'application/vnd.ms-excel',
+  xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  ppt: 'application/vnd.ms-powerpoint',
+  pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  odt: 'application/vnd.oasis.opendocument.text',
+  ods: 'application/vnd.oasis.opendocument.spreadsheet',
+  odp: 'application/vnd.oasis.opendocument.presentation',
+  rtf: 'application/rtf',
+  csv: 'text/csv',
+
+  // Video
+  mp4: 'video/mp4',
+  webm: 'video/webm',
+  mov: 'video/quicktime',
+  mkv: 'video/x-matroska',
+  avi: 'video/x-msvideo',
+  m4v: 'video/mp4',
+  ogv: 'video/ogg',
+
+  // Audio
+  mp3: 'audio/mpeg',
+  wav: 'audio/wav',
+  ogg: 'audio/ogg',
+  oga: 'audio/ogg',
+  m4a: 'audio/mp4',
+  flac: 'audio/flac',
+  aac: 'audio/aac',
+  wma: 'audio/x-ms-wma',
+
+  // Code / Text
+  txt: 'text/plain',
+  log: 'text/plain',
+  env: 'text/plain',
+  md: 'text/markdown',
+  markdown: 'text/markdown',
+  json: 'application/json',
+  js: 'text/javascript',
+  mjs: 'text/javascript',
+  cjs: 'text/javascript',
+  jsx: 'text/javascript',
+  ts: 'text/typescript',
+  tsx: 'text/typescript',
+  html: 'text/html',
+  htm: 'text/html',
+  css: 'text/css',
+  scss: 'text/x-scss',
+  sass: 'text/x-sass',
+  less: 'text/x-less',
+  py: 'text/x-python',
+  java: 'text/x-java-source',
+  c: 'text/x-c',
+  cpp: 'text/x-c++',
+  cs: 'text/x-csharp',
+  rs: 'text/rust',
+  go: 'text/x-go',
+  php: 'text/x-php',
+  rb: 'text/x-ruby',
+  sql: 'application/sql',
+  sh: 'application/x-sh',
+  bat: 'application/x-bat',
+  yaml: 'text/yaml',
+  yml: 'text/yaml',
+  xml: 'application/xml',
+
+  // Archives
+  zip: 'application/zip',
+  tar: 'application/x-tar',
+  gz: 'application/gzip',
+  '7z': 'application/x-7z-compressed',
+  rar: 'application/vnd.rar'
+}
+
+/**
+ * Returns the proper MIME type for a given filename or explicit extension
+ */
+export function getMimeType(
+  filename: string,
+  explicitExt?: string,
+  fallbackMime?: string
+): string {
+  const extension = extractExtension(filename, explicitExt)
+  if (extension && EXTENSION_MIME_MAP[extension]) {
+    return EXTENSION_MIME_MAP[extension]
+  }
+  if (fallbackMime && fallbackMime !== 'application/octet-stream' && fallbackMime !== 'application/x-download') {
+    return fallbackMime
+  }
+  return 'application/octet-stream'
+}
+
+/**
+ * Ensures a Blob has a valid and specific MIME type matching its filename/extension
+ */
+export function ensureTypedBlob(
+  blob: Blob,
+  filename: string,
+  explicitExt?: string,
+  fallbackMime?: string
+): Blob {
+  // If the blob already has a specific non-generic MIME type, use it
+  if (blob.type && blob.type !== 'application/octet-stream' && blob.type !== 'application/x-download') {
+    return blob
+  }
+
+  const resolvedMime = getMimeType(filename, explicitExt, fallbackMime || blob.type)
+  if (resolvedMime && resolvedMime !== blob.type && resolvedMime !== 'application/octet-stream') {
+    return new Blob([blob], { type: resolvedMime })
+  }
+
+  return blob
+}
+
+/**
+ * Safely revokes an Object URL with an optional delay to allow opened tabs or async decoders time to complete
+ */
+export function revokeBlobUrl(url?: string | null, delayMs = 60000): void {
+  if (!url || typeof url !== 'string' || !url.startsWith('blob:')) return
+
+  if (delayMs <= 0) {
+    try {
+      URL.revokeObjectURL(url)
+    } catch {
+      // Ignore if already revoked
+    }
+    return
+  }
+
+  setTimeout(() => {
+    try {
+      URL.revokeObjectURL(url)
+    } catch {
+      // Ignore
+    }
+  }, delayMs)
+}
+
+/**
  * Quick helper returning category directly
  */
 export function getFileCategory(

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { getFileBlob } from '../api'
-import { getFileTypeInfo } from '../utils/file-preview'
+import { getFileTypeInfo, ensureTypedBlob } from '../utils/file-preview'
 
 // In-memory cache for ObjectURLs keyed by fileId to prevent duplicate blob fetches
 const blobUrlCache = new Map<string, string>()
@@ -103,7 +103,8 @@ export function useFileThumbnail({
         if (!fetchPromise) {
           fetchPromise = (async () => {
             try {
-              const blob = await getFileBlob(fileId)
+              const rawBlob = await getFileBlob(fileId)
+              const blob = ensureTypedBlob(rawBlob, name, extension)
               const objectUrl = URL.createObjectURL(blob)
               blobUrlCache.set(fileId, objectUrl)
               return objectUrl

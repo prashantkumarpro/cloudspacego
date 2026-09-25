@@ -1,10 +1,10 @@
 'use client'
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react'
+import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import { useFiles } from '@/features/files/hooks/use-files'
 import { formatBytes } from '@/lib/utils/format'
-import { getFileTypeInfo, FileCategory } from '../utils/file-preview'
+import { getFileTypeInfo, FileCategory, ensureTypedBlob, revokeBlobUrl } from '../utils/file-preview'
 import { cn } from '@/lib/utils/cn'
 import {
   FileText,
@@ -90,6 +90,8 @@ function PreviewSlide({
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
   const [isImageLoaded, setIsImageLoaded] = useState<boolean>(false)
+  const blobUrlRef = useRef<string | null>(null)
+  const isMountedRef = useRef<boolean>(true)
 
   const fileId = file.id || file._id
   const typeInfo = useMemo(() => {
@@ -105,15 +107,31 @@ function PreviewSlide({
     }
   }, [isActive, blobUrl, onActiveBlobUrlChange])
 
+  // Track component mount status and schedule delayed cleanup of Blob URL on unmount
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+      if (blobUrlRef.current) {
+        revokeBlobUrl(blobUrlRef.current, 60000)
+      }
+    }
+  }, [])
+
+  // Reset state when fileId changes
+  useEffect(() => {
+    setBlobUrl(null)
+    setTextContent(null)
+    setError(null)
+    setIsImageLoaded(false)
+  }, [fileId])
+
   // Load content when active or adjacent
   useEffect(() => {
     if (!isActive && !isAdjacent) return
     if (blobUrl || textContent || error) return
 
     let isSubscribed = true
-    let createdUrl: string | null = null
-
-    const resolvedTypeInfo = getFileTypeInfo(file.name, file.extension, file.mimeType)
     const explicitUrl = file.url || file.thumbnailUrl
 
     if (explicitUrl) {
@@ -135,27 +153,45 @@ function PreviewSlide({
         setIsLoading(true)
         setError(null)
 
-        const blob = await getBlob(fileId)
-        if (!isSubscribed) return
+        const rawBlob = await getBlob(fileId)
+        if (!isSubscribed || !isMountedRef.current) return
 
-        setBlobType(blob.type)
-        createdUrl = URL.createObjectURL(blob)
+        // Ensure Blob has the correct MIME type (e.g. image/png, application/pdf, video/mp4)
+        const typedBlob = ensureTypedBlob(
+          rawBlob,
+          file.name,
+          file.extension,
+          file.mimeType
+        )
+
+        setBlobType(typedBlob.type)
+        const createdUrl = URL.createObjectURL(typedBlob)
+
+        if (!isSubscribed || !isMountedRef.current) {
+          revokeBlobUrl(createdUrl, 60000)
+          return
+        }
+
+        if (blobUrlRef.current && blobUrlRef.current !== createdUrl) {
+          revokeBlobUrl(blobUrlRef.current, 60000)
+        }
+        blobUrlRef.current = createdUrl
         setBlobUrl(createdUrl)
 
-        const cat = getFileTypeInfo(file.name, file.extension, blob.type).category
-        if (cat === 'code' || blob.type.startsWith('text/') || blob.type === 'application/json') {
-          const text = await blob.text()
-          if (isSubscribed) {
+        const cat = getFileTypeInfo(file.name, file.extension, typedBlob.type).category
+        if (cat === 'code' || typedBlob.type.startsWith('text/') || typedBlob.type === 'application/json') {
+          const text = await typedBlob.text()
+          if (isSubscribed && isMountedRef.current) {
             setTextContent(text)
           }
         }
       } catch (err) {
-        if (isSubscribed) {
+        if (isSubscribed && isMountedRef.current) {
           console.error('[PreviewSlide] Failed to load content:', err)
           setError('Unable to load file content for preview.')
         }
       } finally {
-        if (isSubscribed) {
+        if (isSubscribed && isMountedRef.current) {
           setIsLoading(false)
         }
       }
@@ -165,11 +201,8 @@ function PreviewSlide({
 
     return () => {
       isSubscribed = false
-      if (createdUrl) {
-        URL.revokeObjectURL(createdUrl)
-      }
     }
-  }, [isActive, isAdjacent, file, fileId, blobUrl, textContent, error, getBlob])
+  }, [isActive, isAdjacent, file.name, file.extension, file.mimeType, file.url, file.thumbnailUrl, fileId, blobUrl, textContent, error, getBlob])
 
   if (isLoading) {
     return (
