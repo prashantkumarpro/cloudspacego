@@ -47,7 +47,7 @@ export function FilePreview({
   showBadge = false,
   alt
 }: FilePreviewProps) {
-  const { url, isLoading, hasError, category, typeInfo } = useFileThumbnail({
+  const { url, isLoading, hasError, category, typeInfo, targetRef } = useFileThumbnail({
     id: file.id,
     _id: file._id,
     name: file.name,
@@ -93,6 +93,7 @@ export function FilePreview({
   if (variant === 'list') {
     return (
       <div
+        ref={targetRef}
         className={cn(
           'w-9 h-9 rounded-lg bg-input-bg border border-card-border flex items-center justify-center shrink-0 relative overflow-hidden transition-all duration-200 select-none group-hover:border-[#6E60EE]/30',
           className
@@ -138,6 +139,7 @@ export function FilePreview({
   if (variant === 'compact') {
     return (
       <div
+        ref={targetRef}
         className={cn(
           'w-8 h-8 rounded-lg bg-input-bg border border-card-border flex items-center justify-center shrink-0 relative overflow-hidden transition-all duration-200 select-none',
           className
@@ -167,6 +169,7 @@ export function FilePreview({
   if (variant === 'large') {
     return (
       <div
+        ref={targetRef}
         className={cn(
           'w-full min-h-[220px] bg-input-bg/40 border border-card-border rounded-xl flex items-center justify-center relative overflow-hidden select-none',
           className
@@ -205,6 +208,7 @@ export function FilePreview({
   // DEFAULT VARIANT: GRID (Card preview box aspect-[16/10])
   return (
     <div
+      ref={targetRef}
       className={cn(
         'w-full aspect-[16/10] bg-input-bg/70 rounded-lg flex items-center justify-center border border-card-border/60 relative overflow-hidden shrink-0 group-hover:border-card-border transition-all duration-200 select-none',
         className

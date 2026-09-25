@@ -197,21 +197,29 @@ export function useInfiniteFiles(
   const nextCursorRef = useRef<string | null>(null);
   const hasMoreRef = useRef<boolean>(false);
   const isFetchingRef = useRef<boolean>(false);
+  const inFlightCursorRef = useRef<string | null>(null);
 
   const fetchInitial = useCallback(async () => {
     if (!enabled) return;
 
     try {
       isFetchingRef.current = true;
-      setIsLoading(true);
+      inFlightCursorRef.current = null;
+      // Only show full loading skeleton if we don't have any items loaded yet
+      setFiles((prev) => {
+        if (prev.length === 0) {
+          setIsLoading(true);
+        }
+        return prev;
+      });
       setError(null);
 
       const response = await getFiles({ limit });
 
       setFiles(response.data);
       nextCursorRef.current = response.pagination.nextCursor;
-      hasMoreRef.current = response.pagination.hasMore;
-      setHasMore(response.pagination.hasMore);
+      hasMoreRef.current = Boolean(response.pagination.hasMore && response.pagination.nextCursor);
+      setHasMore(hasMoreRef.current);
     } catch (err) {
       console.error("Failed to fetch initial files:", err);
       setError("Failed to load files.");
@@ -222,42 +230,46 @@ export function useInfiniteFiles(
   }, [enabled, limit]);
 
   const loadMore = useCallback(async () => {
+    const cursor = nextCursorRef.current;
     if (
       !enabled ||
       isFetchingRef.current ||
       !hasMoreRef.current ||
-      !nextCursorRef.current
+      !cursor ||
+      inFlightCursorRef.current === cursor
     ) {
       return;
     }
 
     try {
       isFetchingRef.current = true;
+      inFlightCursorRef.current = cursor;
       setIsLoadingMore(true);
       setError(null);
 
       const response = await getFiles({
-        cursor: nextCursorRef.current,
+        cursor,
         limit,
       });
 
       setFiles((prev) => {
-        const existingIds = new Set(prev.map((f) => f._id || f.id));
+        const existingIds = new Set(prev.map((f) => (f._id || f.id || "").toString()));
         const newItems = response.data.filter(
-          (f) => !existingIds.has(f._id || f.id)
+          (f) => !existingIds.has((f._id || f.id || "").toString())
         );
         return [...prev, ...newItems];
       });
 
       nextCursorRef.current = response.pagination.nextCursor;
-      hasMoreRef.current = response.pagination.hasMore;
-      setHasMore(response.pagination.hasMore);
+      hasMoreRef.current = Boolean(response.pagination.hasMore && response.pagination.nextCursor);
+      setHasMore(hasMoreRef.current);
     } catch (err) {
       console.error("Failed to load more files:", err);
       setError("Failed to load more files.");
     } finally {
       setIsLoadingMore(false);
       isFetchingRef.current = false;
+      inFlightCursorRef.current = null;
     }
   }, [enabled, limit]);
 

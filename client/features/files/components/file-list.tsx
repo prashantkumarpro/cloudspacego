@@ -153,25 +153,45 @@ export function FileList({
     }
   }
 
-  // Infinite scroll observer using IntersectionObserver
+  // Infinite scroll observer using IntersectionObserver with early prefetching (600px margin)
   const observerTarget = React.useRef<HTMLDivElement>(null)
+  const onLoadMoreRef = React.useRef(onLoadMore)
+  const hasMoreRef = React.useRef(hasMore)
+  const isLoadingMoreRef = React.useRef(isLoadingMore)
+  const isLoadingRef = React.useRef(isLoading)
+
+  onLoadMoreRef.current = onLoadMore
+  hasMoreRef.current = hasMore
+  isLoadingMoreRef.current = isLoadingMore
+  isLoadingRef.current = isLoading
+
+  const checkAndLoadMore = React.useCallback(() => {
+    if (
+      hasMoreRef.current &&
+      !isLoadingMoreRef.current &&
+      !isLoadingRef.current &&
+      onLoadMoreRef.current
+    ) {
+      onLoadMoreRef.current()
+    }
+  }, [])
 
   React.useEffect(() => {
-    if (!onLoadMore || !hasMore) return
+    if (!hasMore || !onLoadMore) return
 
     const target = observerTarget.current
     if (!target) return
 
     const observer = new IntersectionObserver(
       entries => {
-        if (entries[0].isIntersecting && hasMore && !isLoadingMore && !isLoading) {
-          onLoadMore()
+        if (entries[0].isIntersecting) {
+          checkAndLoadMore()
         }
       },
       {
         root: null,
-        rootMargin: '200px',
-        threshold: 0.1
+        rootMargin: '600px 0px', // Early prefetch 600px before reaching the bottom
+        threshold: 0
       }
     )
 
@@ -180,7 +200,20 @@ export function FileList({
     return () => {
       observer.disconnect()
     }
-  }, [onLoadMore, hasMore, isLoadingMore, isLoading])
+  }, [hasMore, onLoadMore, checkAndLoadMore])
+
+  // When isLoadingMore finishes, check if sentinel is still within prefetch viewport
+  React.useEffect(() => {
+    if (!isLoadingMore && hasMore) {
+      const target = observerTarget.current
+      if (target) {
+        const rect = target.getBoundingClientRect()
+        if (rect.top <= (window.innerHeight || document.documentElement.clientHeight) + 600) {
+          checkAndLoadMore()
+        }
+      }
+    }
+  }, [isLoadingMore, hasMore, checkAndLoadMore])
 
   // Filter files if customFiles is explicitly passed
   const displayList = React.useMemo(() => {
@@ -479,11 +512,48 @@ export function FileList({
             <div ref={observerTarget} className='h-4 w-full shrink-0' />
           )}
 
-          {/* Loading More Indicator */}
+          {/* Bottom Pagination Skeletons matching active view */}
           {isLoadingMore && (
-            <div className='w-full py-4 flex items-center justify-center gap-2 text-text-secondary text-xs select-none'>
-              <div className='w-4 h-4 rounded-full border-2 border-[#6E60EE] border-t-transparent animate-spin' />
-              <span>Loading more files...</span>
+            activeViewMode === 'grid' ? (
+              <div className='grid grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-3 sm:gap-4 mt-1'>
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div
+                    key={`pagination-grid-skeleton-${i}`}
+                    className='h-44 bg-card-bg/60 border border-card-border/60 rounded-xl animate-pulse p-3 flex flex-col justify-between select-none'
+                  >
+                    <div className='w-full aspect-[16/10] bg-input-bg/70 rounded-lg' />
+                    <div className='flex items-center gap-2 mt-2.5'>
+                      <div className='h-3.5 bg-input-bg rounded w-3/4' />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className='flex flex-col divide-y divide-card-border/30 border-b border-card-border/40 select-none'>
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={`pagination-row-skeleton-${i}`}
+                    className='flex items-center justify-between px-3 sm:px-4 h-[54px] animate-pulse bg-input-bg/20'
+                  >
+                    <div className='flex items-center gap-3.5 flex-1 pr-6'>
+                      <div className='w-9 h-9 rounded-lg bg-input-bg/80 shrink-0' />
+                      <div className='h-3.5 bg-input-bg/80 rounded w-48' />
+                    </div>
+                    <div className='hidden md:block w-24 h-3 bg-input-bg/60 rounded pr-4' />
+                    <div className='hidden sm:block w-32 h-3 bg-input-bg/60 rounded pr-4' />
+                    <div className='hidden sm:block w-20 h-3 bg-input-bg/60 rounded pr-4' />
+                    <div className='w-8 h-8 rounded-lg bg-input-bg/40 shrink-0' />
+                  </div>
+                ))}
+              </div>
+            )
+          )}
+
+          {/* Subtle Loading More Text Indicator */}
+          {isLoadingMore && (
+            <div className='w-full py-3 flex items-center justify-center gap-2 text-text-secondary text-xs select-none animate-in fade-in duration-150'>
+              <div className='w-3.5 h-3.5 rounded-full border-2 border-[#6E60EE] border-t-transparent animate-spin' />
+              <span className='font-medium'>Loading more files...</span>
             </div>
           )}
         </>

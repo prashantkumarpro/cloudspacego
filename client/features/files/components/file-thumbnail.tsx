@@ -42,7 +42,7 @@ export function FileThumbnail({
   fallbackClassName,
   alt
 }: FileThumbnailProps) {
-  const { url, isLoading, hasError, category, typeInfo } = useFileThumbnail({
+  const { url, isLoading, hasError, category, typeInfo, targetRef } = useFileThumbnail({
     id: file.id,
     _id: file._id,
     name: file.name,
@@ -88,6 +88,7 @@ export function FileThumbnail({
   if (variant === 'list') {
     return (
       <div
+        ref={targetRef}
         className={cn(
           'w-9 h-9 rounded-lg bg-input-bg border border-card-border flex items-center justify-center shrink-0 relative overflow-hidden transition-all duration-200 select-none group-hover:border-[#6E60EE]/30',
           className
@@ -131,6 +132,7 @@ export function FileThumbnail({
   if (variant === 'compact') {
     return (
       <div
+        ref={targetRef}
         className={cn(
           'w-8 h-8 rounded-lg bg-input-bg border border-card-border flex items-center justify-center shrink-0 relative overflow-hidden transition-all duration-200 select-none',
           className
@@ -159,6 +161,7 @@ export function FileThumbnail({
   // DEFAULT VARIANT: CARD (Clean, uncluttered, focused image/video/icon preview without badge pills)
   return (
     <div
+      ref={targetRef}
       className={cn(
         'w-full bg-input-bg/70 rounded-lg flex items-center justify-center border border-card-border/60 relative overflow-hidden shrink-0 transition-all duration-200 select-none group-hover:border-card-border',
         aspectRatio,

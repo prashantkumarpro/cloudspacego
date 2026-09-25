@@ -91,7 +91,9 @@ export default function MyFilesView () {
       }
     })
   }, [activeFolderId, directory?.files, infiniteFiles])
-  const isListLoading = activeFolderId ? isDirLoading : isFilesLoading
+  const isListLoading = activeFolderId
+    ? isDirLoading
+    : (isFilesLoading && filesToDisplay.length === 0)
 
   return (
     <div className='flex flex-col gap-6'>

@@ -1,12 +1,73 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { getFileBlob } from '../api'
 import { getFileTypeInfo, ensureTypedBlob } from '../utils/file-preview'
 
 // In-memory cache for ObjectURLs keyed by fileId to prevent duplicate blob fetches
 const blobUrlCache = new Map<string, string>()
 const inFlightRequests = new Map<string, Promise<string | null>>()
+
+// Global throttled queue for thumbnail blob downloads to prevent saturating browser connections
+const MAX_CONCURRENT_THUMBNAIL_REQUESTS = 4
+let activeRequestCount = 0
+const requestQueue: Array<() => void> = []
+
+function enqueueThumbnailRequest<T>(task: () => Promise<T>): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const execute = () => {
+      activeRequestCount++
+      task()
+        .then(resolve)
+        .catch(reject)
+        .finally(() => {
+          activeRequestCount--
+          if (requestQueue.length > 0) {
+            const next = requestQueue.shift()
+            next?.()
+          }
+        })
+    }
+
+    if (activeRequestCount < MAX_CONCURRENT_THUMBNAIL_REQUESTS) {
+      execute()
+    } else {
+      requestQueue.push(execute)
+    }
+  })
+}
+
+// Shared IntersectionObserver for lazy thumbnail viewport detection
+type VisibilityCallback = (isVisible: boolean) => void
+const elementCallbacks = new WeakMap<Element, VisibilityCallback>()
+
+let sharedObserver: IntersectionObserver | null = null
+
+function getSharedThumbnailObserver(): IntersectionObserver | null {
+  if (typeof window === 'undefined') return null
+  if (!sharedObserver) {
+    sharedObserver = new IntersectionObserver(
+      entries => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const cb = elementCallbacks.get(entry.target)
+            if (cb) {
+              cb(true)
+              sharedObserver?.unobserve(entry.target)
+              elementCallbacks.delete(entry.target)
+            }
+          }
+        }
+      },
+      {
+        root: null,
+        rootMargin: '350px 0px', // Pre-fetch 350px before entering viewport
+        threshold: 0.01
+      }
+    )
+  }
+  return sharedObserver
+}
 
 const isValidObjectId = (id?: string | null): boolean => {
   return Boolean(id && typeof id === 'string' && /^[0-9a-fA-F]{24}$/.test(id))
@@ -20,6 +81,7 @@ export interface UseFileThumbnailOptions {
   url?: string
   thumbnailUrl?: string
   enabled?: boolean
+  lazy?: boolean
 }
 
 export interface UseFileThumbnailResult {
@@ -28,6 +90,7 @@ export interface UseFileThumbnailResult {
   hasError: boolean
   category: ReturnType<typeof getFileTypeInfo>['category']
   typeInfo: ReturnType<typeof getFileTypeInfo>
+  targetRef: (node: HTMLElement | null) => void
 }
 
 export function useFileThumbnail({
@@ -37,14 +100,22 @@ export function useFileThumbnail({
   extension,
   url: propUrl,
   thumbnailUrl: propThumbnailUrl,
-  enabled = true
+  enabled = true,
+  lazy = true
 }: UseFileThumbnailOptions): UseFileThumbnailResult {
   const fileId = id || _id
   const typeInfo = getFileTypeInfo(name, extension)
   const isMountedRef = useRef(true)
+  const elementRef = useRef<HTMLElement | null>(null)
 
   // Direct URL passed via props takes precedence
   const explicitUrl = propThumbnailUrl || propUrl
+  const isCached = Boolean(fileId && blobUrlCache.has(fileId))
+
+  const [isVisible, setIsVisible] = useState<boolean>(() => {
+    if (!lazy || explicitUrl || isCached) return true
+    return false
+  })
 
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(() => {
     if (explicitUrl) return explicitUrl
@@ -58,15 +129,38 @@ export function useFileThumbnail({
     if (explicitUrl) return false
     if (!enabled || !fileId || !isValidObjectId(fileId)) return false
     if (!typeInfo.canHaveVisualThumbnail) return false
-    return !blobUrlCache.has(fileId)
+    return !isCached
   })
 
   const [hasError, setHasError] = useState<boolean>(false)
+
+  // Ref callback to hook into shared IntersectionObserver
+  const targetRef = useCallback((node: HTMLElement | null) => {
+    elementRef.current = node
+    if (!node || !lazy || isCached || explicitUrl) return
+
+    const observer = getSharedThumbnailObserver()
+    if (observer) {
+      elementCallbacks.set(node, (visible) => {
+        if (visible && isMountedRef.current) {
+          setIsVisible(true)
+        }
+      })
+      observer.observe(node)
+    } else {
+      // Fallback if IntersectionObserver is unavailable
+      setIsVisible(true)
+    }
+  }, [lazy, isCached, explicitUrl])
 
   useEffect(() => {
     isMountedRef.current = true
     return () => {
       isMountedRef.current = false
+      if (elementRef.current) {
+        sharedObserver?.unobserve(elementRef.current)
+        elementCallbacks.delete(elementRef.current)
+      }
     }
   }, [])
 
@@ -83,11 +177,16 @@ export function useFileThumbnail({
       return
     }
 
-    // Check in-memory cache
+    // Check in-memory cache immediately (0ms latency)
     if (blobUrlCache.has(fileId)) {
       setThumbnailUrl(blobUrlCache.get(fileId)!)
       setIsLoading(false)
       setHasError(false)
+      return
+    }
+
+    // Defer network fetch until element is visible/near viewport
+    if (lazy && !isVisible) {
       return
     }
 
@@ -101,7 +200,7 @@ export function useFileThumbnail({
         let fetchPromise = inFlightRequests.get(fileId)
 
         if (!fetchPromise) {
-          fetchPromise = (async () => {
+          fetchPromise = enqueueThumbnailRequest(async () => {
             try {
               const rawBlob = await getFileBlob(fileId)
               const blob = ensureTypedBlob(rawBlob, name, extension)
@@ -114,7 +213,7 @@ export function useFileThumbnail({
             } finally {
               inFlightRequests.delete(fileId)
             }
-          })()
+          })
 
           inFlightRequests.set(fileId, fetchPromise)
         }
@@ -129,7 +228,7 @@ export function useFileThumbnail({
             setHasError(true)
           }
         }
-      } catch (err) {
+      } catch {
         if (isSubscribed && isMountedRef.current) {
           setHasError(true)
         }
@@ -145,13 +244,14 @@ export function useFileThumbnail({
     return () => {
       isSubscribed = false
     }
-  }, [fileId, explicitUrl, enabled, typeInfo.canHaveVisualThumbnail])
+  }, [fileId, explicitUrl, enabled, typeInfo.canHaveVisualThumbnail, isVisible, lazy, name, extension])
 
   return {
     url: thumbnailUrl,
-    isLoading,
+    isLoading: isLoading && !thumbnailUrl && !hasError,
     hasError,
     category: typeInfo.category,
-    typeInfo
+    typeInfo,
+    targetRef
   }
 }
