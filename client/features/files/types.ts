@@ -34,9 +34,23 @@ export interface GetFilesParams {
     limit?: number;
 }
 
+export type UploadStatus = 'uploading' | 'completed' | 'error';
+
+export interface UploadTask {
+    id: string;
+    name: string;
+    size: number;
+    progress: number;
+    status: UploadStatus;
+    error?: string;
+    parentDirId?: string;
+    createdAt: number;
+}
+
 export interface UploadFileData {
     file: File | Blob;
     filename?: string;
+    onProgress?: (progress: number) => void;
 }
 
 export interface RenameFileData {

@@ -50,16 +50,17 @@ export function usePlusActions(onActionExecuted?: () => void) {
       const selectedFiles = e.target.files
       if (!selectedFiles || selectedFiles.length === 0) return
 
-      for (const file of Array.from(selectedFiles)) {
-        try {
-          await upload(
+      const files = Array.from(selectedFiles)
+      await Promise.all(
+        files.map(file =>
+          upload(
             { file, filename: file.name },
             activeFolderId ?? undefined
-          )
-        } catch (err) {
-          console.error(`Failed to upload ${file.name}:`, err)
-        }
-      }
+          ).catch(err => {
+            console.error(`Failed to upload ${file.name}:`, err)
+          })
+        )
+      )
     },
     [upload, activeFolderId]
   )

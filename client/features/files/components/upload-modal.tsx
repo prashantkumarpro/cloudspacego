@@ -48,20 +48,18 @@ export function UploadModal() {
       return
     }
 
-    try {
-      const fileToUpload = selectedFile || new Blob([' '], { type: 'text/plain' })
-      const filename = customFileName.trim() || (selectedFile ? selectedFile.name : 'untitled.txt')
+    const fileToUpload = selectedFile || new Blob([' '], { type: 'text/plain' })
+    const filename = customFileName.trim() || (selectedFile ? selectedFile.name : 'untitled.txt')
+    const parentId = activeFolderId ?? undefined
 
-      await upload(
-        { file: fileToUpload, filename },
-        activeFolderId ?? undefined
-      )
+    handleClose()
 
-      handleClose()
-    } catch (err) {
+    upload(
+      { file: fileToUpload, filename },
+      parentId
+    ).catch(err => {
       console.error('Failed to upload file:', err)
-      setError('Failed to upload file. Please try again.')
-    }
+    })
   }
 
   const handleUploadFolder = async (e: React.FormEvent) => {

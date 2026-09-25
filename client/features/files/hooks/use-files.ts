@@ -11,6 +11,7 @@ import {
 } from "../api";
 import type { FileItem, RenameFileData, UploadFileData } from "../types";
 import { notifyDirectoryChanged } from "@/features/directory/hooks/use-directory";
+import { useUpload } from "@/providers/upload-provider";
 
 
 // Global listener set to synchronize active file hook consumers if needed
@@ -51,11 +52,13 @@ interface UseFilesReturn {
 }
 
 export function useFiles(): UseFilesReturn {
-  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const uploadContext = useUpload();
   const [isRenaming, setIsRenaming] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  const isUploading = uploadContext ? uploadContext.isUploading : false;
 
   const upload = useCallback(
     async (
@@ -63,21 +66,20 @@ export function useFiles(): UseFilesReturn {
       parentDirId?: string
     ): Promise<void> => {
       try {
-        setIsUploading(true);
         setError(null);
-
-        await uploadFile(data, parentDirId);
-
-        notifyFilesChanged();
+        if (uploadContext) {
+          await uploadContext.upload(data, parentDirId);
+        } else {
+          await uploadFile(data, parentDirId);
+          notifyFilesChanged();
+        }
       } catch (err) {
         console.error("Failed to upload file:", err);
         setError("Failed to upload file.");
         throw err;
-      } finally {
-        setIsUploading(false);
       }
     },
-    []
+    [uploadContext]
   );
 
   const rename = useCallback(

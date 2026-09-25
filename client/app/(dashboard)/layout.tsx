@@ -63,19 +63,16 @@ export default function DashboardLayout({
 
       const fileList = Array.from(droppedFiles)
       try {
-        for (const file of fileList) {
-          await upload(
-            { file, filename: file.name },
-            activeFolderId ?? undefined
+        await Promise.all(
+          fileList.map(file =>
+            upload(
+              { file, filename: file.name },
+              activeFolderId ?? undefined
+            )
           )
-        }
-        toast.success(
-          'Uploaded successfully',
-          `${fileList.length} ${fileList.length === 1 ? 'file' : 'files'} uploaded to workspace.`
         )
       } catch (err) {
         console.error('Drag drop upload error:', err)
-        toast.error('Upload failed', 'An error occurred while uploading files.')
       }
     },
     [upload, activeFolderId, toast]

@@ -62,16 +62,42 @@ export const getFiles = async (
 
 export const uploadFile = async (
     data: UploadFileData,
-    parentDirId?: string
+    parentDirId?: string,
+    onProgress?: (progress: number) => void
 ): Promise<FileApiResponse> => {
-    const endpoint = parentDirId ? `/file/${parentDirId}` : "/file";
-    const filename =
-        data.filename || (data.file instanceof File ? data.file.name : "untitled");
+    const hasValidParent =
+        Boolean(parentDirId) &&
+        parentDirId !== "null" &&
+        parentDirId !== "undefined" &&
+        typeof parentDirId === "string" &&
+        parentDirId.trim() !== "";
+
+    const endpoint = hasValidParent ? `/file/${parentDirId!.trim()}` : "/file";
+
+    let filename =
+        data.filename || (data.file instanceof File ? data.file.name : "untitled.txt");
+
+    // Ensure the filename has a valid extension so server Mongoose validation doesn't reject it
+    if (!filename.includes(".") || filename.endsWith(".")) {
+        const extFromMime = data.file.type ? data.file.type.split("/")[1] : "txt";
+        const cleanExt = extFromMime ? extFromMime.replace(/[^a-zA-Z0-9]/g, "") : "txt";
+        filename = `${filename.replace(/\.+$/, "")}.${cleanExt || "bin"}`;
+    }
+
+    const progressCallback = onProgress || data.onProgress;
 
     const response = await apiClient.post<FileApiResponse>(endpoint, data.file, {
         headers: {
             filename,
             "Content-Type": data.file.type || "application/octet-stream",
+        },
+        timeout: 0,
+        onUploadProgress: (progressEvent) => {
+            if (!progressEvent.total) return;
+            const progress = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+            );
+            progressCallback?.(progress);
         },
     });
 

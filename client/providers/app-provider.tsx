@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useCallback, useMemo, useEf
 import { FileItem, ActivityItem, StorageStats, SidebarSection, FileType } from '../types';
 import { INITIAL_FILES, INITIAL_ACTIVITIES, INITIAL_STORAGE } from '../lib/constants/mock-data';
 import { ToastProvider } from './toast-provider';
+import { UploadProvider } from './upload-provider';
 
 interface AppContextType {
   currentSection: SidebarSection;
@@ -348,7 +349,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   return (
     <AppContext.Provider value={contextValue}>
       <ToastProvider>
-        {children}
+        <UploadProvider>
+          {children}
+        </UploadProvider>
       </ToastProvider>
     </AppContext.Provider>
   );
