@@ -7,49 +7,106 @@ import Directory from '../models/directory.model.js'
 import File from '../models/file.model.js'
 
 export const createFile = async (req, res) => {
-  const parentDirId = req.params.parentDirId || req.user.rootDirId
+  try {
+    // Get the parent directory.
+    // If no parentDirId is provided, use the user's root directory.
+    const parentDirId = req.params.parentDirId || req.user.rootDirId
 
-  const parentsDirData = await Directory.findOne({
-    _id: parentDirId,
-    userId: req.user._id
-  }).lean()
-  // Check if parent directory exists
-  if (!parentsDirData) {
-    return res.status(404).json({ error: 'Parent directory not found!' })
+    // Check whether the parent directory exists
+    // and belongs to the current user.
+    const parentsDirData = await Directory.findOne({
+      _id: parentDirId,
+      userId: req.user._id
+    }).lean()
+
+    if (!parentsDirData) {
+      return res.status(404).json({
+        error: 'Parent directory not found!'
+      })
+    }
+
+    // Get the filename from the request header.
+    const filename = req.headers.filename || 'untitled'
+
+    // Extract the file extension.
+    const extension = path.extname(filename)
+
+    // Create the database record first.
+    // `size` starts at 0 and will be updated after
+    // the complete file has been received.
+    const insertedFile = await File.create({
+      extension,
+      name: filename,
+      size: 0, // NEW: store file size in the database
+      parentDirId: parentsDirData._id,
+      userId: req.user._id
+    })
+
+    // Use the generated MongoDB ID as the physical filename.
+    const fileId = insertedFile._id.toString()
+    const fullFilename = `${fileId}${extension}`
+
+    const storageRoot = path.resolve('./storage')
+    const fullFilePath = path.resolve(storageRoot, fullFilename)
+
+    // Create a write stream for saving the uploaded file.
+    const writeStream = createWriteStream(fullFilePath)
+
+    // NEW: keep track of how many bytes are received.
+    let fileSize = 0
+
+    // NEW: count the bytes coming through the request stream.
+    // No Multer is required because your upload already uses
+    // the raw request stream.
+    req.on('data', (chunk) => {
+      fileSize += chunk.length
+    })
+
+    // Pipe the uploaded data directly into the storage file.
+    req.pipe(writeStream)
+
+    // Wait until the file has completely finished writing.
+    writeStream.on('finish', async () => {
+      // NEW: save the actual file size in MongoDB.
+      await File.updateOne(
+        { _id: insertedFile._id },
+        { $set: { size: fileSize } }
+      )
+
+      return res.status(201).json({
+        message: 'File Uploaded'
+      })
+    })
+
+    // Handle upload/request errors.
+    req.on('error', async () => {
+      // IMPORTANT: File.create() returns a document,
+      // so use `insertedFile._id`, not `insertedFile.insertedId`.
+      await File.deleteOne({
+        _id: insertedFile._id
+      })
+
+      return res.status(500).json({
+        message: 'Could not Upload File'
+      })
+    })
+
+    // Handle errors while writing the file to disk.
+    writeStream.on('error', async () => {
+      await File.deleteOne({
+        _id: insertedFile._id
+      })
+
+      return res.status(500).json({
+        message: 'Could not Upload File'
+      })
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Could not Upload File'
+    })
   }
-
-  const filename = req.headers.filename || 'untitled'
-
-  const extension = path.extname(filename)
-
-  const insertedFile = await File.create({
-    extension,
-    name: filename,
-    parentDirId: parentsDirData._id,
-    userId: req.user._id
-  })
-
-  const fileId = insertedFile._id.toString()
-
-  const fullFilename = `${fileId}${extension}`
-
-  const storageRoot = path.resolve('./storage')
-
-  // save file using generated ID
-  const fullFilePath = path.resolve(storageRoot, fullFilename)
-
-  const writeStream = createWriteStream(fullFilePath)
-
-  req.pipe(writeStream)
-
-  req.on('end', async () => {
-    return res.status(201).json({ message: 'File Uploaded' })
-  })
-
-  req.on('error', async () => {
-    await File.deleteOne({ _id: insertedFile.insertedId })
-    return res.status(404).json({ message: 'Could not Upload File' })
-  })
 }
 
 // Get all files
