@@ -162,7 +162,7 @@ export default function DashboardOverview() {
         name: f.name,
         type: deriveFileType(f.name, f.extension) as any,
         extension: f.extension,
-        size: typeof f.size === 'number' ? f.size : 0,
+        size: typeof f.size === 'number' ? f.size : (typeof f.size === 'string' && !isNaN(Number(f.size)) ? Number(f.size) : f.size),
         parentDirId: f.parentDirId,
         starred: false,
         updatedAt: f.updatedAt || f.createdAt || new Date().toISOString(),

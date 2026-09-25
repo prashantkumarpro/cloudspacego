@@ -24,6 +24,7 @@ export const getDirectory = async (
         files: (raw.files || []).map((f: any) => ({
             ...f,
             id: f.id || f._id,
+            size: typeof f.size === 'number' ? f.size : (typeof f.size === 'string' && !isNaN(Number(f.size)) ? Number(f.size) : f.size),
         })),
         directories: (raw.directories || []).map((d: any) => ({
             ...d,

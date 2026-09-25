@@ -70,7 +70,27 @@ export default function MyFilesView () {
     return crumbs
   }, [folderTrail, activeFolderId, directory?.name])
 
-  const filesToDisplay = activeFolderId ? directory?.files : infiniteFiles
+  const filesToDisplay = useMemo(() => {
+    if (activeFolderId) {
+      return directory?.files || []
+    }
+    const dirFiles = directory?.files || []
+    const infFiles = infiniteFiles || []
+
+    if (infFiles.length === 0) {
+      return dirFiles
+    }
+
+    const dirMap = new Map(dirFiles.map(f => [f.id || f._id, f]))
+    return infFiles.map(f => {
+      const match = dirMap.get(f.id || f._id)
+      const sizeVal = typeof f.size === 'number' && f.size > 0 ? f.size : (match?.size ?? f.size)
+      return {
+        ...f,
+        size: sizeVal
+      }
+    })
+  }, [activeFolderId, directory?.files, infiniteFiles])
   const isListLoading = activeFolderId ? isDirLoading : isFilesLoading
 
   return (

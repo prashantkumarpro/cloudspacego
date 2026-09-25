@@ -1,6 +1,6 @@
 export function formatBytes(bytes: number, decimals: number = 1): string {
   if (bytes === 0) return '0 Bytes';
-  if (bytes === -1) return '—'; // for folders where size is not computed
+  if (bytes === -1 || bytes < 0 || isNaN(bytes)) return '—'; // for folders or uncomputed size
 
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
@@ -10,6 +10,8 @@ export function formatBytes(bytes: number, decimals: number = 1): string {
 
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
+
+export const formatFileSize = formatBytes;
 
 export function formatDate(dateStr: string): string {
   const date = new Date(dateStr);

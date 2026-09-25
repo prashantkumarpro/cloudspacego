@@ -44,7 +44,7 @@ export const getFiles = async (
         userId: item.userId,
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
-        size: item.size,
+        size: typeof item.size === 'number' ? item.size : (typeof item.size === 'string' && !isNaN(Number(item.size)) ? Number(item.size) : item.size),
         directory: item.directory
             ? {
                   id: (item.directory.id || item.directory._id || "").toString(),

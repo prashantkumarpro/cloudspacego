@@ -4,7 +4,7 @@ import React from 'react'
 import { FilePreview } from './file-preview'
 import { ActionMenu, ActionMenuItem } from '../../../components/ui/action-menu'
 import { Tooltip } from '../../../components/ui/tooltip'
-import { formatBytes, formatDate } from '../../../lib/utils/format'
+import { formatBytes, formatFileSize, formatDate } from '../../../lib/utils/format'
 import { FileType } from '../../../types'
 import { UnifiedFileItem } from './file-list'
 import { useAuth } from '@/features/auth/hooks/use-auth'
@@ -142,9 +142,17 @@ export function FileTable({
           const ownerName = getOwnerName(file)
           const displayDate =
             file.updatedAt || file.createdAt || new Date().toISOString()
+          const isFolder = fileType === 'folder'
+          const rawSize = file.size ?? (file as any).raw?.size ?? (file as any).fileSize ?? (file as any).length
+          const fileSizeNum =
+            typeof rawSize === 'number'
+              ? rawSize
+              : typeof rawSize === 'string' && !isNaN(Number(rawSize))
+              ? Number(rawSize)
+              : undefined
           const displaySize =
-            typeof file.size === 'number' && file.size > 0
-              ? formatBytes(file.size)
+            !isFolder && typeof fileSizeNum === 'number' && fileSizeNum >= 0
+              ? formatFileSize(fileSizeNum)
               : '—'
 
           return (

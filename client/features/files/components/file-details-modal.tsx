@@ -4,7 +4,7 @@ import React from 'react'
 import { Dialog } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { FilePreview } from './file-preview'
-import { formatBytes, formatDate } from '@/lib/utils/format'
+import { formatBytes, formatFileSize, formatDate } from '@/lib/utils/format'
 import { UnifiedFileItem } from './file-list'
 import { useApp } from '@/providers/app-provider'
 import {
@@ -37,11 +37,19 @@ export function FileDetailsModal({
   if (!file) return null
 
   const isFolder = file.type === 'folder'
-  const displaySize = typeof file.size === 'number' && file.size > 0
-    ? formatBytes(file.size)
-    : isFolder
-    ? '—'
-    : 'Unknown size'
+  const rawSize = file.size ?? (file as any).raw?.size ?? (file as any).fileSize ?? (file as any).length
+  const fileSizeNum =
+    typeof rawSize === 'number'
+      ? rawSize
+      : typeof rawSize === 'string' && !isNaN(Number(rawSize))
+      ? Number(rawSize)
+      : undefined
+  const displaySize =
+    !isFolder && typeof fileSizeNum === 'number' && fileSizeNum >= 0
+      ? formatFileSize(fileSizeNum)
+      : isFolder
+      ? '—'
+      : 'Unknown size'
 
   const displayCreated = file.createdAt ? formatDate(file.createdAt) : '—'
   const displayUpdated = file.updatedAt ? formatDate(file.updatedAt) : displayCreated
