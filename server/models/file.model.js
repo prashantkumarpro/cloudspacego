@@ -26,6 +26,10 @@ const fileSchema = new Schema(
     userId: {
       type: Schema.Types.ObjectId,
       required: true
+    },
+    storageKey: {
+      type: String,
+      required: true,
     }
   },
   {

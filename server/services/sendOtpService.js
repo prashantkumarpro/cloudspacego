@@ -4,7 +4,7 @@ import OTP from '../models/otpModel.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-export async function sendOtpService (email) {
+export async function sendOtpService(email) {
   const otp = Math.floor(1000 + Math.random() * 9000).toString()
 
   // Upsert OTP (replace if it already exists)
@@ -37,7 +37,7 @@ export async function sendOtpService (email) {
         font-size: 28px;
         font-weight: 700;
       ">
-        dataDock
+        cloudspacego
       </h1>
 
       <p style="
@@ -62,7 +62,7 @@ export async function sendOtpService (email) {
         font-size: 15px;
         line-height: 1.6;
       ">
-        Use the verification code below to continue with your dataDock account.
+        Use the verification code below to continue with your cloudespacego account.
       </p>
 
       <div style="
@@ -110,7 +110,7 @@ export async function sendOtpService (email) {
           color: #9ca3af;
           font-size: 12px;
         ">
-          © ${new Date().getFullYear()} dataDock. All rights reserved.
+          © ${new Date().getFullYear()} cloudspacego. All rights reserved.
         </p>
       </div>
 
@@ -119,9 +119,9 @@ export async function sendOtpService (email) {
 `
 
   await resend.emails.send({
-    from: 'dataDock <otp@mail.prashantkumar.dev>',
+    from: 'cloudspacego <otp@pkdev.pro>',
     to: email,
-    subject: 'dataDock  OTP',
+    subject: 'cloudspacego  OTP',
     html
   })
 

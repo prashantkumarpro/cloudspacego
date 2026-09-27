@@ -6,105 +6,74 @@ import { rm } from 'fs/promises'
 import Directory from '../models/directory.model.js'
 import File from '../models/file.model.js'
 
+import { uploadToR2, deleteFromR2, getFromR2 } from '../services/r2.service.js'
+
 export const createFile = async (req, res) => {
   try {
-    // Get the parent directory.
-    // If no parentDirId is provided, use the user's root directory.
-    const parentDirId = req.params.parentDirId || req.user.rootDirId
+    // 1. Get parent directory
+    const parentDirId =
+      req.params.parentDirId || req.user.rootDirId
 
-    // Check whether the parent directory exists
-    // and belongs to the current user.
+    // 2. Check parent directory belongs to current user
     const parentsDirData = await Directory.findOne({
       _id: parentDirId,
-      userId: req.user._id
+      userId: req.user._id,
     }).lean()
 
     if (!parentsDirData) {
       return res.status(404).json({
-        error: 'Parent directory not found!'
+        error: 'Parent directory not found!',
       })
     }
 
-    // Get the filename from the request header.
+    // 3. Get filename
     const filename = req.headers.filename || 'untitled'
 
-    // Extract the file extension.
+    // 4. Get extension
     const extension = path.extname(filename)
 
-    // Create the database record first.
-    // `size` starts at 0 and will be updated after
-    // the complete file has been received.
-    const insertedFile = await File.create({
+    // 5. Generate MongoDB ObjectId ourselves
+    const fileId = new mongoose.Types.ObjectId()
+
+    // 6. Create R2 object key
+    const storageKey = `files/${fileId.toString()}${extension}`
+
+    // 7. Get content type
+    const contentType =
+      req.headers['content-type'] || 'application/octet-stream'
+
+    // 8. Get size if frontend sends Content-Length
+    const contentLength = req.headers['content-length']
+      ? Number(req.headers['content-length'])
+      : undefined
+
+    // 9. Upload request stream directly to R2
+    await uploadToR2({
+      key: storageKey,
+      body: req,
+      contentType,
+      contentLength,
+    })
+
+    // 10. Save metadata in MongoDB
+    await File.create({
+      _id: fileId,
       extension,
       name: filename,
-      size: 0, // NEW: store file size in the database
+      size: contentLength || 0,
       parentDirId: parentsDirData._id,
-      userId: req.user._id
+      userId: req.user._id,
+      storageKey,
     })
 
-    // Use the generated MongoDB ID as the physical filename.
-    const fileId = insertedFile._id.toString()
-    const fullFilename = `${fileId}${extension}`
-
-    const storageRoot = path.resolve('./storage')
-    const fullFilePath = path.resolve(storageRoot, fullFilename)
-
-    // Create a write stream for saving the uploaded file.
-    const writeStream = createWriteStream(fullFilePath)
-
-    // NEW: keep track of how many bytes are received.
-    let fileSize = 0
-
-    // NEW: count the bytes coming through the request stream.
-    // No Multer is required because your upload already uses
-    // the raw request stream.
-    req.on('data', (chunk) => {
-      fileSize += chunk.length
+    return res.status(201).json({
+      message: 'File Uploaded',
     })
-
-    // Pipe the uploaded data directly into the storage file.
-    req.pipe(writeStream)
-
-    // Wait until the file has completely finished writing.
-    writeStream.on('finish', async () => {
-      // NEW: save the actual file size in MongoDB.
-      await File.updateOne(
-        { _id: insertedFile._id },
-        { $set: { size: fileSize } }
-      )
-
-      return res.status(201).json({
-        message: 'File Uploaded'
-      })
-    })
-
-    // Handle upload/request errors.
-    req.on('error', async () => {
-      // IMPORTANT: File.create() returns a document,
-      // so use `insertedFile._id`, not `insertedFile.insertedId`.
-      await File.deleteOne({
-        _id: insertedFile._id
-      })
-
-      return res.status(500).json({
-        message: 'Could not Upload File'
-      })
-    })
-
-    // Handle errors while writing the file to disk.
-    writeStream.on('error', async () => {
-      await File.deleteOne({
-        _id: insertedFile._id
-      })
-
-      return res.status(500).json({
-        message: 'Could not Upload File'
-      })
-    })
-
   } catch (error) {
+    console.error('File upload error:', error)
+
     return res.status(500).json({
-      message: 'Could not Upload File'
+      message: 'Could not Upload File',
     })
   }
 }
@@ -262,31 +231,61 @@ export const getFiles = async (req, res, next) => {
 }
 
 export const getFile = async (req, res) => {
-  const id = req.params.id
+  try {
+    const id = req.params.id
 
-  const fileData = await File.findOne({
-    _id: id,
-    userId: req.user._id
-  }).lean()
+    const fileData = await File.findOne({
+      _id: id,
+      userId: req.user._id
+    }).lean()
 
-  // Check if file exists
-  if (!fileData) {
-    return res.status(404).json({ message: 'File not found' })
-  }
-
-  // If "download" is requested, set the appropriate headers
-  const filePath = `${process.cwd()}/storage/${id}${fileData.extension}`
-
-  if (req.query.action === 'download') {
-    return res.download(filePath, fileData.name)
-  }
-
-  // Send file
-  return res.sendFile(filePath, err => {
-    if (!res.headersSent && err) {
-      return res.status(404).json({ error: 'File not found!' })
+    // Check if file exists
+    if (!fileData) {
+      return res.status(404).json({
+        message: 'File not found'
+      })
     }
-  })
+
+    // NEW: Get the actual file from Cloudflare R2 using its storage key
+    const result = await getFromR2(fileData.storageKey)
+
+    // NEW: Set the file's content type from R2
+    res.setHeader(
+      'Content-Type',
+      result.ContentType || 'application/octet-stream'
+    )
+
+    // NEW: Set the file size if R2 provides it
+    if (result.ContentLength !== undefined) {
+      res.setHeader(
+        'Content-Length',
+        result.ContentLength.toString()
+      )
+    }
+
+    // NEW: Set download header when download is requested
+    if (req.query.action === 'download') {
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${encodeURIComponent(fileData.name)}"`
+      )
+    }
+
+    // NEW: Stream the file directly from R2 to the browser
+    result.Body.pipe(res)
+
+  } catch (error) {
+    console.error('Get file error:', error)
+
+    if (!res.headersSent) {
+      return res.status(404).json({
+        error: 'File not found!'
+      })
+    }
+
+    // NEW: End the response if headers were already sent
+    res.end()
+  }
 }
 
 export const updateFile = async (req, res, next) => {
@@ -327,22 +326,28 @@ export const deleteFile = async (req, res, next) => {
   const file = await File.findOne({
     _id: id,
     userId: req.user._id
-  }).select('extension')
+  }).select('storageKey')
 
   if (!file) {
-    return res.status(404).json({ error: 'File not found!' })
+    return res.status(404).json({
+      error: 'File not found!'
+    })
   }
 
   try {
-    await file.deleteOne()
+    // NEW: Delete the actual file from Cloudflare R2
+    await deleteFromR2(file.storageKey)
 
-    await rm(`./storage/${id}${file.extension}`)
+    // Delete file metadata from MongoDB
+    await file.deleteOne()
 
     return res
       .status(200)
-      .json({ success: true, message: 'File deleted successfully' })
+      .json({
+        success: true,
+        message: 'File deleted successfully'
+      })
   } catch (error) {
-    return res.json(error)
-    // next(error)
+    return next(error)
   }
 }

@@ -2,7 +2,9 @@ import mongoose from 'mongoose'
 import 'dotenv/config'
 const connectDB = async () => {
   try {
-    const connect = await mongoose.connect(process.env.MONGODB_URI)
+    const connect = await mongoose.connect(process.env.MONGODB_URI, {
+      dbName: 'cloudspacego'
+    })
     console.log(
       `DB Connected : ${connect.connection.host}, ${connect.connection.name}`
     )
