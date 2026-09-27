@@ -31,7 +31,7 @@ const startServer = async () => {
     app.use(
       cors({
         origin: [
-          'http://localhost:4000',
+          'http://localhost:3000',
           'http://localhost:5174',
           'http://localhost:5173',
           process.env.CORS_ORIGIN
@@ -54,8 +54,10 @@ const startServer = async () => {
     })
 
     // 4. Start server only after DB connection succeeds
-    app.listen(4000, () => {
-      console.log('Server Started')
+    const PORT = process.env.PORT || 4000
+
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server Started on port ${PORT}`)
     })
   } catch (err) {
     console.error('Could not start server:', err)
