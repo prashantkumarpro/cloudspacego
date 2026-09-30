@@ -1,12 +1,11 @@
 import mongoose from 'mongoose'
 import { createCursor, decodeCursor } from '../utils/cursor.js'
 import path from 'path'
-import { createWriteStream } from 'fs'
-import { rm } from 'fs/promises'
 import Directory from '../models/directory.model.js'
 import File from '../models/file.model.js'
 
-import { uploadToR2, deleteFromR2, getFromR2 } from '../services/r2.service.js'
+import { getFile as getStoredFile } from '../services/storage.service.js'
+import { uploadFile } from '../services/storage.service.js'
 
 export const createFile = async (req, res) => {
   try {
@@ -35,7 +34,7 @@ export const createFile = async (req, res) => {
     // 5. Generate MongoDB ObjectId ourselves
     const fileId = new mongoose.Types.ObjectId()
 
-    // 6. Create R2 object key
+    // 6. Create storage key
     const storageKey = `files/${fileId.toString()}${extension}`
 
     // 7. Get content type
@@ -47,15 +46,15 @@ export const createFile = async (req, res) => {
       ? Number(req.headers['content-length'])
       : undefined
 
-    // 9. Upload request stream directly to R2
-    await uploadToR2({
+    // 9. Upload using configured storage provider
+    await uploadFile({
       key: storageKey,
       body: req,
       contentType,
       contentLength,
     })
 
-    // 10. Save metadata in MongoDB
+    // 10. Save file metadata in MongoDB
     await File.create({
       _id: fileId,
       extension,
@@ -230,6 +229,8 @@ export const getFiles = async (req, res, next) => {
   }
 }
 
+
+
 export const getFile = async (req, res) => {
   try {
     const id = req.params.id
@@ -246,16 +247,16 @@ export const getFile = async (req, res) => {
       })
     }
 
-    // NEW: Get the actual file from Cloudflare R2 using its storage key
-    const result = await getFromR2(fileData.storageKey)
+    // Get file from configured storage provider
+    const result = await getStoredFile(fileData.storageKey)
 
-    // NEW: Set the file's content type from R2
+    // Set content type
     res.setHeader(
       'Content-Type',
       result.ContentType || 'application/octet-stream'
     )
 
-    // NEW: Set the file size if R2 provides it
+    // Set file size if available
     if (result.ContentLength !== undefined) {
       res.setHeader(
         'Content-Length',
@@ -263,7 +264,7 @@ export const getFile = async (req, res) => {
       )
     }
 
-    // NEW: Set download header when download is requested
+    // Set download header when download is requested
     if (req.query.action === 'download') {
       res.setHeader(
         'Content-Disposition',
@@ -271,7 +272,7 @@ export const getFile = async (req, res) => {
       )
     }
 
-    // NEW: Stream the file directly from R2 to the browser
+    // Stream file to browser
     result.Body.pipe(res)
 
   } catch (error) {
@@ -283,7 +284,6 @@ export const getFile = async (req, res) => {
       })
     }
 
-    // NEW: End the response if headers were already sent
     res.end()
   }
 }
