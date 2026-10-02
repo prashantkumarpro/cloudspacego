@@ -4,7 +4,7 @@ import path from 'path'
 import Directory from '../models/directory.model.js'
 import File from '../models/file.model.js'
 
-import { getFile as getStoredFile } from '../services/storage.service.js'
+import { getFile as getStoredFile, deleteFile as deleteStoredFile } from '../services/storage.service.js'
 import { uploadFile } from '../services/storage.service.js'
 
 export const createFile = async (req, res) => {
@@ -336,7 +336,7 @@ export const deleteFile = async (req, res, next) => {
 
   try {
     // NEW: Delete the actual file from Cloudflare R2
-    await deleteFromR2(file.storageKey)
+    await deleteStoredFile(file.storageKey)
 
     // Delete file metadata from MongoDB
     await file.deleteOne()
