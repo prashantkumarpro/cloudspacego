@@ -127,11 +127,11 @@ input:-webkit-autofill:active {
   transition: background-color 5000s ease-in-out 0s;
 }
 
-/* Landing Page Subtle Entrance Animations */
+/* Landing Page Subtle Entrance & Float Animations */
 @keyframes landingFadeUp {
   0% {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(20px);
   }
   100% {
     opacity: 1;
@@ -148,14 +148,83 @@ input:-webkit-autofill:active {
   }
 }
 
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes floatDelayed {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(7px);
+  }
+}
+
+@keyframes floatReverse {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px) translateX(3px);
+  }
+}
+
+@keyframes pulseSubtle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(0.98);
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.04);
+  }
+}
+
 .animate-landing-fade-up {
   opacity: 0;
-  animation: landingFadeUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: landingFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-landing-fade-in {
   opacity: 0;
   animation: landingFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-float-slow {
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: floatDelayed 7s ease-in-out 1s infinite;
+}
+
+.animate-float-reverse {
+  animation: floatReverse 8s ease-in-out 2s infinite;
+}
+
+.animate-pulse-subtle {
+  animation: pulseSubtle 3s ease-in-out infinite;
+}
+
+.animate-glow-pulse {
+  animation: glowPulse 8s ease-in-out infinite;
 }
 
 .animation-delay-75 {
@@ -184,7 +253,12 @@ input:-webkit-autofill:active {
 
 @media (prefers-reduced-motion: reduce) {
   .animate-landing-fade-up,
-  .animate-landing-fade-in {
+  .animate-landing-fade-in,
+  .animate-float-slow,
+  .animate-float-delayed,
+  .animate-float-reverse,
+  .animate-pulse-subtle,
+  .animate-glow-pulse {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
