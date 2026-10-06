@@ -19,11 +19,10 @@ export function LandingNavbar() {
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-all duration-250 ${
-        isScrolled
+      className={`sticky top-0 z-50 w-full transition-all duration-250 ${isScrolled
           ? 'bg-[#FAF9F7]/95 backdrop-blur-md shadow-[0_2px_18px_rgba(30,25,60,0.05)] border-b border-[#ECEAF0]'
           : 'bg-[#FAF9F7]/85 backdrop-blur-sm border-b border-[#ECEAF0]'
-      }`}
+        }`}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand Logo */}

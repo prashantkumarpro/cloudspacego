@@ -206,11 +206,10 @@ export function ProductPreview() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id as FeatureTab)}
               type="button"
-              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer ${
-                isActive
+              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer ${isActive
                   ? 'bg-[#6E60EE] text-white shadow-xs scale-102'
                   : 'bg-white/90 text-[#585361] border border-[#ECEAF0] hover:border-[#D6D1FF] hover:bg-[#FAF9F7]'
-              }`}
+                }`}
             >
               <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-white' : 'text-[#6E60EE]'}`} />
               <span>{tab.label}</span>
@@ -308,7 +307,7 @@ export function ProductPreview() {
       {/* MAIN REALISTIC CLOUDSPACEGO WORKSPACE CONTAINER */}
       {/* ========================================================================= */}
       <div className="relative overflow-hidden rounded-2xl border border-[#ECEAF0] bg-white shadow-[0_24px_70px_rgba(30,25,60,0.09)] transition-all duration-300 hover:shadow-[0_28px_80px_rgba(30,25,60,0.13)]">
-        
+
         {/* Workspace Real App Header Bar */}
         <div className="flex h-14 items-center justify-between border-b border-[#ECEAF0] bg-[#FAF9F7] px-4 sm:px-6">
           {/* Left: Window Dots & Logo */}
@@ -341,11 +340,10 @@ export function ProductPreview() {
           {/* Center: Search Bar with dynamic typing simulation */}
           <div className="relative flex-1 max-w-md mx-4">
             <div
-              className={`flex h-8 items-center gap-2 rounded-lg border bg-white px-3 text-xs shadow-2xs transition-all ${
-                activeTab === 'search' || isSearching
+              className={`flex h-8 items-center gap-2 rounded-lg border bg-white px-3 text-xs shadow-2xs transition-all ${activeTab === 'search' || isSearching
                   ? 'border-[#6E60EE] ring-2 ring-[#6E60EE]/15'
                   : 'border-[#ECEAF0] text-[#8A8594]'
-              }`}
+                }`}
             >
               <Search className="h-3.5 w-3.5 text-[#8A8594] shrink-0" />
               <input
@@ -402,7 +400,7 @@ export function ProductPreview() {
 
         {/* Dashboard Main Workspace Layout */}
         <div className="flex min-h-[500px] flex-col md:flex-row bg-[#FAF9F7]">
-          
+
           {/* Dashboard Left Sidebar */}
           <aside className="hidden w-60 flex-col justify-between border-r border-[#ECEAF0] bg-white p-4 md:flex">
             <div>
@@ -492,7 +490,7 @@ export function ProductPreview() {
 
           {/* Main Dashboard Canvas Viewport */}
           <div className="flex-1 p-5 sm:p-6 lg:p-7 overflow-hidden">
-            
+
             {/* Action Bar / Breadcrumb */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
               <div>
@@ -543,11 +541,10 @@ export function ProductPreview() {
                       key={folder.id}
                       onMouseEnter={() => setActiveFolderHover(folder.id)}
                       onMouseLeave={() => setActiveFolderHover(null)}
-                      className={`group relative flex items-center justify-between p-3.5 rounded-xl border bg-white shadow-2xs transition-all duration-200 cursor-pointer ${
-                        isHovered || activeTab === 'uploading'
+                      className={`group relative flex items-center justify-between p-3.5 rounded-xl border bg-white shadow-2xs transition-all duration-200 cursor-pointer ${isHovered || activeTab === 'uploading'
                           ? 'border-[#6E60EE] ring-2 ring-[#6E60EE]/10 bg-[#FAF9F7]'
                           : 'border-[#ECEAF0] hover:border-[#D6D1FF]'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#F2EFFF] group-hover:scale-105 transition-transform">
@@ -581,11 +578,10 @@ export function ProductPreview() {
                       key={filter}
                       type="button"
                       onClick={() => setSelectedFilter(filter)}
-                      className={`rounded-lg px-2.5 py-1 text-xs font-semibold capitalize transition-all cursor-pointer ${
-                        selectedFilter === filter
+                      className={`rounded-lg px-2.5 py-1 text-xs font-semibold capitalize transition-all cursor-pointer ${selectedFilter === filter
                           ? 'bg-[#1E1B24] text-white shadow-2xs'
                           : 'text-[#8A8594] hover:text-[#1E1B24] hover:bg-white'
-                      }`}
+                        }`}
                     >
                       {filter === 'all' ? 'All Files' : filter}
                     </button>
@@ -609,9 +605,8 @@ export function ProductPreview() {
                     return (
                       <div
                         key={file.id}
-                        className={`flex items-center justify-between p-3.5 transition-all cursor-pointer group ${
-                          isNewUpload ? 'bg-[#F2EFFF]/60' : 'hover:bg-[#FAF9F7]'
-                        }`}
+                        className={`flex items-center justify-between p-3.5 transition-all cursor-pointer group ${isNewUpload ? 'bg-[#F2EFFF]/60' : 'hover:bg-[#FAF9F7]'
+                          }`}
                       >
                         <div className="flex items-center gap-3.5 min-w-0 flex-1">
                           <div
@@ -700,9 +695,8 @@ export function ProductPreview() {
 
           <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#ECEAF0]">
             <div
-              className={`h-full rounded-full transition-all duration-300 ${
-                uploadProgress >= 100 ? 'bg-emerald-500' : 'bg-[#6E60EE]'
-              }`}
+              className={`h-full rounded-full transition-all duration-300 ${uploadProgress >= 100 ? 'bg-emerald-500' : 'bg-[#6E60EE]'
+                }`}
               style={{ width: `${uploadProgress}%` }}
             />
           </div>
