@@ -57,31 +57,31 @@
 
 .dark {
   /* Polished, premium, unified Dark Mode */
-  --background: #0D0D0F;
+  --background: #0D0D11;
   /* main canvas */
-  --foreground: #F5F5F7;
-  /* primary text */
-  --card-bg: #111114;
-  /* cards / modal / dropdown surfaces */
-  --card-border: #222226;
-  /* subtle dark card border */
-  --card-hover: #16161A;
-  /* subtle hover surface */
-  --sidebar-bg: #0A0A0C;
+  --foreground: #F4F4F6;
+  /* primary high-contrast text */
+  --card-bg: #14141A;
+  /* cards, modals, dropdown elevated surfaces */
+  --card-border: #23232E;
+  /* crisp, refined structural border */
+  --card-hover: #191922;
+  /* subtle interactive hover surface */
+  --sidebar-bg: #0A0A0D;
   /* sidebar background */
-  --sidebar-border: #1C1C20;
-  /* subtle sidebar separation divider */
-  --sidebar-active-bg: rgba(110, 96, 238, 0.10);
-  /* subtle violet active nav background */
-  --sidebar-active-text: #6E60EE;
-  /* brand violet text */
-  --text-muted: #71717A;
-  /* clean gray-muted text */
-  --text-secondary: #A1A1AA;
-  /* secondary text */
-  --input-bg: #16161A;
-  /* dark controls & hover bg */
-  --divider: #222226;
+  --sidebar-border: #1E1E26;
+  /* sidebar separation divider */
+  --sidebar-active-bg: rgba(110, 96, 238, 0.12);
+  /* brand-tinted active nav background */
+  --sidebar-active-text: #8E82F8;
+  /* luminous brand violet text */
+  --text-muted: #767688;
+  /* tertiary metadata text with WCAG AA contrast */
+  --text-secondary: #A3A3B5;
+  /* readable secondary text */
+  --input-bg: #1A1A22;
+  /* nested controls, pills, well containers */
+  --divider: #22222C;
 }
 
 body {

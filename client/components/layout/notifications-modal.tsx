@@ -107,7 +107,7 @@ export function NotificationsModal({
     >
       <div className="flex flex-col gap-3">
         {/* Notification List Container with subtle warm off-white background */}
-        <div className="flex flex-col gap-1.5 p-1.5 bg-[#FAF9F7] dark:bg-background border border-card-border rounded-xl max-h-80 overflow-y-auto">
+        <div className="flex flex-col gap-1.5 p-1.5 bg-input-bg/50 border border-card-border rounded-xl max-h-80 overflow-y-auto">
           {isLoading ? (
             /* Skeleton Loading State */
             <div className="flex flex-col gap-1.5">

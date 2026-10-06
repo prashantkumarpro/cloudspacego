@@ -139,7 +139,7 @@ export function Header({ onMenuToggle, className }: HeaderProps) {
                 className='flex items-center gap-1.5 p-1 pl-1 pr-2.5 rounded-full bg-input-bg hover:bg-input-bg/80 active:bg-input-bg/60 border border-card-border hover:border-[#6E60EE]/40 active:scale-95 cursor-pointer select-none transition-all duration-200 group relative shrink-0 h-10 shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6E60EE]/50 focus-visible:ring-offset-1 focus-visible:ring-offset-card-bg'
                 aria-label='User account menu'
               >
-                <div className='w-8 h-8 rounded-full bg-slate-200 dark:bg-zinc-800 overflow-hidden relative shrink-0 ring-1 ring-card-border'>
+                <div className='w-8 h-8 rounded-full bg-input-bg overflow-hidden relative shrink-0 ring-1 ring-card-border'>
                   <img
                     src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=256&h=256&fit=crop'
                     alt='User Profile'

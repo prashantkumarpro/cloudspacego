@@ -206,9 +206,9 @@ function PreviewSlide({
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 p-8 text-white/80 dark:text-white/80 animate-in fade-in duration-200">
+      <div className="flex flex-col items-center justify-center gap-3 p-8 text-foreground animate-in fade-in duration-200">
         <Loader2 className="w-8 h-8 sm:w-9 sm:h-9 animate-spin text-[#6E60EE]" />
-        <span className="text-xs sm:text-sm font-semibold tracking-wide text-white drop-shadow-sm">
+        <span className="text-xs sm:text-sm font-semibold tracking-wide text-foreground drop-shadow-sm">
           Loading preview...
         </span>
       </div>
