@@ -1,13 +1,25 @@
 import mongoose from 'mongoose'
-import { createCursor, decodeCursor } from '../utils/cursor.js'
+import fs from 'fs'
 import path from 'path'
+import { createCursor, decodeCursor } from '../utils/cursor.js'
 import Directory from '../models/directory.model.js'
 import File from '../models/file.model.js'
+import User from '../models/user.model.js'
+import {
+  DEFAULT_STORAGE_LIMIT,
+  getStorageStats,
+} from '../config/storageQuota.js'
 
 import { getFile as getStoredFile, deleteFile as deleteStoredFile } from '../services/storage.service.js'
 import { uploadFile } from '../services/storage.service.js'
 
 export const createFile = async (req, res) => {
+  let fileId = null
+  let storageKey = null
+  let isUploadedToStorage = false
+  let isMetadataCreated = false
+  let reservedSize = 0
+
   try {
     // 1. Get parent directory
     const parentDirId =
@@ -25,51 +37,253 @@ export const createFile = async (req, res) => {
       })
     }
 
-    // 3. Get filename
-    const filename = req.headers.filename || 'untitled'
+    // 3. Determine if Content-Length header is provided
+    const contentLength = req.headers['content-length']
+      ? Number(req.headers['content-length'])
+      : undefined
+    const hasKnownSize =
+      contentLength !== undefined && !Number.isNaN(contentLength) && contentLength > 0
 
-    // 4. Get extension
+    // 4. If Content-Length is known, ATOMICALLY RESERVE quota in MongoDB
+    if (hasKnownSize) {
+      const reservedUser = await User.findOneAndUpdate(
+        {
+          _id: req.user._id,
+          $expr: {
+            $lte: [
+              { $add: [{ $ifNull: ['$storageUsed', 0] }, contentLength] },
+              { $ifNull: ['$storageLimit', DEFAULT_STORAGE_LIMIT] },
+            ],
+          },
+        },
+        { $inc: { storageUsed: contentLength } },
+        { returnDocument: 'after' }
+      )
+
+      if (!reservedUser) {
+        const currentUser = await User.findById(req.user._id).select(
+          'storageUsed storageLimit plan'
+        )
+        const stats = getStorageStats(currentUser || req.user)
+
+        return res.status(400).json({
+          error: 'Storage limit exceeded',
+          message: 'Storage quota exceeded. Please free up space or upgrade your plan.',
+          limit: stats.limit,
+          used: stats.used,
+          required: contentLength,
+          remaining: stats.remaining,
+        })
+      }
+
+      reservedSize = contentLength
+    }
+
+    // 5. Get filename and extension
+    const filename = req.headers.filename || 'untitled'
     const extension = path.extname(filename)
 
-    // 5. Generate MongoDB ObjectId ourselves
-    const fileId = new mongoose.Types.ObjectId()
-
-    // 6. Create storage key
-    const storageKey = `files/${fileId.toString()}${extension}`
+    // 6. Generate MongoDB ObjectId and storage key
+    fileId = new mongoose.Types.ObjectId()
+    storageKey = `files/${fileId.toString()}${extension}`
 
     // 7. Get content type
     const contentType =
       req.headers['content-type'] || 'application/octet-stream'
 
-    // 8. Get size if frontend sends Content-Length
-    const contentLength = req.headers['content-length']
-      ? Number(req.headers['content-length'])
-      : undefined
-
-    // 9. Upload using configured storage provider
+    // 8. Stream file to storage provider
     await uploadFile({
       key: storageKey,
       body: req,
       contentType,
       contentLength,
     })
+    isUploadedToStorage = true
 
-    // 10. Save file metadata in MongoDB
+    // 9. Determine actual uploaded size
+    let actualSize = reservedSize
+
+    if (process.env.STORAGE_DRIVER === 'local' || actualSize === 0) {
+      try {
+        const localFilePath = path.resolve('./storage', storageKey)
+        const stat = await fs.promises.stat(localFilePath)
+        if (stat && typeof stat.size === 'number') {
+          actualSize = stat.size
+        }
+      } catch {
+        // Fallback to existing actualSize if stat fails
+      }
+    }
+
+    // 10. Handle size adjustments or unknown initial size
+    if (reservedSize === 0) {
+      // Content-Length was missing; atomically reserve actualSize now
+      const postReservedUser = await User.findOneAndUpdate(
+        {
+          _id: req.user._id,
+          $expr: {
+            $lte: [
+              { $add: [{ $ifNull: ['$storageUsed', 0] }, actualSize] },
+              { $ifNull: ['$storageLimit', DEFAULT_STORAGE_LIMIT] },
+            ],
+          },
+        },
+        { $inc: { storageUsed: actualSize } },
+        { returnDocument: 'after' }
+      )
+
+      if (!postReservedUser) {
+        await deleteStoredFile(storageKey).catch(() => {})
+        isUploadedToStorage = false
+
+        const currentUser = await User.findById(req.user._id).select(
+          'storageUsed storageLimit plan'
+        )
+        const stats = getStorageStats(currentUser || req.user)
+
+        return res.status(400).json({
+          error: 'Storage limit exceeded',
+          message: 'Storage quota exceeded. Please free up space or upgrade your plan.',
+          limit: stats.limit,
+          used: stats.used,
+          required: actualSize,
+          remaining: stats.remaining,
+        })
+      }
+
+      reservedSize = actualSize
+    } else if (actualSize !== reservedSize) {
+      // Actual streamed size differed from Content-Length
+      if (actualSize < reservedSize) {
+        // Release excess reservation atomically
+        const diff = reservedSize - actualSize
+        await User.updateOne(
+          { _id: req.user._id },
+          [
+            {
+              $set: {
+                storageUsed: {
+                  $max: [0, { $subtract: [{ $ifNull: ['$storageUsed', 0] }, diff] }],
+                },
+              },
+            },
+          ],
+          { updatePipeline: true }
+        )
+        reservedSize = actualSize
+      } else if (actualSize > reservedSize) {
+        // Streamed more than header; reserve delta atomically
+        const delta = actualSize - reservedSize
+        const extraReserved = await User.findOneAndUpdate(
+          {
+            _id: req.user._id,
+            $expr: {
+              $lte: [
+                { $add: [{ $ifNull: ['$storageUsed', 0] }, delta] },
+                { $ifNull: ['$storageLimit', DEFAULT_STORAGE_LIMIT] },
+              ],
+            },
+          },
+          { $inc: { storageUsed: delta } },
+          { returnDocument: 'after' }
+        )
+
+        if (!extraReserved) {
+          // Extra bytes exceeded quota -> rollback entire reservation and clean up
+          await deleteStoredFile(storageKey).catch(() => {})
+          isUploadedToStorage = false
+
+          await User.updateOne(
+            { _id: req.user._id },
+            [
+              {
+                $set: {
+                  storageUsed: {
+                    $max: [0, { $subtract: [{ $ifNull: ['$storageUsed', 0] }, reservedSize] }],
+                  },
+                },
+              },
+            ],
+            { updatePipeline: true }
+          )
+          reservedSize = 0
+
+          const currentUser = await User.findById(req.user._id).select(
+            'storageUsed storageLimit plan'
+          )
+          const stats = getStorageStats(currentUser || req.user)
+
+          return res.status(400).json({
+            error: 'Storage limit exceeded',
+            message: 'Storage quota exceeded. Please free up space or upgrade your plan.',
+            limit: stats.limit,
+            used: stats.used,
+            required: actualSize,
+            remaining: stats.remaining,
+          })
+        }
+
+        reservedSize = actualSize
+      }
+    }
+
+    // 11. Save file metadata in MongoDB
     await File.create({
       _id: fileId,
       extension,
       name: filename,
-      size: contentLength || 0,
+      size: actualSize,
       parentDirId: parentsDirData._id,
       userId: req.user._id,
       storageKey,
     })
+    isMetadataCreated = true
 
     return res.status(201).json({
       message: 'File Uploaded',
+      size: actualSize,
     })
   } catch (error) {
     console.error('File upload error:', error)
+
+    // Release any reserved quota on failure atomically
+    if (reservedSize > 0) {
+      try {
+        await User.updateOne(
+          { _id: req.user._id },
+          [
+            {
+              $set: {
+                storageUsed: {
+                  $max: [0, { $subtract: [{ $ifNull: ['$storageUsed', 0] }, reservedSize] }],
+                },
+              },
+            },
+          ],
+          { updatePipeline: true }
+        )
+      } catch (releaseErr) {
+        console.error('Failed to release reserved storage quota:', releaseErr)
+      }
+    }
+
+    // Cleanup storage file if partially uploaded
+    if (isUploadedToStorage && storageKey) {
+      try {
+        await deleteStoredFile(storageKey)
+      } catch (cleanupErr) {
+        console.error('Cleanup storage error on upload failure:', cleanupErr)
+      }
+    }
+
+    // Cleanup MongoDB file metadata if partially created
+    if (isMetadataCreated && fileId) {
+      try {
+        await File.deleteOne({ _id: fileId, userId: req.user._id })
+      } catch (cleanupErr) {
+        console.error('Cleanup DB error on upload failure:', cleanupErr)
+      }
+    }
 
     return res.status(500).json({
       message: 'Could not Upload File',
@@ -191,6 +405,7 @@ export const getFiles = async (req, res, next) => {
           _id: 1,
           name: 1,
           extension: 1,
+          size: 1,
           parentDirId: 1,
           createdAt: 1,
           directory: {
@@ -326,7 +541,7 @@ export const deleteFile = async (req, res, next) => {
   const file = await File.findOne({
     _id: id,
     userId: req.user._id
-  }).select('storageKey')
+  }).select('storageKey size')
 
   if (!file) {
     return res.status(404).json({
@@ -335,11 +550,29 @@ export const deleteFile = async (req, res, next) => {
   }
 
   try {
-    // NEW: Delete the actual file from Cloudflare R2
+    // Delete the actual file from storage
     await deleteStoredFile(file.storageKey)
 
     // Delete file metadata from MongoDB
     await file.deleteOne()
+
+    // Atomically decrement user's storageUsed (never negative)
+    const fileSize = typeof file.size === 'number' && file.size > 0 ? file.size : 0
+    if (fileSize > 0) {
+      await User.updateOne(
+        { _id: req.user._id },
+        [
+          {
+            $set: {
+              storageUsed: {
+                $max: [0, { $subtract: [{ $ifNull: ['$storageUsed', 0] }, fileSize] }],
+              },
+            },
+          },
+        ],
+        { updatePipeline: true }
+      )
+    }
 
     return res
       .status(200)

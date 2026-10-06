@@ -33,5 +33,5 @@ export const getFromLocal = async (key) => {
 export const deleteFromLocal = async (key) => {
     const filePath = path.resolve(storageRoot, key)
 
-    await fs.promises.rm(filePath)
+    await fs.promises.rm(filePath, { force: true })
 }

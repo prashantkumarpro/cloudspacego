@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { getNavItems } from './nav-config';
 import { Tooltip } from '../ui/tooltip';
 import { Sun, Moon } from 'lucide-react';
+import { formatBytes } from '../../lib/utils/format';
 
 interface MobileNavProps {
   isOpen: boolean;
@@ -22,7 +23,14 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
     theme,
     toggleTheme,
     setActiveModal,
+    storageStats,
   } = useApp();
+
+  const percentageUsed = storageStats.totalCapacity > 0
+    ? Math.min(100, Math.round((storageStats.totalUsed / storageStats.totalCapacity) * 100))
+    : 0;
+  const freeSpaceFormatted = formatBytes(Math.max(0, storageStats.totalCapacity - storageStats.totalUsed), 1);
+  const usedSpaceFormatted = formatBytes(storageStats.totalUsed, 1);
 
   const menuItems = getNavItems();
 
@@ -173,18 +181,18 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
                 </span>
               </div>
               <span className='text-[9px] font-bold text-white bg-[#6E60EE] px-2 py-0.5 rounded-full'>
-                72%
+                {percentageUsed}%
               </span>
             </div>
 
             <div className='flex flex-col gap-1'>
               <span className='text-[10px] font-bold text-text-secondary'>
-                72% used &bull; 2.8 GB free
+                {usedSpaceFormatted} used &bull; {freeSpaceFormatted} free
               </span>
-              <div className='w-full bg-[#F3F4F6] h-2.5 overflow-hidden relative border border-[#E5E7EB] rounded-full'>
+              <div className='w-full bg-[#F3F4F6] dark:bg-zinc-800 h-2.5 overflow-hidden relative border border-[#E5E7EB] dark:border-zinc-700 rounded-full'>
                 <div
-                  className='h-full bg-[#6E60EE]'
-                  style={{ width: '72%' }}
+                  className='h-full bg-[#6E60EE] rounded-full'
+                  style={{ width: `${Math.max(percentageUsed, percentageUsed > 0 ? 3 : 0)}%` }}
                 />
               </div>
             </div>

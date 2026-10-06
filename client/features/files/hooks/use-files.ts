@@ -17,6 +17,13 @@ import { useUpload } from "@/providers/upload-provider";
 // Global listener set to synchronize active file hook consumers if needed
 const fileListeners = new Set<() => void>();
 
+export const subscribeFilesChanged = (listener: () => void) => {
+  fileListeners.add(listener);
+  return () => {
+    fileListeners.delete(listener);
+  };
+};
+
 export const notifyFilesChanged = () => {
   fileListeners.forEach((listener) => {
     try {

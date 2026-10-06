@@ -5,6 +5,8 @@ import { FileItem, ActivityItem, StorageStats, SidebarSection, FileType } from '
 import { INITIAL_FILES, INITIAL_ACTIVITIES, INITIAL_STORAGE } from '../lib/constants/mock-data';
 import { ToastProvider } from './toast-provider';
 import { UploadProvider } from './upload-provider';
+import { getStorageQuota, type StorageQuotaResponse } from '@/features/storage/api';
+import { subscribeFilesChanged } from '@/features/files/hooks/use-files';
 
 interface AppContextType {
   currentSection: SidebarSection;
@@ -100,8 +102,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setSearchQuery('');
   }, []);
 
-  // Recalculate storage stats based on active files (only non-deleted and non-folder items count toward storage usage)
-  const storageStats = useMemo(() => {
+  // Backend storage quota state (source of truth)
+  const [backendQuota, setBackendQuota] = useState<StorageQuotaResponse>({
+    used: 0,
+    limit: INITIAL_STORAGE.totalCapacity,
+    remaining: INITIAL_STORAGE.totalCapacity,
+    percentage: 0,
+    plan: 'free',
+  });
+
+  const refreshStorageQuota = useCallback(async () => {
+    try {
+      const quota = await getStorageQuota();
+      if (quota && typeof quota.used === 'number') {
+        setBackendQuota(quota);
+      }
+    } catch {
+      // Keep default / current stats if unauthenticated or network error
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshStorageQuota();
+    const unsubscribe = subscribeFilesChanged(refreshStorageQuota);
+    return () => {
+      unsubscribe();
+    };
+  }, [refreshStorageQuota]);
+
+  // Storage stats combining backend source of truth with local categorization
+  const storageStats: StorageStats = useMemo(() => {
     const activeFiles = files.filter(f => !f.deleted && f.type !== 'folder');
 
     let docs = 0;
@@ -121,7 +151,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    const totalUsed = docs + imgs + vids + other;
+    const localTotal = docs + imgs + vids + other;
+    const totalUsed = backendQuota.used > 0 ? backendQuota.used : localTotal;
+    const totalCapacity = backendQuota.limit || INITIAL_STORAGE.totalCapacity;
+    const remaining =
+      backendQuota.remaining !== undefined
+        ? backendQuota.remaining
+        : Math.max(0, totalCapacity - totalUsed);
+    const percentage =
+      totalCapacity > 0
+        ? Math.min(100, Math.round((totalUsed / totalCapacity) * 100))
+        : 0;
 
     return {
       documents: docs,
@@ -129,9 +169,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       videos: vids,
       other,
       totalUsed,
-      totalCapacity: INITIAL_STORAGE.totalCapacity || 15 * 1024 * 1024 * 1024,
+      totalCapacity,
+      remaining,
+      percentage,
+      plan: backendQuota.plan,
     };
-  }, [files]);
+  }, [files, backendQuota]);
 
   // Actions
   const addActivity = useCallback((type: ActivityItem['type'], assetName: string, details: string, user = 'Prashant') => {

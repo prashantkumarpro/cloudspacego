@@ -1,5 +1,7 @@
 import Directory from '../models/directory.model.js'
 import File from '../models/file.model.js'
+import User from '../models/user.model.js'
+import { deleteFile as deleteStoredFile } from '../services/storage.service.js'
 import { rm } from 'fs/promises'
 
 export const createDirectory = async (req, res, next) => {
@@ -88,14 +90,13 @@ export const deleteDriectory = async (req, res, next) => {
 
     async function getDirectoryContents (id) {
       let files = await File.find({ parentDirId: id })
-        .select('extension')
+        .select('extension size storageKey')
         .lean()
 
       let directories = await Directory.find({ parentDirId: id })
         .select('_id')
         .lean()
 
-      console.log(files)
       for (const { _id } of directories) {
         const { files: childFiles, directories: childDirectories } =
           await getDirectoryContents(_id)
@@ -108,10 +109,15 @@ export const deleteDriectory = async (req, res, next) => {
     }
 
     const { files, directories } = await getDirectoryContents(id)
-    
 
-    for (const { _id, extension } of files) {
-      await rm(`./storage/${_id.toString()}${extension}`)
+    let totalDeletedBytes = 0
+
+    for (const file of files) {
+      const fileKey = file.storageKey || `files/${file._id.toString()}${file.extension}`
+      await deleteStoredFile(fileKey).catch(() => {})
+      if (typeof file.size === 'number' && file.size > 0) {
+        totalDeletedBytes += file.size
+      }
     }
 
     await File.deleteMany({
@@ -121,6 +127,30 @@ export const deleteDriectory = async (req, res, next) => {
     await Directory.deleteMany({
       _id: { $in: [...directories.map(({ _id }) => _id), id] }
     })
+
+    if (totalDeletedBytes > 0) {
+      await User.updateOne(
+        { _id: req.user._id },
+        [
+          {
+            $set: {
+              storageUsed: {
+                $max: [
+                  0,
+                  {
+                    $subtract: [
+                      { $ifNull: ['$storageUsed', 0] },
+                      totalDeletedBytes,
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        { updatePipeline: true }
+      )
+    }
   } catch (error) {
     next(error)
   }

@@ -93,12 +93,19 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
         notifyFilesChanged()
         return response
       } catch (err: unknown) {
-        const errorMessage =
-          err instanceof Error
-            ? err.message
-            : typeof err === 'object' && err !== null && 'message' in err
-            ? String((err as { message: unknown }).message)
-            : 'Upload failed'
+        let errorMessage = 'Upload failed'
+        if (typeof err === 'object' && err !== null) {
+          const axiosErr = err as { response?: { data?: { message?: string; error?: string } }; message?: string }
+          if (axiosErr.response?.data?.message) {
+            errorMessage = axiosErr.response.data.message
+          } else if (axiosErr.response?.data?.error) {
+            errorMessage = axiosErr.response.data.error
+          } else if (axiosErr.message) {
+            errorMessage = axiosErr.message
+          }
+        } else if (err instanceof Error) {
+          errorMessage = err.message
+        }
 
         setTasks(prev =>
           prev.map(t =>

@@ -29,7 +29,10 @@ export interface StorageStats {
   videos: number; // size in bytes
   other: number; // size in bytes
   totalUsed: number; // size in bytes
-  totalCapacity: number; // size in bytes (e.g. 100 GB)
+  totalCapacity: number; // size in bytes (200 MB for Free plan = 209715200 bytes)
+  remaining?: number; // size in bytes
+  percentage?: number; // percentage (0-100)
+  plan?: string; // 'free' | 'pro' | 'business'
 }
 
 export type SidebarSection = 'Dashboard' | 'My Files' | 'Shared' | 'Recent' | 'Starred' | 'Trash' | 'Settings';

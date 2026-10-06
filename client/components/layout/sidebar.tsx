@@ -189,7 +189,7 @@ export function Sidebar({ className }: SidebarProps) {
         {/* Storage details panel */}
         {isSidebarCollapsed ? (
           <div className="w-full px-2 flex justify-center py-1 shrink-0">
-            <Tooltip content="72% used  •  2.8 GB free" side="right">
+            <Tooltip content={`${percentageUsed}% used • ${freeSpaceFormatted} free`} side="right">
               <div
                 onClick={() => setCurrentSection('My Files')}
                 className="w-12 rounded-xl py-2 px-1 flex flex-col items-center gap-1.5 select-none cursor-pointer border bg-card-bg border-card-border hover:bg-input-bg transition-colors shadow-xs"

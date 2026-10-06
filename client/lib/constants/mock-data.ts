@@ -10,5 +10,8 @@ export const INITIAL_STORAGE: StorageStats = {
   videos: 0,
   other: 0,
   totalUsed: 0,
-  totalCapacity: 15 * 1024 * 1024 * 1024, // 15 GB
+  totalCapacity: 200 * 1024 * 1024, // 200 MB (209715200 bytes)
+  remaining: 200 * 1024 * 1024,
+  percentage: 0,
+  plan: 'free',
 };

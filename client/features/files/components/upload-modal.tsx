@@ -11,7 +11,7 @@ import { Upload, FolderPlus } from 'lucide-react'
 import { formatBytes } from '../../../lib/utils/format'
 
 export function UploadModal() {
-  const { activeModal, setActiveModal, activeFolderId } = useApp()
+  const { activeModal, setActiveModal, activeFolderId, storageStats } = useApp()
   const { upload, isUploading } = useFiles()
   const { create: createDir, isCreating: isCreatingDir } = useDirectory(activeFolderId ?? undefined)
 
@@ -37,7 +37,12 @@ export function UploadModal() {
     if (file) {
       setSelectedFile(file)
       setCustomFileName(file.name)
-      setError('')
+      const remainingStorage = Math.max(0, storageStats.totalCapacity - storageStats.totalUsed)
+      if (file.size > remainingStorage) {
+        setError(`Selected file (${formatBytes(file.size)}) exceeds remaining storage (${formatBytes(remainingStorage)}).`)
+      } else {
+        setError('')
+      }
     }
   }
 

@@ -3,6 +3,10 @@ import User from '../models/user.model.js'
 import mongoose, { Types } from 'mongoose'
 import Session from '../models/sessionModel.js'
 import OTP from '../models/otpModel.js'
+import {
+  FREE_STORAGE_LIMIT_BYTES,
+  getStorageStats,
+} from '../config/storageQuota.js'
 
 export const addUser = async (req, res, next) => {
   const { name, email, password, otp } = req.body
@@ -33,7 +37,10 @@ export const addUser = async (req, res, next) => {
         name,
         email,
         password,
-        rootDirId
+        rootDirId,
+        storageUsed: 0,
+        storageLimit: FREE_STORAGE_LIMIT_BYTES,
+        plan: 'free'
       },
       { session }
     )
@@ -115,10 +122,29 @@ export const loginUser = async (req, res, next) => {
 }
 
 export const getUser = (req, res) => {
+  const stats = getStorageStats(req.user)
   res.status(200).json({
     name: req.user.name,
-    email: req.user.email
+    email: req.user.email,
+    storage: stats
   })
+}
+
+export const getUserStorage = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).select(
+      'storageUsed storageLimit plan'
+    )
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+
+    const stats = getStorageStats(user)
+    return res.status(200).json(stats)
+  } catch (error) {
+    next(error)
+  }
 }
 
 export const logoutUser = async (req, res) => {
