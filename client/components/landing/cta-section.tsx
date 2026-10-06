@@ -6,40 +6,34 @@ import { ArrowRight, Sparkles } from 'lucide-react'
 
 export function CtaSection() {
   return (
-    <section className="relative px-4 py-20 sm:px-6 sm:py-28 lg:px-8 bg-background border-t border-card-border transition-colors duration-200">
-      <div className="relative mx-auto max-w-5xl overflow-hidden rounded-3xl bg-card-bg border border-card-border px-6 py-16 text-center shadow-[0_24px_60px_rgba(0,0,0,0.06)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.4)] sm:px-12 sm:py-20">
-        {/* Subtle radial purple glow accent inside container */}
-        <div
-          className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-80 w-[450px] rounded-full bg-[#6E60EE]/15 dark:bg-[#6E60EE]/25 blur-3xl"
-          aria-hidden="true"
-        />
-
+    <section className="relative px-4 py-16 sm:px-6 sm:py-24 lg:px-8 bg-background border-t border-card-border transition-colors duration-200">
+      <div className="relative mx-auto max-w-5xl rounded-2xl bg-card-bg border border-card-border px-6 py-12 text-center shadow-md dark:shadow-xl dark:shadow-black/50 sm:px-12 sm:py-16">
         <div className="relative z-10 mx-auto max-w-2xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#6E60EE]/25 bg-[#6E60EE]/10 px-4 py-1.5 text-xs font-semibold text-[#6E60EE] dark:text-[#8E82F8] backdrop-blur-xs mb-6">
-            <Sparkles className="h-3.5 w-3.5 text-[#6E60EE] dark:text-[#8E82F8]" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-card-border bg-input-bg px-3.5 py-1 text-[11px] font-semibold text-text-secondary tracking-wider uppercase mb-5">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#6E60EE]" />
             <span>Ready to get started?</span>
           </div>
 
-          <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
             Keep your files within reach.
           </h2>
 
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-text-secondary sm:text-base">
+          <p className="mx-auto mt-4 max-w-lg text-sm sm:text-base leading-relaxed text-text-secondary">
             Start building your personal cloud workspace with CloudSpaceGo today. Fast setup, intuitive file management, and instant access.
           </p>
 
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5">
+          <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               href="/register"
-              className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-[#6E60EE] px-8 py-3.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[#6052E6] hover:shadow-md active:scale-[0.98]"
+              className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-[#6E60EE] px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs transition-all duration-150 hover:bg-[#6052E6] active:scale-[0.98]"
             >
               Get started free
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-3.5 w-3.5" />
             </Link>
 
             <Link
               href="/login"
-              className="inline-flex w-full sm:w-auto items-center justify-center rounded-xl border border-card-border bg-input-bg px-6 py-3.5 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-card-hover active:scale-[0.98]"
+              className="inline-flex w-full sm:w-auto items-center justify-center rounded-lg border border-card-border bg-input-bg px-5 py-2.5 text-xs sm:text-sm font-semibold text-foreground transition-all duration-150 hover:bg-card-hover active:scale-[0.98]"
             >
               Sign in
             </Link>

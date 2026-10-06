@@ -183,122 +183,111 @@ export function ProductPreview() {
   })
 
   return (
-    <div id="product-demo" className="relative mx-auto mt-14 w-full max-w-6xl animate-landing-fade-up animation-delay-300 select-none">
-      {/* Soft background ambient glow */}
-      <div
-        className="pointer-events-none absolute -inset-6 rounded-[36px] bg-gradient-to-b from-[#6E60EE]/15 via-[#6E60EE]/5 to-transparent blur-3xl opacity-70"
-        aria-hidden="true"
-      />
-
-      {/* Interactive Feature Pills Switcher */}
-      <div className="mb-6 flex flex-wrap items-center justify-center gap-2 px-2">
-        {[
-          { id: 'overview', label: 'Workspace Overview', icon: LayoutDashboard },
-          { id: 'uploading', label: 'Live Upload & Sync', icon: CloudUpload },
-          { id: 'search', label: 'Instant ⌘K Search', icon: Search },
-          { id: 'sharing', label: 'Team Sharing & Links', icon: Share2 },
-          { id: 'storage', label: 'Storage Analytics', icon: HardDrive }
-        ].map(tab => {
-          const Icon = tab.icon
-          const isActive = activeTab === tab.id
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as FeatureTab)}
-              type="button"
-              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer ${isActive
-                  ? 'bg-[#6E60EE] text-white shadow-xs scale-102'
-                  : 'bg-card-bg text-text-secondary border border-card-border hover:border-card-border/80 hover:bg-input-bg hover:text-foreground'
+    <div id="product-demo" className="relative mx-auto mt-12 w-full max-w-6xl animate-landing-fade-up animation-delay-300 select-none">
+      {/* Tight Segmented Feature Tabs Switcher */}
+      <div className="mb-6 flex items-center justify-center px-2">
+        <div className="inline-flex flex-wrap items-center justify-center gap-1 rounded-xl border border-card-border bg-input-bg p-1">
+          {[
+            { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+            { id: 'uploading', label: 'Upload & Sync', icon: CloudUpload },
+            { id: 'search', label: '⌘K Search', icon: Search },
+            { id: 'sharing', label: 'Team Sharing', icon: Share2 },
+            { id: 'storage', label: 'Storage', icon: HardDrive }
+          ].map(tab => {
+            const Icon = tab.icon
+            const isActive = activeTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as FeatureTab)}
+                type="button"
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-all duration-150 cursor-pointer ${
+                  isActive
+                    ? 'bg-card-bg text-foreground font-semibold shadow-xs border border-card-border/80'
+                    : 'text-text-muted hover:text-foreground'
                 }`}
-            >
-              <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-white' : 'text-[#6E60EE]'}`} />
-              <span>{tab.label}</span>
-            </button>
-          )
-        })}
+              >
+                <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-[#6E60EE]' : 'text-text-muted'}`} />
+                <span>{tab.label}</span>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* 5 FLOATING MICRO-UI CARDS (Uploading, Organization, Search, Sharing, Storage) */}
+      {/* 5 COMPACT FLOATING MICRO-UI CARDS (Refined visual weight, subtle borders) */}
       {/* ========================================================================= */}
 
       {/* 1. FLOATING CARD: Uploading */}
-      <div className="hidden xl:flex items-center gap-3.5 absolute -top-8 -left-10 z-30 rounded-2xl border border-card-border bg-card-bg/95 backdrop-blur-md p-3.5 shadow-xl dark:shadow-2xl dark:shadow-black/60 animate-float-slow transition-transform hover:scale-105">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-input-bg text-[#6E60EE] border border-card-border">
-          <CloudUpload className="h-5 w-5 animate-pulse" />
+      <div className="hidden xl:flex items-center gap-2.5 absolute -top-5 -left-6 z-30 rounded-xl border border-card-border/80 bg-card-bg/95 p-2.5 shadow-md dark:shadow-lg dark:shadow-black/50 animate-float-slow">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-input-bg text-[#6E60EE] border border-card-border/60">
+          <CloudUpload className="h-3.5 w-3.5" />
         </div>
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-foreground">Direct R2 Upload</span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+        <div className="flex flex-col pr-1">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-semibold text-foreground">R2 Direct Sync</span>
+            <span className="inline-flex items-center gap-0.5 rounded bg-emerald-500/10 px-1.5 py-0.2 text-[9px] font-medium text-emerald-600 dark:text-emerald-400">
               14.8 MB/s
             </span>
           </div>
-          <span className="text-[11px] text-text-muted">Pitch-Deck-2026.pdf • 100% Synced</span>
+          <span className="text-[10px] text-text-muted">Pitch-Deck-2026.pdf • 100%</span>
         </div>
       </div>
 
       {/* 2. FLOATING CARD: File Organization */}
-      <div className="hidden lg:flex items-center gap-3 absolute top-36 -left-8 z-30 rounded-2xl border border-card-border bg-card-bg/95 backdrop-blur-md p-3.5 shadow-xl dark:shadow-2xl dark:shadow-black/60 animate-float-delayed transition-transform hover:scale-105">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
-          <FolderClosed className="h-4 w-4" />
+      <div className="hidden lg:flex items-center gap-2.5 absolute top-32 -left-6 z-30 rounded-xl border border-card-border/80 bg-card-bg/95 p-2.5 shadow-md dark:shadow-lg dark:shadow-black/50 animate-float-delayed">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-input-bg text-text-secondary border border-card-border/60">
+          <FolderClosed className="h-3.5 w-3.5 text-[#6E60EE]" />
         </div>
-        <div className="flex flex-col">
-          <span className="text-xs font-bold text-foreground">File Organization</span>
-          <span className="text-[11px] text-text-secondary">Moved 4 files to &ldquo;Brand Assets&rdquo;</span>
+        <div className="flex flex-col pr-1">
+          <span className="text-[11px] font-semibold text-foreground">Organized Workspace</span>
+          <span className="text-[10px] text-text-muted">4 files moved to Brand Assets</span>
         </div>
       </div>
 
       {/* 3. FLOATING CARD: Search */}
-      <div className="hidden xl:flex items-center gap-3 absolute -top-8 -right-8 z-30 rounded-2xl border border-card-border bg-card-bg/95 backdrop-blur-md p-3.5 shadow-xl dark:shadow-2xl dark:shadow-black/60 animate-float-reverse transition-transform hover:scale-105">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-input-bg text-[#6E60EE] border border-card-border">
-          <Search className="h-5 w-5" />
+      <div className="hidden xl:flex items-center gap-2.5 absolute -top-5 -right-6 z-30 rounded-xl border border-card-border/80 bg-card-bg/95 p-2.5 shadow-md dark:shadow-lg dark:shadow-black/50 animate-float-reverse">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-input-bg text-text-secondary border border-card-border/60">
+          <Search className="h-3.5 w-3.5 text-[#6E60EE]" />
         </div>
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-foreground">Instant Search</span>
-            <kbd className="rounded bg-input-bg border border-card-border px-1.5 py-0.5 text-[10px] font-medium text-[#6E60EE]">
+        <div className="flex flex-col pr-1">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-semibold text-foreground">Instant Search</span>
+            <span className="rounded bg-input-bg border border-card-border/60 px-1 py-0.2 text-[9px] font-medium text-text-muted">
               12ms
-            </kbd>
+            </span>
           </div>
-          <span className="text-[11px] text-text-muted">Found 3 items for &ldquo;Pitch Deck&rdquo;</span>
+          <span className="text-[10px] text-text-muted">3 matches for &ldquo;Pitch Deck&rdquo;</span>
         </div>
       </div>
 
       {/* 4. FLOATING CARD: Sharing */}
-      <div className="hidden lg:flex items-center gap-3.5 absolute top-48 -right-8 z-30 rounded-2xl border border-card-border bg-card-bg/95 backdrop-blur-md p-3.5 shadow-xl dark:shadow-2xl dark:shadow-black/60 animate-float-slow transition-transform hover:scale-105">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-          <Share2 className="h-4 w-4" />
+      <div className="hidden lg:flex items-center gap-2.5 absolute top-44 -right-6 z-30 rounded-xl border border-card-border/80 bg-card-bg/95 p-2.5 shadow-md dark:shadow-lg dark:shadow-black/50 animate-float-slow">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-input-bg text-text-secondary border border-card-border/60">
+          <Share2 className="h-3.5 w-3.5 text-[#6E60EE]" />
         </div>
-        <div className="flex flex-col">
-          <div className="flex items-center gap-1.5">
-            <span className="text-xs font-bold text-foreground">Team Sharing</span>
-            <span className="text-[10px] rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-300 px-1.5 py-0.2 font-medium">Link active</span>
+        <div className="flex flex-col pr-1">
+          <div className="flex items-center gap-1">
+            <span className="text-[11px] font-semibold text-foreground">Active Share Link</span>
+            <span className="text-[9px] text-[#6E60EE] font-medium">• 3 members</span>
           </div>
-          <div className="mt-1 flex items-center gap-1 text-[11px] text-text-muted">
-            <div className="flex -space-x-1.5 overflow-hidden">
-              <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#6E60EE] text-[9px] font-bold text-white">A</span>
-              <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[9px] font-bold text-white">S</span>
-              <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[9px] font-bold text-white">D</span>
-            </div>
-            <span className="ml-1">3 team collaborators</span>
-          </div>
+          <span className="text-[10px] text-text-muted">Expires in 7 days</span>
         </div>
       </div>
 
       {/* 5. FLOATING CARD: Storage */}
-      <div className="hidden lg:flex items-center gap-3 absolute -bottom-6 -left-6 z-30 rounded-2xl border border-card-border bg-card-bg/95 backdrop-blur-md p-3.5 shadow-xl dark:shadow-2xl dark:shadow-black/60 animate-float-delayed transition-transform hover:scale-105">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-          <HardDrive className="h-4 w-4" />
+      <div className="hidden lg:flex items-center gap-2.5 absolute -bottom-4 -left-4 z-30 rounded-xl border border-card-border/80 bg-card-bg/95 p-2.5 shadow-md dark:shadow-lg dark:shadow-black/50 animate-float-delayed">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-input-bg text-text-secondary border border-card-border/60">
+          <HardDrive className="h-3.5 w-3.5 text-[#6E60EE]" />
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col pr-1">
           <div className="flex items-center justify-between gap-3">
-            <span className="text-xs font-bold text-foreground">Storage Meter</span>
-            <span className="text-[11px] font-semibold text-[#6E60EE]">24.8 / 50 GB</span>
+            <span className="text-[11px] font-semibold text-foreground">Storage Pool</span>
+            <span className="text-[10px] font-semibold text-text-secondary">24.8 / 50 GB</span>
           </div>
-          <div className="mt-1.5 h-1.5 w-36 overflow-hidden rounded-full bg-input-bg border border-card-border/60">
-            <div className="h-full w-[49%] rounded-full bg-gradient-to-r from-[#6E60EE] to-emerald-500" />
+          <div className="mt-1 h-1 w-28 overflow-hidden rounded-full bg-input-bg border border-card-border/50">
+            <div className="h-full w-[49%] rounded-full bg-[#6E60EE]" />
           </div>
         </div>
       </div>

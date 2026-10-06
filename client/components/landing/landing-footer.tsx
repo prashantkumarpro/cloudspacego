@@ -7,7 +7,7 @@ import Image from 'next/image'
 export function LandingFooter() {
   return (
     <footer className="border-t border-card-border bg-background px-4 py-12 sm:px-6 lg:px-8 transition-colors duration-200">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-6xl">
         <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
           {/* Brand & Tagline */}
           <div className="flex flex-col gap-2">
