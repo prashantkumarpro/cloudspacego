@@ -183,10 +183,10 @@ export function ProductPreview() {
   })
 
   return (
-    <div id="product-demo" className="relative mx-auto mt-14 w-full max-w-6xl animate-landing-fade-up animation-delay-300">
+    <div id="product-demo" className="relative mx-auto mt-14 w-full max-w-6xl animate-landing-fade-up animation-delay-300 select-none">
       {/* Soft background ambient glow */}
       <div
-        className="pointer-events-none absolute -inset-6 rounded-[36px] bg-gradient-to-b from-[#6E60EE]/12 via-[#E8E4FF]/20 to-transparent blur-3xl opacity-70"
+        className="pointer-events-none absolute -inset-6 rounded-[36px] bg-gradient-to-b from-[#6E60EE]/15 via-[#6E60EE]/5 to-transparent blur-3xl opacity-70"
         aria-hidden="true"
       />
 
@@ -208,7 +208,7 @@ export function ProductPreview() {
               type="button"
               className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer ${isActive
                   ? 'bg-[#6E60EE] text-white shadow-xs scale-102'
-                  : 'bg-white/90 text-[#585361] border border-[#ECEAF0] hover:border-[#D6D1FF] hover:bg-[#FAF9F7]'
+                  : 'bg-card-bg text-text-secondary border border-card-border hover:border-card-border/80 hover:bg-input-bg hover:text-foreground'
                 }`}
             >
               <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-white' : 'text-[#6E60EE]'}`} />
@@ -223,60 +223,60 @@ export function ProductPreview() {
       {/* ========================================================================= */}
 
       {/* 1. FLOATING CARD: Uploading */}
-      <div className="hidden xl:flex items-center gap-3.5 absolute -top-8 -left-10 z-30 rounded-2xl border border-[#ECEAF0] bg-white/95 backdrop-blur-md p-3.5 shadow-[0_12px_32px_rgba(30,25,60,0.09)] animate-float-slow transition-transform hover:scale-105">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F2EFFF] text-[#6E60EE]">
+      <div className="hidden xl:flex items-center gap-3.5 absolute -top-8 -left-10 z-30 rounded-2xl border border-card-border bg-card-bg/95 backdrop-blur-md p-3.5 shadow-xl dark:shadow-2xl dark:shadow-black/60 animate-float-slow transition-transform hover:scale-105">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-input-bg text-[#6E60EE] border border-card-border">
           <CloudUpload className="h-5 w-5 animate-pulse" />
         </div>
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-[#1E1B24]">Direct R2 Upload</span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-600">
+            <span className="text-xs font-bold text-foreground">Direct R2 Upload</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
               14.8 MB/s
             </span>
           </div>
-          <span className="text-[11px] text-[#8A8594]">Pitch-Deck-2026.pdf • 100% Synced</span>
+          <span className="text-[11px] text-text-muted">Pitch-Deck-2026.pdf • 100% Synced</span>
         </div>
       </div>
 
       {/* 2. FLOATING CARD: File Organization */}
-      <div className="hidden lg:flex items-center gap-3 absolute top-36 -left-8 z-30 rounded-2xl border border-[#ECEAF0] bg-white/95 backdrop-blur-md p-3.5 shadow-[0_12px_32px_rgba(30,25,60,0.08)] animate-float-delayed transition-transform hover:scale-105">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
+      <div className="hidden lg:flex items-center gap-3 absolute top-36 -left-8 z-30 rounded-2xl border border-card-border bg-card-bg/95 backdrop-blur-md p-3.5 shadow-xl dark:shadow-2xl dark:shadow-black/60 animate-float-delayed transition-transform hover:scale-105">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
           <FolderClosed className="h-4 w-4" />
         </div>
         <div className="flex flex-col">
-          <span className="text-xs font-bold text-[#1E1B24]">File Organization</span>
-          <span className="text-[11px] text-[#585361]">Moved 4 files to &ldquo;Brand Assets&rdquo;</span>
+          <span className="text-xs font-bold text-foreground">File Organization</span>
+          <span className="text-[11px] text-text-secondary">Moved 4 files to &ldquo;Brand Assets&rdquo;</span>
         </div>
       </div>
 
       {/* 3. FLOATING CARD: Search */}
-      <div className="hidden xl:flex items-center gap-3 absolute -top-8 -right-8 z-30 rounded-2xl border border-[#ECEAF0] bg-white/95 backdrop-blur-md p-3.5 shadow-[0_12px_32px_rgba(30,25,60,0.09)] animate-float-reverse transition-transform hover:scale-105">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F2EFFF] text-[#6E60EE]">
+      <div className="hidden xl:flex items-center gap-3 absolute -top-8 -right-8 z-30 rounded-2xl border border-card-border bg-card-bg/95 backdrop-blur-md p-3.5 shadow-xl dark:shadow-2xl dark:shadow-black/60 animate-float-reverse transition-transform hover:scale-105">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-input-bg text-[#6E60EE] border border-card-border">
           <Search className="h-5 w-5" />
         </div>
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-[#1E1B24]">Instant Search</span>
-            <kbd className="rounded bg-[#FAF9F7] border border-[#ECEAF0] px-1.5 py-0.5 text-[10px] font-medium text-[#6E60EE]">
+            <span className="text-xs font-bold text-foreground">Instant Search</span>
+            <kbd className="rounded bg-input-bg border border-card-border px-1.5 py-0.5 text-[10px] font-medium text-[#6E60EE]">
               12ms
             </kbd>
           </div>
-          <span className="text-[11px] text-[#8A8594]">Found 3 items for &ldquo;Pitch Deck&rdquo;</span>
+          <span className="text-[11px] text-text-muted">Found 3 items for &ldquo;Pitch Deck&rdquo;</span>
         </div>
       </div>
 
       {/* 4. FLOATING CARD: Sharing */}
-      <div className="hidden lg:flex items-center gap-3.5 absolute top-48 -right-8 z-30 rounded-2xl border border-[#ECEAF0] bg-white/95 backdrop-blur-md p-3.5 shadow-[0_12px_32px_rgba(30,25,60,0.08)] animate-float-slow transition-transform hover:scale-105">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+      <div className="hidden lg:flex items-center gap-3.5 absolute top-48 -right-8 z-30 rounded-2xl border border-card-border bg-card-bg/95 backdrop-blur-md p-3.5 shadow-xl dark:shadow-2xl dark:shadow-black/60 animate-float-slow transition-transform hover:scale-105">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
           <Share2 className="h-4 w-4" />
         </div>
         <div className="flex flex-col">
           <div className="flex items-center gap-1.5">
-            <span className="text-xs font-bold text-[#1E1B24]">Team Sharing</span>
-            <span className="text-[10px] rounded-full bg-blue-100/60 px-1.5 py-0.2 text-blue-700 font-medium">Link active</span>
+            <span className="text-xs font-bold text-foreground">Team Sharing</span>
+            <span className="text-[10px] rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-300 px-1.5 py-0.2 font-medium">Link active</span>
           </div>
-          <div className="mt-1 flex items-center gap-1 text-[11px] text-[#8A8594]">
+          <div className="mt-1 flex items-center gap-1 text-[11px] text-text-muted">
             <div className="flex -space-x-1.5 overflow-hidden">
               <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#6E60EE] text-[9px] font-bold text-white">A</span>
               <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[9px] font-bold text-white">S</span>
@@ -288,16 +288,16 @@ export function ProductPreview() {
       </div>
 
       {/* 5. FLOATING CARD: Storage */}
-      <div className="hidden lg:flex items-center gap-3 absolute -bottom-6 -left-6 z-30 rounded-2xl border border-[#ECEAF0] bg-white/95 backdrop-blur-md p-3.5 shadow-[0_12px_32px_rgba(30,25,60,0.09)] animate-float-delayed transition-transform hover:scale-105">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+      <div className="hidden lg:flex items-center gap-3 absolute -bottom-6 -left-6 z-30 rounded-2xl border border-card-border bg-card-bg/95 backdrop-blur-md p-3.5 shadow-xl dark:shadow-2xl dark:shadow-black/60 animate-float-delayed transition-transform hover:scale-105">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
           <HardDrive className="h-4 w-4" />
         </div>
         <div className="flex flex-col">
           <div className="flex items-center justify-between gap-3">
-            <span className="text-xs font-bold text-[#1E1B24]">Storage Meter</span>
+            <span className="text-xs font-bold text-foreground">Storage Meter</span>
             <span className="text-[11px] font-semibold text-[#6E60EE]">24.8 / 50 GB</span>
           </div>
-          <div className="mt-1.5 h-1.5 w-36 overflow-hidden rounded-full bg-[#ECEAF0]">
+          <div className="mt-1.5 h-1.5 w-36 overflow-hidden rounded-full bg-input-bg border border-card-border/60">
             <div className="h-full w-[49%] rounded-full bg-gradient-to-r from-[#6E60EE] to-emerald-500" />
           </div>
         </div>
@@ -306,19 +306,19 @@ export function ProductPreview() {
       {/* ========================================================================= */}
       {/* MAIN REALISTIC CLOUDSPACEGO WORKSPACE CONTAINER */}
       {/* ========================================================================= */}
-      <div className="relative overflow-hidden rounded-2xl border border-[#ECEAF0] bg-white shadow-[0_24px_70px_rgba(30,25,60,0.09)] transition-all duration-300 hover:shadow-[0_28px_80px_rgba(30,25,60,0.13)]">
+      <div className="relative overflow-hidden rounded-2xl border border-card-border bg-card-bg shadow-2xl dark:shadow-black/70 transition-all duration-300">
 
         {/* Workspace Real App Header Bar */}
-        <div className="flex h-14 items-center justify-between border-b border-[#ECEAF0] bg-[#FAF9F7] px-4 sm:px-6">
+        <div className="flex h-14 items-center justify-between border-b border-card-border bg-card-bg px-4 sm:px-6">
           {/* Left: Window Dots & Logo */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
-              <span className="h-3 w-3 rounded-full bg-[#E5E2EA] transition-colors hover:bg-rose-400" />
-              <span className="h-3 w-3 rounded-full bg-[#E5E2EA] transition-colors hover:bg-amber-400" />
-              <span className="h-3 w-3 rounded-full bg-[#E5E2EA] transition-colors hover:bg-emerald-400" />
+              <span className="h-3 w-3 rounded-full bg-divider transition-colors hover:bg-rose-400" />
+              <span className="h-3 w-3 rounded-full bg-divider transition-colors hover:bg-amber-400" />
+              <span className="h-3 w-3 rounded-full bg-divider transition-colors hover:bg-emerald-400" />
             </div>
 
-            <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-[#ECEAF0]">
+            <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-card-border">
               <div className="w-5 h-5 flex items-center justify-center">
                 <Image
                   src="/images/cloudeLogo.png"
@@ -328,10 +328,10 @@ export function ProductPreview() {
                   className="w-5 h-auto object-contain"
                 />
               </div>
-              <span className="text-xs font-bold tracking-tight text-[#1E1B24]">
+              <span className="text-xs font-bold tracking-tight text-foreground">
                 cloud<span className="text-[#6E60EE]">spacego</span>
               </span>
-              <span className="rounded bg-[#F2EFFF] px-1.5 py-0.2 text-[9px] font-bold text-[#6E60EE]">
+              <span className="rounded bg-[#6E60EE]/10 px-1.5 py-0.2 text-[9px] font-bold text-[#6E60EE]">
                 v2.4
               </span>
             </div>
@@ -340,43 +340,43 @@ export function ProductPreview() {
           {/* Center: Search Bar with dynamic typing simulation */}
           <div className="relative flex-1 max-w-md mx-4">
             <div
-              className={`flex h-8 items-center gap-2 rounded-lg border bg-white px-3 text-xs shadow-2xs transition-all ${activeTab === 'search' || isSearching
+              className={`flex h-8 items-center gap-2 rounded-lg border bg-input-bg px-3 text-xs shadow-2xs transition-all ${activeTab === 'search' || isSearching
                   ? 'border-[#6E60EE] ring-2 ring-[#6E60EE]/15'
-                  : 'border-[#ECEAF0] text-[#8A8594]'
+                  : 'border-card-border text-text-muted'
                 }`}
             >
-              <Search className="h-3.5 w-3.5 text-[#8A8594] shrink-0" />
+              <Search className="h-3.5 w-3.5 text-text-muted shrink-0" />
               <input
                 type="text"
                 readOnly
                 value={searchQuery || (activeTab === 'search' ? '' : 'Search files, folders, and shared items...')}
-                className="w-full bg-transparent text-xs text-[#1E1B24] placeholder-[#8A8594] focus:outline-none"
+                className="w-full bg-transparent text-xs text-foreground placeholder:text-text-muted focus:outline-none"
               />
-              <kbd className="hidden rounded bg-[#FAF9F7] px-1.5 py-0.5 text-[10px] font-medium text-[#8A8594] sm:inline border border-[#ECEAF0]">
+              <kbd className="hidden rounded bg-card-bg px-1.5 py-0.5 text-[10px] font-medium text-text-muted sm:inline border border-card-border">
                 ⌘K
               </kbd>
             </div>
 
             {/* Instant Search Results Dropdown Preview */}
             {(activeTab === 'search' || searchQuery.length > 3) && (
-              <div className="absolute top-10 left-0 right-0 z-40 rounded-xl border border-[#ECEAF0] bg-white p-2 shadow-xl animate-landing-fade-in">
-                <div className="px-2 py-1 text-[10px] font-semibold text-[#8A8594] uppercase tracking-wider">
+              <div className="absolute top-10 left-0 right-0 z-40 rounded-xl border border-card-border bg-card-bg p-2 shadow-2xl animate-landing-fade-in divide-y divide-card-border/40">
+                <div className="px-2 py-1 text-[10px] font-semibold text-text-muted uppercase tracking-wider">
                   Instant Matches (3)
                 </div>
-                <div className="space-y-1 mt-1">
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-[#F2EFFF] text-xs font-medium text-[#1E1B24] cursor-pointer">
+                <div className="space-y-1 mt-1 pt-1">
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-input-bg text-xs font-medium text-foreground cursor-pointer border border-card-border/60">
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4 text-[#6E60EE]" />
                       <span className="font-semibold text-[#6E60EE]">Pitch Deck 2026 Final.pdf</span>
                     </div>
-                    <span className="text-[10px] text-[#8A8594]">4.2 MB • Marketing</span>
+                    <span className="text-[10px] text-text-muted">4.2 MB • Marketing</span>
                   </div>
-                  <div className="flex items-center justify-between p-2 rounded-lg hover:bg-[#FAF9F7] text-xs font-medium text-[#585361] cursor-pointer">
+                  <div className="flex items-center justify-between p-2 rounded-lg hover:bg-input-bg text-xs font-medium text-text-secondary cursor-pointer">
                     <div className="flex items-center gap-2">
                       <ImageIcon className="h-4 w-4 text-blue-500" />
                       <span>Pitch-Deck-Visuals.zip</span>
                     </div>
-                    <span className="text-[10px] text-[#8A8594]">18.4 MB • Assets</span>
+                    <span className="text-[10px] text-text-muted">18.4 MB • Assets</span>
                   </div>
                 </div>
               </div>
@@ -385,7 +385,7 @@ export function ProductPreview() {
 
           {/* Right: Workspace Profile & Status */}
           <div className="flex items-center gap-3">
-            <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#F2EFFF] px-2.5 py-1 text-[11px] font-semibold text-[#6E60EE]">
+            <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#6E60EE]/10 px-2.5 py-1 text-[11px] font-semibold text-[#6E60EE] dark:text-[#8E82F8]">
               <span className="h-1.5 w-1.5 rounded-full bg-[#6E60EE] animate-pulse" />
               Live Workspace
             </span>
@@ -399,69 +399,69 @@ export function ProductPreview() {
         </div>
 
         {/* Dashboard Main Workspace Layout */}
-        <div className="flex min-h-[500px] flex-col md:flex-row bg-[#FAF9F7]">
+        <div className="flex min-h-[500px] flex-col md:flex-row bg-background">
 
           {/* Dashboard Left Sidebar */}
-          <aside className="hidden w-60 flex-col justify-between border-r border-[#ECEAF0] bg-white p-4 md:flex">
+          <aside className="hidden w-60 flex-col justify-between border-r border-sidebar-border bg-sidebar-bg p-4 md:flex">
             <div>
               {/* Navigation Menu */}
               <div className="space-y-1">
-                <div className="flex items-center justify-between rounded-xl bg-[#F2EFFF] px-3 py-2 text-xs font-semibold text-[#6E60EE]">
+                <div className="flex items-center justify-between rounded-xl bg-sidebar-active-bg px-3 py-2 text-xs font-semibold text-[#6E60EE] dark:text-[#8E82F8]">
                   <div className="flex items-center gap-2.5">
-                    <LayoutDashboard className="h-4 w-4 text-[#6E60EE]" />
+                    <LayoutDashboard className="h-4 w-4 text-[#6E60EE] dark:text-[#8E82F8]" />
                     <span>Dashboard</span>
                   </div>
                   <span className="h-1.5 w-1.5 rounded-full bg-[#6E60EE]" />
                 </div>
 
-                <div className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-[#585361] hover:bg-[#FAF9F7] transition-colors cursor-pointer">
+                <div className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-text-secondary hover:bg-input-bg hover:text-foreground transition-colors cursor-pointer">
                   <div className="flex items-center gap-2.5">
-                    <FolderClosed className="h-4 w-4 text-[#8A8594]" />
+                    <FolderClosed className="h-4 w-4 text-text-muted" />
                     <span>My Files</span>
                   </div>
-                  <span className="text-[10px] text-[#8A8594] font-semibold">124</span>
+                  <span className="text-[10px] text-text-muted font-semibold">124</span>
                 </div>
 
-                <div className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-[#585361] hover:bg-[#FAF9F7] transition-colors cursor-pointer">
+                <div className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-text-secondary hover:bg-input-bg hover:text-foreground transition-colors cursor-pointer">
                   <div className="flex items-center gap-2.5">
-                    <Share2 className="h-4 w-4 text-[#8A8594]" />
+                    <Share2 className="h-4 w-4 text-text-muted" />
                     <span>Shared</span>
                   </div>
-                  <span className="rounded bg-[#FAF9F7] px-1.5 py-0.2 text-[10px] text-[#6E60EE] font-bold border border-[#ECEAF0]">
+                  <span className="rounded bg-input-bg px-1.5 py-0.2 text-[10px] text-[#6E60EE] font-bold border border-card-border">
                     3 new
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-[#585361] hover:bg-[#FAF9F7] transition-colors cursor-pointer">
-                  <Clock className="h-4 w-4 text-[#8A8594]" />
+                <div className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-text-secondary hover:bg-input-bg hover:text-foreground transition-colors cursor-pointer">
+                  <Clock className="h-4 w-4 text-text-muted" />
                   <span>Recent</span>
                 </div>
 
-                <div className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-[#585361] hover:bg-[#FAF9F7] transition-colors cursor-pointer">
+                <div className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-text-secondary hover:bg-input-bg hover:text-foreground transition-colors cursor-pointer">
                   <div className="flex items-center gap-2.5">
-                    <Star className="h-4 w-4 text-[#8A8594]" />
+                    <Star className="h-4 w-4 text-text-muted" />
                     <span>Starred</span>
                   </div>
-                  <span className="text-[10px] text-[#8A8594]">8</span>
+                  <span className="text-[10px] text-text-muted">8</span>
                 </div>
 
-                <div className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-[#585361] hover:bg-[#FAF9F7] transition-colors cursor-pointer">
-                  <Trash2 className="h-4 w-4 text-[#8A8594]" />
+                <div className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-text-secondary hover:bg-input-bg hover:text-foreground transition-colors cursor-pointer">
+                  <Trash2 className="h-4 w-4 text-text-muted" />
                   <span>Trash</span>
                 </div>
               </div>
 
               {/* Quick Tags Section */}
-              <div className="mt-6 pt-4 border-t border-[#ECEAF0]">
-                <span className="px-2 text-[10px] font-bold text-[#8A8594] uppercase tracking-wider">
+              <div className="mt-6 pt-4 border-t border-card-border">
+                <span className="px-2 text-[10px] font-bold text-text-muted uppercase tracking-wider">
                   Pinned Tags
                 </span>
                 <div className="mt-2 space-y-1">
-                  <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#585361] hover:bg-[#FAF9F7] cursor-pointer">
+                  <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-text-secondary hover:bg-input-bg hover:text-foreground cursor-pointer">
                     <span className="h-2 w-2 rounded-full bg-[#6E60EE]" />
                     <span>#Design-System</span>
                   </div>
-                  <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#585361] hover:bg-[#FAF9F7] cursor-pointer">
+                  <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-text-secondary hover:bg-input-bg hover:text-foreground cursor-pointer">
                     <span className="h-2 w-2 rounded-full bg-emerald-500" />
                     <span>#Q3-Deliverables</span>
                   </div>
@@ -470,20 +470,20 @@ export function ProductPreview() {
             </div>
 
             {/* Sidebar Storage Widget */}
-            <div className="rounded-xl border border-[#ECEAF0] bg-[#FAF9F7] p-3.5 transition-all">
-              <div className="flex items-center justify-between text-xs font-medium text-[#1E1B24]">
+            <div className="rounded-xl border border-card-border bg-card-bg p-3.5 transition-all">
+              <div className="flex items-center justify-between text-xs font-medium text-foreground">
                 <span className="flex items-center gap-1.5">
                   <HardDrive className="h-3.5 w-3.5 text-[#6E60EE]" />
                   Storage Pool
                 </span>
                 <span className="text-[#6E60EE] font-bold text-[11px]">49%</span>
               </div>
-              <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-[#ECEAF0]">
+              <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-input-bg border border-card-border/50">
                 <div className="h-full w-[49%] rounded-full bg-gradient-to-r from-[#6E60EE] to-[#8B5CF6]" />
               </div>
-              <div className="mt-2 flex items-center justify-between text-[10px] text-[#8A8594]">
+              <div className="mt-2 flex items-center justify-between text-[10px] text-text-muted">
                 <span>24.8 GB used</span>
-                <span className="font-semibold text-[#585361]">50 GB Pro</span>
+                <span className="font-semibold text-text-secondary">50 GB Pro</span>
               </div>
             </div>
           </aside>
@@ -494,12 +494,12 @@ export function ProductPreview() {
             {/* Action Bar / Breadcrumb */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
               <div>
-                <div className="flex items-center gap-2 text-xs text-[#8A8594]">
+                <div className="flex items-center gap-2 text-xs text-text-muted">
                   <span>My Workspace</span>
                   <span>/</span>
-                  <span className="font-semibold text-[#1E1B24]">Marketing & Assets</span>
+                  <span className="font-semibold text-foreground">Marketing & Assets</span>
                 </div>
-                <h3 className="text-lg sm:text-xl font-bold text-[#1E1B24] mt-0.5">
+                <h3 className="text-lg sm:text-xl font-bold text-foreground mt-0.5">
                   Files & Folders
                 </h3>
               </div>
@@ -508,7 +508,7 @@ export function ProductPreview() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-[#ECEAF0] bg-white px-3 py-1.5 text-xs font-semibold text-[#1E1B24] shadow-2xs hover:border-[#D6D1FF] hover:bg-[#FAF9F7] transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-card-border bg-card-bg px-3 py-1.5 text-xs font-semibold text-foreground shadow-2xs hover:border-card-border/80 hover:bg-input-bg transition-all cursor-pointer"
                 >
                   <FolderPlus className="h-3.5 w-3.5 text-[#6E60EE]" />
                   <span>New Folder</span>
@@ -527,10 +527,10 @@ export function ProductPreview() {
             {/* Folders Row */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold text-[#585361] uppercase tracking-wider">
+                <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">
                   Folders (4)
                 </span>
-                <span className="text-xs text-[#8A8594]">Drag files to organize</span>
+                <span className="text-xs text-text-muted">Drag files to organize</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -541,20 +541,20 @@ export function ProductPreview() {
                       key={folder.id}
                       onMouseEnter={() => setActiveFolderHover(folder.id)}
                       onMouseLeave={() => setActiveFolderHover(null)}
-                      className={`group relative flex items-center justify-between p-3.5 rounded-xl border bg-white shadow-2xs transition-all duration-200 cursor-pointer ${isHovered || activeTab === 'uploading'
-                          ? 'border-[#6E60EE] ring-2 ring-[#6E60EE]/10 bg-[#FAF9F7]'
-                          : 'border-[#ECEAF0] hover:border-[#D6D1FF]'
+                      className={`group relative flex items-center justify-between p-3.5 rounded-xl border bg-card-bg shadow-2xs transition-all duration-200 cursor-pointer ${isHovered || activeTab === 'uploading'
+                          ? 'border-[#6E60EE] ring-2 ring-[#6E60EE]/10 bg-input-bg/70'
+                          : 'border-card-border hover:border-card-border/80 hover:bg-input-bg/40'
                         }`}
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#F2EFFF] group-hover:scale-105 transition-transform">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-input-bg border border-card-border group-hover:scale-105 transition-transform">
                           <Folder className={`h-5 w-5 ${folder.color}`} />
                         </div>
                         <div className="flex flex-col min-w-0 flex-1">
-                          <span className="text-xs font-bold text-[#1E1B24] truncate group-hover:text-[#6E60EE] transition-colors">
+                          <span className="text-xs font-bold text-foreground truncate group-hover:text-[#6E60EE] transition-colors">
                             {folder.name}
                           </span>
-                          <span className="text-[10px] text-[#8A8594] truncate">
+                          <span className="text-[10px] text-text-muted truncate">
                             {folder.count} • {folder.size}
                           </span>
                         </div>
@@ -579,8 +579,8 @@ export function ProductPreview() {
                       type="button"
                       onClick={() => setSelectedFilter(filter)}
                       className={`rounded-lg px-2.5 py-1 text-xs font-semibold capitalize transition-all cursor-pointer ${selectedFilter === filter
-                          ? 'bg-[#1E1B24] text-white shadow-2xs'
-                          : 'text-[#8A8594] hover:text-[#1E1B24] hover:bg-white'
+                          ? 'bg-card-bg text-[#6E60EE] border border-card-border shadow-2xs'
+                          : 'text-text-muted hover:text-foreground hover:bg-card-bg/60'
                         }`}
                     >
                       {filter === 'all' ? 'All Files' : filter}
@@ -588,7 +588,7 @@ export function ProductPreview() {
                   ))}
                 </div>
 
-                <div className="flex items-center gap-2 text-xs text-[#8A8594]">
+                <div className="flex items-center gap-2 text-xs text-text-muted">
                   <span className="font-medium text-[#6E60EE] hover:underline cursor-pointer">
                     Sort by Recent
                   </span>
@@ -596,8 +596,8 @@ export function ProductPreview() {
               </div>
 
               {/* Files Table / List */}
-              <div className="overflow-hidden rounded-xl border border-[#ECEAF0] bg-white shadow-2xs">
-                <div className="divide-y divide-[#ECEAF0]">
+              <div className="overflow-hidden rounded-xl border border-card-border bg-card-bg shadow-2xs">
+                <div className="divide-y divide-card-border/50">
                   {filteredFiles.map((file, idx) => {
                     const Icon = file.icon
                     const isNewUpload = idx === 0 && isUploaded
@@ -605,57 +605,57 @@ export function ProductPreview() {
                     return (
                       <div
                         key={file.id}
-                        className={`flex items-center justify-between p-3.5 transition-all cursor-pointer group ${isNewUpload ? 'bg-[#F2EFFF]/60' : 'hover:bg-[#FAF9F7]'
+                        className={`flex items-center justify-between p-3.5 transition-all cursor-pointer group ${isNewUpload ? 'bg-[#6E60EE]/8' : 'hover:bg-input-bg/70'
                           }`}
                       >
                         <div className="flex items-center gap-3.5 min-w-0 flex-1">
                           <div
-                            className={`h-9 w-9 rounded-xl ${file.iconBg} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}
+                            className="h-9 w-9 rounded-xl bg-input-bg border border-card-border flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform"
                           >
                             <Icon className={`h-4 w-4 ${file.iconColor}`} />
                           </div>
 
                           <div className="flex flex-col min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <span className="text-xs font-bold text-[#1E1B24] truncate group-hover:text-[#6E60EE] transition-colors">
+                              <span className="text-xs font-bold text-foreground truncate group-hover:text-[#6E60EE] transition-colors">
                                 {file.name}
                               </span>
                               {isNewUpload && (
-                                <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-100 px-2 py-0.2 text-[9px] font-bold text-emerald-700 animate-pulse">
+                                <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.2 text-[9px] font-bold text-emerald-600 dark:text-emerald-400 animate-pulse">
                                   Just Added
                                 </span>
                               )}
                               {file.shared && (
-                                <span className="hidden sm:inline-flex items-center gap-1 rounded bg-[#FAF9F7] px-1.5 py-0.2 text-[9px] font-medium text-[#8A8594] border border-[#ECEAF0]">
+                                <span className="hidden sm:inline-flex items-center gap-1 rounded bg-input-bg px-1.5 py-0.2 text-[9px] font-medium text-text-muted border border-card-border">
                                   <Users className="h-2.5 w-2.5 text-[#6E60EE]" />
                                   Shared
                                 </span>
                               )}
                             </div>
-                            <span className="text-[10px] text-[#8A8594] sm:hidden">
+                            <span className="text-[10px] text-text-muted sm:hidden">
                               {file.size} • {file.updated}
                             </span>
                           </div>
                         </div>
 
                         {/* File Metadata Columns */}
-                        <div className="hidden sm:flex items-center gap-6 text-xs text-[#8A8594]">
-                          <span className="w-16 text-right font-medium">{file.size}</span>
+                        <div className="hidden sm:flex items-center gap-6 text-xs text-text-muted">
+                          <span className="w-16 text-right font-medium text-text-secondary">{file.size}</span>
                           <span className="w-24 text-right">{file.updated}</span>
-                          <span className="rounded bg-[#FAF9F7] px-2 py-0.5 text-[10px] font-semibold text-[#585361] border border-[#ECEAF0]">
+                          <span className="rounded bg-input-bg px-2 py-0.5 text-[10px] font-semibold text-text-secondary border border-card-border">
                             {file.badge}
                           </span>
                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
                               type="button"
-                              className="p-1 rounded-md hover:bg-white text-[#585361] hover:text-[#6E60EE]"
+                              className="p-1 rounded-md hover:bg-input-bg text-text-secondary hover:text-[#6E60EE]"
                               title="Preview"
                             >
                               <Eye className="h-3.5 w-3.5" />
                             </button>
                             <button
                               type="button"
-                              className="p-1 rounded-md hover:bg-white text-[#585361] hover:text-[#6E60EE]"
+                              className="p-1 rounded-md hover:bg-input-bg text-text-secondary hover:text-[#6E60EE]"
                               title="Share"
                             >
                               <Share2 className="h-3.5 w-3.5" />
@@ -672,8 +672,8 @@ export function ProductPreview() {
         </div>
 
         {/* Live Upload Progress Docked Toast (Bottom Right) */}
-        <div className="absolute bottom-4 right-4 z-40 max-w-xs rounded-xl border border-[#ECEAF0] bg-white/95 backdrop-blur-md p-3.5 shadow-xl transition-all">
-          <div className="flex items-center justify-between text-xs font-bold text-[#1E1B24]">
+        <div className="absolute bottom-4 right-4 z-40 max-w-xs rounded-xl border border-card-border bg-card-bg/95 backdrop-blur-md p-3.5 shadow-xl transition-all">
+          <div className="flex items-center justify-between text-xs font-bold text-foreground">
             <div className="flex items-center gap-2">
               {uploadProgress >= 100 ? (
                 <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
@@ -689,11 +689,11 @@ export function ProductPreview() {
             </span>
           </div>
 
-          <p className="mt-1 text-[10px] text-[#8A8594] truncate">
+          <p className="mt-1 text-[10px] text-text-muted truncate">
             Brand-Assets-Archive-v2.zip (24.4 MB)
           </p>
 
-          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#ECEAF0]">
+          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-input-bg border border-card-border/50">
             <div
               className={`h-full rounded-full transition-all duration-300 ${uploadProgress >= 100 ? 'bg-emerald-500' : 'bg-[#6E60EE]'
                 }`}
@@ -704,7 +704,7 @@ export function ProductPreview() {
       </div>
 
       {/* Trust & Guarantee Badges below Mockup */}
-      <div className="mt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs font-semibold text-[#8A8594]">
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs font-semibold text-text-muted">
         <div className="flex items-center gap-2">
           <CheckCircle2 className="h-4 w-4 text-[#6E60EE]" />
           <span>Cloudflare R2 Storage</span>

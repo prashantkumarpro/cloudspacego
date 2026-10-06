@@ -18,26 +18,26 @@ export function HeroSection() {
     <section className="relative overflow-hidden px-4 pt-14 pb-20 sm:px-6 sm:pt-20 sm:pb-28 lg:px-8">
       {/* Background Subtle Gradient Blobs - Soft purple glow, not excessive */}
       <div
-        className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[480px] bg-gradient-to-b from-[#F2EFFF]/80 via-[#ECE8FF]/40 to-transparent blur-3xl opacity-70 -z-10 animate-glow-pulse"
+        className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[480px] bg-gradient-to-b from-[#F2EFFF]/80 via-[#ECE8FF]/40 to-transparent dark:from-[#6E60EE]/15 dark:via-[#6E60EE]/5 dark:to-transparent blur-3xl opacity-70 -z-10 animate-glow-pulse"
         aria-hidden="true"
       />
 
       <div className="mx-auto max-w-5xl text-center">
         {/* Eyebrow Badge */}
-        <div className="inline-flex items-center gap-2 rounded-full border border-[#E5E1FF] bg-[#F2EFFF] px-4 py-1.5 text-[11px] sm:text-xs font-bold tracking-[0.14em] uppercase text-[#6E60EE] shadow-2xs animate-landing-fade-up">
+        <div className="inline-flex items-center gap-2 rounded-full border border-[#6E60EE]/20 bg-[#6E60EE]/10 px-4 py-1.5 text-[11px] sm:text-xs font-bold tracking-[0.14em] uppercase text-[#6E60EE] dark:text-[#8E82F8] shadow-2xs animate-landing-fade-up">
           <Sparkles className="h-3.5 w-3.5 text-[#6E60EE]" />
           <span>YOUR FILES, FINALLY IN ONE PLACE</span>
         </div>
 
         {/* Confident Editorial Headline */}
-        <h1 className="mx-auto mt-6 max-w-4xl text-4xl font-extrabold tracking-[-0.035em] text-[#1E1B24] sm:text-6xl md:text-7xl lg:text-[72px] lg:leading-[1.08] animate-landing-fade-up animation-delay-75">
+        <h1 className="mx-auto mt-6 max-w-4xl text-4xl font-extrabold tracking-[-0.035em] text-foreground sm:text-6xl md:text-7xl lg:text-[72px] lg:leading-[1.08] animate-landing-fade-up animation-delay-75">
           Everything you need
           <br />
           <span className="text-[#6E60EE]">to manage your files.</span>
         </h1>
 
         {/* Subtitle / Value Proposition */}
-        <p className="mx-auto mt-6 max-w-2xl text-base sm:text-lg md:text-xl font-normal leading-relaxed text-[#585361] animate-landing-fade-up animation-delay-150">
+        <p className="mx-auto mt-6 max-w-2xl text-base sm:text-lg md:text-xl font-normal leading-relaxed text-text-secondary animate-landing-fade-up animation-delay-150">
           Store, organize, search, preview, and share your files from one simple workspace.
         </p>
 
@@ -54,7 +54,7 @@ export function HeroSection() {
           <a
             href="#product-demo"
             onClick={scrollToDemo}
-            className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-[#ECEAF0] bg-white px-6 py-3.5 text-sm font-semibold text-[#1E1B24] shadow-2xs transition-all duration-200 hover:border-[#D6D1FF] hover:bg-[#FAF9F7] active:scale-[0.98]"
+            className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-card-border bg-card-bg px-6 py-3.5 text-sm font-semibold text-foreground shadow-2xs transition-all duration-200 hover:border-card-border/80 hover:bg-input-bg active:scale-[0.98]"
           >
             <Play className="h-3.5 w-3.5 text-[#6E60EE] fill-[#6E60EE]/20" />
             See how it works

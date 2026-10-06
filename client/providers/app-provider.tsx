@@ -57,9 +57,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  // Theme & Sidebar states
-  const [theme, setTheme] = useState<'light' | 'dark'>('light'); // Light theme by default
+  // Theme & Sidebar states - Dark theme by default
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  // Initialize theme from localStorage on client mount if available
+  useEffect(() => {
+    try {
+      const savedTheme = localStorage.getItem('cloudspacego_theme');
+      if (savedTheme === 'light' || savedTheme === 'dark') {
+        setTheme(savedTheme);
+      } else {
+        setTheme('dark');
+      }
+    } catch {
+      // Ignore if localStorage is unavailable
+    }
+  }, []);
 
   // Set initial collapse state based on viewport size on mount
   useEffect(() => {
@@ -75,7 +89,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [activeModal, setActiveModal] = useState<'upload-file' | 'upload-folder' | 'create-folder' | 'share' | 'get-link' | 'search' | 'storage-upgrade' | null>(null);
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
 
-  // Sync theme to DOM root
+  // Sync theme to DOM root and localStorage
   useEffect(() => {
     const root = window.document.documentElement;
     if (theme === 'dark') {
@@ -84,6 +98,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } else {
       root.classList.add('light');
       root.classList.remove('dark');
+    }
+    try {
+      localStorage.setItem('cloudspacego_theme', theme);
+    } catch {
+      // Ignore storage errors
     }
   }, [theme]);
 

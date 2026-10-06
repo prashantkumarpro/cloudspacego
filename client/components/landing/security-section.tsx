@@ -32,19 +32,19 @@ const securityPoints = [
 
 export function SecuritySection() {
   return (
-    <section id="security" className="border-t border-[#ECEAF0] bg-white px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+    <section id="security" className="border-t border-card-border bg-background px-4 py-20 sm:px-6 sm:py-28 lg:px-8 transition-colors duration-200">
       <div className="mx-auto max-w-6xl">
         {/* Section Header */}
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-[#6E60EE]">
+          <p className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-[#6E60EE] dark:text-[#8E82F8]">
             Security & Trust
           </p>
 
-          <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1E1B24] sm:text-4xl">
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Your files stay organized and under your control.
           </h2>
 
-          <p className="mt-4 text-base leading-relaxed text-[#71717A]">
+          <p className="mt-4 text-base leading-relaxed text-text-secondary">
             CloudSpaceGo is designed from the ground up around clear file ownership, organized workspaces, and responsible data management.
           </p>
         </div>
@@ -56,17 +56,17 @@ export function SecuritySection() {
             return (
               <div
                 key={item.title}
-                className="flex items-start gap-4 rounded-2xl border border-[#ECEAF0] bg-[#FAF9F7]/70 p-6 sm:p-7 transition-all duration-200 hover:border-[#D6D1FF] hover:bg-white hover:shadow-2xs"
+                className="flex items-start gap-4 rounded-2xl border border-card-border bg-card-bg p-6 sm:p-7 transition-all duration-200 hover:border-[#6E60EE]/40 hover:shadow-2xs"
               >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#F2EFFF] text-[#6E60EE]">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-input-bg text-[#6E60EE] dark:text-[#8E82F8] border border-card-border/60 shadow-2xs">
                   <Icon className="h-5 w-5" />
                 </div>
 
                 <div className="flex-1">
-                  <h3 className="text-base font-semibold text-[#1E1B24]">
+                  <h3 className="text-base font-semibold text-foreground">
                     {item.title}
                   </h3>
-                  <p className="mt-2 text-xs sm:text-sm leading-relaxed text-[#71717A]">
+                  <p className="mt-2 text-xs sm:text-sm leading-relaxed text-text-secondary">
                     {item.description}
                   </p>
                 </div>

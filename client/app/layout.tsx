@@ -20,8 +20,29 @@ export default function RootLayout ({
   children: React.ReactNode
 }) {
   return (
-    <html lang='en' className={`${inter.variable} h-full antialiased`}>
-      <body className='min-h-full flex flex-col selection:bg-[#e22718] selection:text-white'>
+    <html lang='en' className={`${inter.variable} dark h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var saved = localStorage.getItem('cloudspacego_theme');
+                  var theme = (saved === 'light' || saved === 'dark') ? saved : 'dark';
+                  if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.classList.remove('light');
+                  } else {
+                    document.documentElement.classList.add('light');
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className='min-h-full flex flex-col selection:bg-[#6E60EE]/25 selection:text-foreground bg-background text-foreground transition-colors duration-200'>
         <AuthProvider>
           <AppProvider>{children}</AppProvider>
         </AuthProvider>

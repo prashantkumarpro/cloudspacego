@@ -8,7 +8,7 @@ import { LandingFooter } from '@/components/landing/landing-footer'
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[#FAF9F7] text-[#1E1B24] selection:bg-[#F2EFFF] selection:text-[#6E60EE] flex flex-col justify-between">
+    <div className="min-h-screen bg-background text-foreground selection:bg-[#6E60EE]/25 selection:text-foreground flex flex-col justify-between transition-colors duration-200">
       <LandingNavbar />
       <main className="flex-1">
         <HeroSection />
