@@ -10,7 +10,7 @@ export default function SettingsView () {
       </div>
 
       <div className='flex flex-col gap-4 font-light text-sm text-text-secondary'>
-        <div className='flex items-center justify-between p-4 bg-background border border-card-border rounded-xl'>
+        <div className='flex items-center justify-between p-4 bg-input-bg/50 border border-card-border rounded-xl'>
           <div>
             <div className='text-xs font-bold text-foreground uppercase tracking-[0.5px]'>
               Performance Mode
@@ -24,7 +24,7 @@ export default function SettingsView () {
           </div>
         </div>
 
-        <div className='flex items-center justify-between p-4 bg-background border border-card-border rounded-xl'>
+        <div className='flex items-center justify-between p-4 bg-input-bg/50 border border-card-border rounded-xl'>
           <div>
             <div className='text-xs font-bold text-foreground uppercase tracking-[0.5px]'>
               High Contrast Outlines
@@ -33,7 +33,7 @@ export default function SettingsView () {
               Thicken borders for enhanced visibility.
             </div>
           </div>
-          <div className='w-10 h-6 bg-divider rounded-full flex items-center p-0.5 justify-start border border-card-border'>
+          <div className='w-10 h-6 bg-card-border rounded-full flex items-center p-0.5 justify-start border border-card-border'>
             <div className='w-5 h-5 bg-white rounded-full shadow' />
           </div>
         </div>

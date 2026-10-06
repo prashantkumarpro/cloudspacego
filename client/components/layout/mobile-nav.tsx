@@ -54,7 +54,7 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
       {/* Backdrop overlay */}
       <div
         className={cn(
-          "fixed inset-0 bg-slate-900/30 dark:bg-black/60 transition-opacity duration-300 ease-in-out",
+          "fixed inset-0 bg-black/40 dark:bg-black/70 transition-opacity duration-300 ease-in-out",
           isOpen ? "opacity-100" : "opacity-0"
         )}
         onClick={onClose}
@@ -62,7 +62,7 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
 
       {/* Navigation panel */}
       <div className={cn(
-        "fixed inset-y-0 left-0 w-64 bg-card-bg border-r border-card-border flex flex-col justify-between pt-2.5 pb-3 px-4 shadow-2xl transition-transform duration-300 ease-in-out",
+        "fixed inset-y-0 left-0 w-64 bg-sidebar-bg border-r border-sidebar-border flex flex-col justify-between pt-2.5 pb-3 px-4 shadow-2xl transition-transform duration-300 ease-in-out",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         {/* Brand Header */}
@@ -100,7 +100,7 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
             <Tooltip content="Close sidebar" side="bottom">
               <button
                 onClick={onClose}
-                className="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white rounded-lg hover:bg-slate-50 dark:hover:bg-zinc-800/40 cursor-pointer transition-colors"
+                className="w-8 h-8 flex items-center justify-center text-text-secondary hover:text-foreground rounded-lg hover:bg-input-bg cursor-pointer transition-colors"
                 aria-label="Close menu"
               >
                 <svg
@@ -129,7 +129,7 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
             return (
               <div key={item.name} className='w-full flex flex-col gap-1'>
                 {isTrash && (
-                  <div className='h-[1px] bg-slate-100 dark:bg-zinc-800/80 my-1 mx-3' />
+                  <div className='h-[1px] bg-sidebar-border my-1 mx-3' />
                 )}
                 <button
                   onClick={() => {
@@ -166,30 +166,30 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
         </nav>
 
         {/* Bottom Section: Storage & Theme Toggle */}
-        <div className='flex flex-col gap-3 pt-2 border-t border-card-border mt-auto shrink-0'>
+        <div className='flex flex-col gap-3 pt-2 border-t border-sidebar-border mt-auto shrink-0'>
           {/* Storage Information Card */}
-          <div className='w-full bg-white dark:bg-zinc-900/60 rounded-2xl p-3 shadow-[inset_0_0_0_1px_var(--color-card-border)] flex flex-col gap-2.5 select-none'>
+          <div className='w-full bg-card-bg rounded-xl border border-card-border p-3 shadow-xs flex flex-col gap-2.5 select-none'>
             <div className='flex items-center justify-between'>
               <div className='flex items-center gap-2'>
-                <div className='w-7 h-7 rounded-full bg-input-bg flex items-center justify-center text-[#6E60EE] shrink-0 border border-card-border'>
+                <div className='w-7 h-7 rounded-lg bg-input-bg flex items-center justify-center text-[#6E60EE] shrink-0 border border-card-border'>
                   <svg className='w-4 h-4' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={2}>
                     <path strokeLinecap='round' strokeLinejoin='round' d='M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z' />
                   </svg>
                 </div>
-                <span className='text-[11px] font-bold text-foreground'>
+                <span className='text-xs font-semibold text-foreground'>
                   Storage
                 </span>
               </div>
-              <span className='text-[9px] font-bold text-white bg-[#6E60EE] px-2 py-0.5 rounded-full'>
+              <span className='text-[10px] font-bold text-white bg-[#6E60EE] px-2 py-0.5 rounded-full'>
                 {percentageUsed}%
               </span>
             </div>
 
-            <div className='flex flex-col gap-1'>
-              <span className='text-[10px] font-bold text-text-secondary'>
+            <div className='flex flex-col gap-1.5'>
+              <span className='text-[11px] font-normal text-text-secondary'>
                 {usedSpaceFormatted} used &bull; {freeSpaceFormatted} free
               </span>
-              <div className='w-full bg-[#F3F4F6] dark:bg-zinc-800 h-2.5 overflow-hidden relative border border-[#E5E7EB] dark:border-zinc-700 rounded-full'>
+              <div className='w-full h-1.5 overflow-hidden relative border rounded-full bg-input-bg border-card-border'>
                 <div
                   className='h-full bg-[#6E60EE] rounded-full'
                   style={{ width: `${Math.max(percentageUsed, percentageUsed > 0 ? 3 : 0)}%` }}
@@ -202,42 +202,40 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
                 onClose();
                 setActiveModal('storage-upgrade');
               }}
-              className='w-full flex items-center justify-between text-[10px] font-bold text-[#6E60EE] hover:text-[#6E60EE]/80 transition-colors pt-0.5 cursor-pointer group'
+              className='w-full flex items-center justify-between text-xs font-semibold text-[#6E60EE] hover:text-[#6E60EE]/80 transition-colors pt-0.5 cursor-pointer group'
             >
               <span>Upgrade Storage</span>
-              <svg className='w-3 h-3 transform group-hover:translate-x-0.5 transition-transform' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={2.5}>
+              <svg className='w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={2.2}>
                 <path strokeLinecap='round' strokeLinejoin='round' d='M9 5l7 7-7 7' />
               </svg>
             </button>
           </div>
 
           {/* Theme Switcher Toggle */}
-          <div className='w-full p-0.5 bg-slate-50/50 dark:bg-zinc-950/40 rounded-xl flex items-center justify-between select-none shadow-[inset_0_0_0_1px_var(--color-card-border)] relative border border-card-border'>
+          <div className='w-full p-1 bg-input-bg rounded-xl flex items-center justify-between select-none relative border border-card-border gap-1'>
             <button
               onClick={() => theme === 'dark' && toggleTheme()}
               className={cn(
-                'w-1/2 flex items-center justify-center gap-2 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer focus:outline-none border border-transparent',
+                'w-1/2 flex items-center justify-center gap-2 py-1.5 px-3 rounded-lg text-xs font-semibold cursor-pointer focus:outline-none border transition-all duration-200 active:scale-95',
                 theme === 'light'
-                  ? 'bg-card-bg border-card-border text-[#6E60EE] font-bold shadow-sm'
-                  : 'text-text-secondary hover:text-foreground'
+                  ? 'bg-card-bg border-card-border/60 text-[#6E60EE] font-bold shadow-xs'
+                  : 'border-transparent text-text-secondary hover:text-foreground'
               )}
             >
-              <Sun className='w-4 h-4 text-amber-500' />
+              <Sun className='w-3.5 h-3.5 text-amber-500 shrink-0' />
               <span>Light</span>
             </button>
-
-            <div className='h-4 w-[1px] bg-sidebar-border shrink-0 self-center' />
 
             <button
               onClick={() => theme === 'light' && toggleTheme()}
               className={cn(
-                'w-1/2 flex items-center justify-center gap-2 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer focus:outline-none border border-transparent',
+                'w-1/2 flex items-center justify-center gap-2 py-1.5 px-3 rounded-lg text-xs font-semibold cursor-pointer focus:outline-none border transition-all duration-200 active:scale-95',
                 theme === 'dark'
-                  ? 'bg-card-bg border-card-border text-white font-bold shadow-sm'
-                  : 'text-text-secondary hover:text-foreground'
+                  ? 'bg-card-bg border-card-border/60 text-foreground font-bold shadow-xs'
+                  : 'border-transparent text-text-secondary hover:text-foreground'
               )}
             >
-              <Moon className='w-4 h-4 text-slate-400' />
+              <Moon className='w-3.5 h-3.5 text-slate-400 shrink-0' />
               <span>Dark</span>
             </button>
           </div>

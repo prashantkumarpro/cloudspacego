@@ -62,12 +62,12 @@ export default function RecentActivity () {
           </div>
         )
       case 'create_folder':
-        // Blue circle for folders
+        // Purple circle for folders
         return (
           <div
             className={cn(
               baseClass,
-              'bg-blue-50 dark:bg-blue-950/20 text-[#0056f7] dark:text-blue-400 border-blue-100 dark:border-blue-900/30'
+              'bg-[#6E60EE]/10 text-[#6E60EE] border-[#6E60EE]/20'
             )}
           >
             <svg
@@ -91,7 +91,7 @@ export default function RecentActivity () {
           <div
             className={cn(
               baseClass,
-              'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-900/30'
+              'bg-amber-500/10 text-amber-500 border-amber-500/20'
             )}
           >
             <svg
@@ -115,7 +115,7 @@ export default function RecentActivity () {
           <div
             className={cn(
               baseClass,
-              'bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border-rose-100 dark:border-rose-900/30'
+              'bg-rose-500/10 text-rose-500 border-rose-500/20'
             )}
           >
             <svg
@@ -138,7 +138,7 @@ export default function RecentActivity () {
           <div
             className={cn(
               baseClass,
-              'bg-gray-50 dark:bg-gray-900 text-gray-500 border-gray-100 dark:border-gray-800'
+              'bg-input-bg text-text-secondary border-card-border'
             )}
           >
             <svg
@@ -166,7 +166,7 @@ export default function RecentActivity () {
         <div className='flex items-center justify-between border-b border-divider pb-4 shrink-0 select-none'>
           <h3 className='text-sm font-bold text-foreground flex items-center gap-2'>
             <svg
-              className='w-4 h-4 text-[#0056f7]'
+              className='w-4 h-4 text-[#6E60EE]'
               fill='currentColor'
               viewBox='0 0 24 24'
             >

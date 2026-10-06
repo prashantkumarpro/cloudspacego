@@ -208,7 +208,7 @@ export function Tooltip({
               'px-2.5 py-1 text-[11px] font-medium leading-none whitespace-nowrap tracking-normal',
               'rounded-md',
               'bg-white text-slate-800 border border-slate-200/90 shadow-md shadow-slate-900/5',
-              'dark:bg-[#15151F] dark:text-zinc-100 dark:border-zinc-800/80 dark:shadow-xl dark:shadow-black/50',
+              'dark:bg-[#111114] dark:text-[#F5F5F7] dark:border-[#222226] dark:shadow-xl dark:shadow-black/50',
               sideTransforms[side],
               'transition-all duration-120 ease-out will-change-[opacity,transform]',
               isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95',

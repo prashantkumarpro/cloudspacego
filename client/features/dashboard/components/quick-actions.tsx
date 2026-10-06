@@ -12,7 +12,7 @@ export default function QuickActions () {
       {/* Action 1: Upload Files */}
       <button
         onClick={() => setActiveModal('upload-file')}
-        className='inline-flex items-center gap-2 px-4.5 py-2.5 bg-blue-50 dark:bg-blue-950/40 text-[#0056f7] dark:text-blue-400 rounded-lg text-xs font-bold shadow-[0_2px_8px_-2px_rgba(0,86,247,0.12)] hover:shadow-[0_4px_12px_-2px_rgba(0,86,247,0.2)] hover:bg-blue-100/70 dark:hover:bg-blue-950/60 transition-all duration-200 cursor-pointer focus:outline-none border-none'
+        className='inline-flex items-center gap-2 px-4.5 py-2.5 bg-[#6E60EE]/10 text-[#6E60EE] hover:bg-[#6E60EE]/15 border border-[#6E60EE]/20 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer focus:outline-none shadow-xs active:scale-95'
       >
         <CloudUpload className='w-4 h-4 shrink-0' />
         <span>Upload Files</span>
@@ -21,9 +21,9 @@ export default function QuickActions () {
       {/* Action 2: New Folder */}
       <button
         onClick={() => setActiveModal('create-folder')}
-        className='inline-flex items-center gap-2 px-4.5 py-2.5 bg-slate-50 dark:bg-zinc-900/60 text-slate-700 dark:text-zinc-300 rounded-lg text-xs font-bold shadow-sm hover:shadow-md hover:bg-slate-100/90 dark:hover:bg-zinc-800/80 transition-all duration-200 cursor-pointer focus:outline-none border-none'
+        className='inline-flex items-center gap-2 px-4.5 py-2.5 bg-card-bg text-foreground hover:bg-input-bg border border-card-border rounded-lg text-xs font-bold shadow-xs hover:border-card-border/80 transition-all duration-200 cursor-pointer focus:outline-none active:scale-95'
       >
-        <FolderPlus className='w-4 h-4 shrink-0' />
+        <FolderPlus className='w-4 h-4 shrink-0 text-[#6E60EE]' />
         <span>New Folder</span>
       </button>
     </div>

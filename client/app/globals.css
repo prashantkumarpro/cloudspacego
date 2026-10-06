@@ -13,6 +13,7 @@
   --color-foreground: var(--foreground);
   --color-card-bg: var(--card-bg);
   --color-card-border: var(--card-border);
+  --color-card-hover: var(--card-hover);
   --color-sidebar-bg: var(--sidebar-bg);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-active-bg: var(--sidebar-active-bg);
@@ -35,6 +36,8 @@
   /* pure white containers */
   --card-border: #ECEAF0;
   /* subtle neutral border */
+  --card-hover: #F8F7FB;
+  /* subtle light hover surface */
   --sidebar-bg: #FFFFFF;
   /* pure white sidebar */
   --sidebar-border: #ECEAF0;
@@ -53,28 +56,32 @@
 }
 
 .dark {
-  /* Sleek Leonardo.ai Style Dark Mode */
-  --background: #000000;
-  /* pure black canvas */
-  --foreground: #FFFFFF;
-  /* absolute white text */
-  --card-bg: #0A0A0E;
-  /* ultra dark card background */
-  --card-border: #16161C;
+  /* Polished, premium, unified Dark Mode */
+  --background: #0D0D0F;
+  /* main canvas */
+  --foreground: #F5F5F7;
+  /* primary text */
+  --card-bg: #111114;
+  /* cards / modal / dropdown surfaces */
+  --card-border: #222226;
   /* subtle dark card border */
-  --sidebar-bg: #08080A;
-  /* very dark sidebar */
-  --sidebar-border: #121216;
-  --sidebar-active-bg: #15151F;
-  /* active navigation item background with violet hue */
-  --sidebar-active-text: #ffffff;
-  --text-muted: #686875;
+  --card-hover: #16161A;
+  /* subtle hover surface */
+  --sidebar-bg: #0A0A0C;
+  /* sidebar background */
+  --sidebar-border: #1C1C20;
+  /* subtle sidebar separation divider */
+  --sidebar-active-bg: rgba(110, 96, 238, 0.10);
+  /* subtle violet active nav background */
+  --sidebar-active-text: #6E60EE;
+  /* brand violet text */
+  --text-muted: #71717A;
   /* clean gray-muted text */
-  --text-secondary: #9A9AAB;
+  --text-secondary: #A1A1AA;
   /* secondary text */
-  --input-bg: #0E0E12;
-  /* dark input bg */
-  --divider: #121216;
+  --input-bg: #16161A;
+  /* dark controls & hover bg */
+  --divider: #222226;
 }
 
 body {

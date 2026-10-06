@@ -72,16 +72,16 @@ export function StorageOverview() {
             <span className="text-sm font-light text-text-secondary">
               of {formatBytes(storageStats.totalCapacity, 0)} used
             </span>
-            <span className="ml-auto text-sm font-extrabold tracking-wide text-[#0056f7]">
+            <span className="ml-auto text-sm font-extrabold tracking-wide text-[#6E60EE]">
               {percentageUsed}%
             </span>
           </div>
         </div>
 
         {/* Large Progress Bar */}
-        <div className="w-full bg-divider h-2.5 rounded-full overflow-hidden relative">
+        <div className="w-full bg-input-bg h-2.5 rounded-full overflow-hidden relative border border-card-border/60">
           <div
-            className="h-full bg-gradient-to-r from-[#0056f7] to-indigo-500 rounded-full transition-all duration-300"
+            className="h-full bg-[#6E60EE] rounded-full transition-all duration-300"
             style={{ width: `${percentageUsed}%` }}
           />
         </div>
@@ -97,7 +97,7 @@ export function StorageOverview() {
         {categories.map(cat => (
           <div
             key={cat.name}
-            className="bg-background border border-card-border rounded-xl p-4 flex items-center gap-3.5 transition-all hover:shadow-sm"
+            className="bg-input-bg/60 border border-card-border rounded-xl p-4 flex items-center gap-3.5 transition-all hover:border-card-border/80"
           >
             {/* Category Icon */}
             <div className={cn("w-9 h-9 flex items-center justify-center shrink-0 rounded-lg shadow-sm", cat.color)}>
