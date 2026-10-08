@@ -73,18 +73,18 @@ export function ShareSection() {
       <LandingContainer className="relative z-10">
         {/* Section Header */}
         <div className="max-w-2xl text-left">
-          <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold tracking-tight text-[#F5F5F7] leading-[1.12]">
+          <h2 className="text-3xl sm:text-4xl lg:text-[38px] font-extrabold tracking-tight text-[#F5F5F7] leading-[1.15]">
             Share what matters.
           </h2>
 
-          <p className="mt-3.5 sm:mt-4 text-base sm:text-lg font-normal leading-relaxed text-[#A1A1AA]">
+          <p className="mt-2 sm:mt-2.5 max-w-xl text-sm sm:text-base font-normal leading-relaxed text-[#A1A1AA]">
             Collaborate on individual assets or entire project folders. Manage who can view,
             edit, or comment, and enforce password protection and automatic link expiry.
           </p>
         </div>
 
         {/* CloudSpaceGo Share Modal Interface */}
-        <div className="mt-8 sm:mt-10 lg:mt-12 w-full rounded-2xl border border-[#24242B] bg-[#101014] overflow-hidden">
+        <div className="mt-5 sm:mt-6 w-full rounded-2xl border border-[#24242B] bg-[#101014] overflow-hidden">
           {/* Modal Header */}
           <div className="p-5 sm:p-6 border-b border-[#24242B] bg-[#0D0D10]">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -129,61 +129,61 @@ export function ShareSection() {
           {/* 2-Column Grid: Security Controls & Collaborator List */}
           <div className="grid grid-cols-1 lg:grid-cols-12">
             {/* Left Column: Link Security Controls */}
-            <div className="p-5 sm:p-6 lg:col-span-5 border-b lg:border-b-0 lg:border-r border-[#24242B] bg-[#0A0A0C] flex flex-col justify-between">
+            <div className="p-4 sm:p-5 lg:col-span-5 border-b lg:border-b-0 lg:border-r border-[#24242B] bg-[#0A0A0C] flex flex-col justify-between">
               <div>
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#71717A] block mb-4">
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#71717A] block mb-3">
                   Access & Security
                 </span>
 
-                <div className="space-y-3">
-                  <div className="p-3.5 rounded-xl border border-[#24242B] bg-[#141419] flex items-center justify-between">
+                <div className="space-y-2.5 text-xs">
+                  <div className="flex items-center justify-between p-3 rounded-xl border border-[#24242B] bg-[#141419]">
                     <div className="flex items-center gap-2.5">
                       <Lock className="w-4 h-4 text-[#6E60EE]" />
                       <div>
-                        <p className="text-xs font-semibold text-[#F5F5F7]">Password Required</p>
-                        <p className="text-[10px] text-[#71717A]">Passcode: ••••••••</p>
+                        <p className="font-semibold text-[#F5F5F7]">Password Required</p>
+                        <p className="text-[10px] text-[#71717A]">Protected link</p>
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => setRequirePassword(!requirePassword)}
                       aria-label="Toggle password protection"
-                      className={`w-9 h-5 rounded-full transition-colors relative cursor-pointer ${
+                      className={`w-8 h-4.5 rounded-full transition-colors relative cursor-pointer ${
                         requirePassword ? 'bg-[#6E60EE]' : 'bg-[#24242B]'
                       }`}
                     >
                       <span
-                        className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
-                          requirePassword ? 'left-4.5' : 'left-0.5'
+                        className={`absolute top-0.5 w-3.5 h-3.5 rounded-full bg-white transition-transform ${
+                          requirePassword ? 'left-4' : 'left-0.5'
                         }`}
                       />
                     </button>
                   </div>
 
-                  <div className="p-3.5 rounded-xl border border-[#24242B] bg-[#141419] flex items-center justify-between">
+                  <div className="flex items-center justify-between p-3 rounded-xl border border-[#24242B] bg-[#141419]">
                     <div className="flex items-center gap-2.5">
                       <Calendar className="w-4 h-4 text-[#6E60EE]" />
                       <div>
-                        <p className="text-xs font-semibold text-[#F5F5F7]">Link Expiration</p>
-                        <p className="text-[10px] text-[#71717A]">Auto-expires in {expiresInDays}</p>
+                        <p className="font-semibold text-[#F5F5F7]">Link Expiration</p>
+                        <p className="text-[10px] text-[#71717A]">Expires in {expiresInDays}</p>
                       </div>
                     </div>
-                    <span className="text-[11px] font-medium text-[#6E60EE] bg-[#1D1935] border border-[#24242B] px-2 py-0.5 rounded">
+                    <span className="text-[10px] font-medium text-[#6E60EE]">
                       Active
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-[#24242B]">
-                <p className="text-[11px] text-[#71717A] leading-relaxed">
-                  Anyone with the link and passcode will be able to access the shared files until expiration.
+              <div className="mt-4 pt-3 border-t border-[#24242B]">
+                <p className="text-[10px] text-[#71717A] leading-relaxed">
+                  Only users with the link and passcode can view these files.
                 </p>
               </div>
             </div>
 
             {/* Right Column: Collaborator List */}
-            <div className="p-5 sm:p-6 lg:col-span-7 bg-[#101014] space-y-4">
+            <div className="p-4 sm:p-5 lg:col-span-7 bg-[#101014] space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold uppercase tracking-wider text-[#71717A]">
                   Collaborators ({collaborators.length})
@@ -193,27 +193,27 @@ export function ShareSection() {
                   className="inline-flex items-center gap-1 text-xs font-medium text-[#6E60EE] hover:text-[#5F52DE] cursor-pointer"
                 >
                   <UserPlus className="w-3.5 h-3.5" />
-                  <span>Invite by email</span>
+                  <span>Invite</span>
                 </button>
               </div>
 
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 {collaborators.map((c) => (
                   <div
                     key={c.id}
-                    className="flex items-center justify-between p-3 rounded-xl border border-[#24242B] bg-[#141419] hover:bg-[#101014] transition-colors"
+                    className="flex items-center justify-between p-2.5 rounded-xl border border-[#24242B] bg-[#141419] hover:bg-[#101014] transition-colors"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <div
-                        className={`w-8 h-8 rounded-full ${c.avatarColor} text-white font-bold text-xs flex items-center justify-center shrink-0`}
+                        className={`w-7 h-7 rounded-full ${c.avatarColor} text-white font-bold text-[11px] flex items-center justify-center shrink-0`}
                       >
                         {c.name.slice(0, 2).toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs sm:text-sm font-semibold text-[#F5F5F7] truncate">
+                        <p className="text-xs font-semibold text-[#F5F5F7] truncate">
                           {c.name}
                         </p>
-                        <p className="text-[11px] text-[#71717A] truncate">
+                        <p className="text-[10px] text-[#71717A] truncate">
                           {c.email}
                         </p>
                       </div>
@@ -222,7 +222,7 @@ export function ShareSection() {
                     {/* Role Tag / Selector */}
                     <div>
                       {c.role === 'Owner' ? (
-                        <span className="text-xs font-semibold text-[#A1A1AA] bg-[#101014] border border-[#24242B] px-2.5 py-1 rounded-lg">
+                        <span className="text-[11px] font-semibold text-[#A1A1AA] px-2 py-0.5">
                           Owner
                         </span>
                       ) : (
@@ -230,7 +230,7 @@ export function ShareSection() {
                           value={c.role}
                           onChange={(e) => handleRoleChange(c.id, e.target.value as Collaborator['role'])}
                           aria-label={`Permission role for ${c.name}`}
-                          className="text-xs font-medium text-[#6E60EE] bg-[#1D1935] border border-[#24242B] rounded-lg px-2.5 py-1 focus:outline-none focus:border-[#6E60EE] cursor-pointer"
+                          className="text-[11px] font-medium text-[#6E60EE] bg-[#1D1935] border border-[#24242B] rounded-lg px-2 py-0.5 focus:outline-none focus:border-[#6E60EE] cursor-pointer"
                         >
                           <option value="Editor">Editor</option>
                           <option value="Viewer">Viewer</option>

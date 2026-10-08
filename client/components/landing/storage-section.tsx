@@ -16,17 +16,17 @@ export function StorageSection() {
       <LandingContainer className="relative z-10">
         {/* Section Header */}
         <div className="max-w-2xl text-left">
-          <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold tracking-tight text-[#F5F5F7] leading-[1.12]">
+          <h2 className="text-3xl sm:text-4xl lg:text-[38px] font-extrabold tracking-tight text-[#F5F5F7] leading-[1.15]">
             A workspace that grows with you.
           </h2>
 
-          <p className="mt-3.5 sm:mt-4 text-base sm:text-lg font-normal leading-relaxed text-[#A1A1AA]">
+          <p className="mt-2 sm:mt-2.5 max-w-xl text-sm sm:text-base font-normal leading-relaxed text-[#A1A1AA]">
             15 GB of fast cloud storage with clear visibility into how your space is allocated across documents, images, code, and archives.
           </p>
         </div>
 
         {/* Large Storage Showcase Card */}
-        <div className="mt-8 sm:mt-10 lg:mt-12 w-full rounded-2xl border border-[#24242B] bg-[#101014] overflow-hidden">
+        <div className="mt-5 sm:mt-6 w-full rounded-2xl border border-[#24242B] bg-[#101014] overflow-hidden">
           <div className="p-6 sm:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#24242B] pb-6">
               <div>
@@ -59,21 +59,16 @@ export function StorageSection() {
               </div>
             </div>
 
-            {/* Category Breakdown Grid */}
-            <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {/* Category Breakdown Grid - Un-boxed & Clean */}
+            <div className="mt-6 pt-6 border-t border-[#24242B] grid grid-cols-2 sm:grid-cols-4 gap-4">
               {categories.map((cat) => (
-                <div
-                  key={cat.name}
-                  className="p-3.5 rounded-xl border border-[#24242B] bg-[#141419]"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className={`w-2.5 h-2.5 rounded-full ${cat.color}`} />
-                    <span className="text-xs font-semibold text-[#F5F5F7] truncate">
-                      {cat.name}
-                    </span>
+                <div key={cat.name} className="flex flex-col">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <div className={`w-2 h-2 rounded-full ${cat.color}`} />
+                    <span className="text-xs text-[#A1A1AA] truncate">{cat.name}</span>
                   </div>
-                  <p className="text-base font-bold text-[#F5F5F7]">{cat.size}</p>
-                  <p className="text-[11px] text-[#71717A] mt-0.5">{cat.count}</p>
+                  <p className="text-sm sm:text-base font-bold text-[#F5F5F7]">{cat.size}</p>
+                  <p className="text-[10px] text-[#71717A] mt-0.5">{cat.count}</p>
                 </div>
               ))}
             </div>

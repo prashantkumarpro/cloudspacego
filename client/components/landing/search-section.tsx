@@ -3,140 +3,285 @@
 import React, { useState, useMemo } from 'react'
 import {
   Search,
+  X,
   FileText,
   Image as ImageIcon,
-  FileCode,
-  FileArchive,
-  FileSpreadsheet,
-  Film,
-  Command,
-  Eye,
-  Share2
+  Folder,
+  Home,
+  Users,
+  Clock,
+  Star,
+  Trash2,
+  MoreVertical,
+  Grid,
+  List,
+  ArrowUp,
+  Bell,
+  HardDrive,
+  ChevronRight,
+  Sparkles
 } from 'lucide-react'
 import { LandingContainer } from '@/components/landing/landing-container'
 
-interface SearchItem {
+interface SearchResultItem {
   id: string
-  title: string
-  folder: string
+  name: string
+  ext: string
   size: string
-  modified: string
-  type: 'pdf' | 'img' | 'code' | 'archive' | 'sheet' | 'video'
-  tags: string[]
-  matchSnippet?: string
+  location: string
+  date: string
+  type: 'img' | 'pdf' | 'code' | 'archive'
+  previewType?: 'dark-img' | 'white-card' | 'pdf' | 'yellow-dark'
 }
 
-const SEARCH_DATABASE: SearchItem[] = [
+const SEARCH_ITEMS: SearchResultItem[] = [
   {
     id: '1',
-    title: 'Project Presentation.pdf',
-    folder: 'Projects / Q3 Strategy',
-    size: '4.8 MB',
-    modified: '2 hours ago',
-    type: 'pdf',
-    tags: ['presentation', 'strategy', 'q3'],
-    matchSnippet: 'Slide 4: Cloud architecture overview & R2 storage scaling'
+    name: 'postbg3.png',
+    ext: '.PNG',
+    size: '1.1 MB',
+    location: 'in My Files',
+    date: 'Oct 6, 2026',
+    type: 'img',
+    previewType: 'dark-img'
   },
   {
     id: '2',
-    title: 'Project Assets.zip',
-    folder: 'Projects / Brand 2026',
-    size: '142 MB',
-    modified: 'Yesterday',
-    type: 'archive',
-    tags: ['assets', 'brand', 'vector'],
-    matchSnippet: 'Contains 48 vector icons, logo lockups, and font weights'
+    name: 'cloudspacegov1_thumbnail.png',
+    ext: '.PNG',
+    size: '107.9 KB',
+    location: 'in My Files',
+    date: 'Oct 6, 2026',
+    type: 'img',
+    previewType: 'white-card'
   },
   {
     id: '3',
-    title: 'Project Notes.md',
-    folder: 'Documents / Notes',
-    size: '18 KB',
-    modified: '3 hours ago',
-    type: 'code',
-    tags: ['markdown', 'notes', 'roadmap'],
-    matchSnippet: '# Project Roadmap 2026 - Milestone 1 release checklist'
+    name: 'file.pdf',
+    ext: '.PDF',
+    size: '222.4 KB',
+    location: 'in My Files',
+    date: 'Oct 6, 2026',
+    type: 'pdf',
+    previewType: 'pdf'
   },
   {
     id: '4',
-    title: 'Project Images / Hero_Mockup.png',
-    folder: 'Images / Showcase',
-    size: '3.2 MB',
-    modified: 'May 14',
+    name: 'postbg2.png',
+    ext: '.PNG',
+    size: '1.1 MB',
+    location: 'in My Files',
+    date: 'Oct 6, 2026',
     type: 'img',
-    tags: ['hero', 'mockup', 'darkmode'],
-    matchSnippet: 'Dimensions 3840 × 2160 · 24-bit PNG with alpha'
+    previewType: 'dark-img'
   },
   {
     id: '5',
-    title: 'Financial Projections.xlsx',
-    folder: 'Documents / Finance',
-    size: '920 KB',
-    modified: 'Apr 29',
-    type: 'sheet',
-    tags: ['finance', 'budget', 'q3'],
-    matchSnippet: 'Sheet 1: Storage cost analysis vs AWS S3 & egress savings'
+    name: 'b10.png',
+    ext: '.PNG',
+    size: '1.1 MB',
+    location: 'in My Files',
+    date: 'Oct 6, 2026',
+    type: 'img',
+    previewType: 'yellow-dark'
   },
   {
     id: '6',
-    title: 'Product Demo Reel 4K.mp4',
-    folder: 'Videos / Marketing',
-    size: '1.4 GB',
-    modified: 'May 02',
-    type: 'video',
-    tags: ['video', 'demo', 'marketing'],
-    matchSnippet: 'Video master render 3840x2160 @ 60fps'
+    name: 'b11.png',
+    ext: '.PNG',
+    size: '1.1 MB',
+    location: 'in My Files',
+    date: 'Oct 6, 2026',
+    type: 'img',
+    previewType: 'dark-img'
+  },
+  {
+    id: '7',
+    name: 'bnbg4.png',
+    ext: '.PNG',
+    size: '1 MB',
+    location: 'in My Files',
+    date: 'Oct 6, 2026',
+    type: 'img',
+    previewType: 'dark-img'
+  },
+  {
+    id: '8',
+    name: 'b2.png',
+    ext: '.PNG',
+    size: '1.4 MB',
+    location: 'in My Files',
+    date: 'Oct 6, 2026',
+    type: 'img',
+    previewType: 'dark-img'
+  },
+  {
+    id: '9',
+    name: 'bnbg1.png',
+    ext: '.PNG',
+    size: '1.2 MB',
+    location: 'in My Files',
+    date: 'Oct 6, 2026',
+    type: 'img',
+    previewType: 'dark-img'
+  },
+  {
+    id: '10',
+    name: 'b3.png',
+    ext: '.PNG',
+    size: '477.2 KB',
+    location: 'in My Files',
+    date: 'Oct 6, 2026',
+    type: 'img',
+    previewType: 'dark-img'
+  },
+  {
+    id: '11',
+    name: 'b4.png',
+    ext: '.PNG',
+    size: '1.4 MB',
+    location: 'in My Files',
+    date: 'Oct 6, 2026',
+    type: 'img',
+    previewType: 'dark-img'
+  },
+  {
+    id: '12',
+    name: 'ChatGPT Image Oct 1, 2026, 03_03_45 PM.png',
+    ext: '.PNG',
+    size: '1.3 MB',
+    location: 'in My Files',
+    date: 'Oct 6, 2026',
+    type: 'img',
+    previewType: 'dark-img'
+  },
+  {
+    id: '13',
+    name: 'b5.png',
+    ext: '.PNG',
+    size: '1.4 MB',
+    location: 'in My Files',
+    date: 'Oct 6, 2026',
+    type: 'img',
+    previewType: 'dark-img'
+  },
+  {
+    id: '14',
+    name: 'b7.png',
+    ext: '.PNG',
+    size: '1.3 MB',
+    location: 'in My Files',
+    date: 'Oct 6, 2026',
+    type: 'img',
+    previewType: 'dark-img'
+  },
+  {
+    id: '15',
+    name: 'b9.png',
+    ext: '.PNG',
+    size: '1.1 MB',
+    location: 'in My Files',
+    date: 'Oct 6, 2026',
+    type: 'img',
+    previewType: 'dark-img'
+  },
+  {
+    id: '16',
+    name: 'bnbg2.png',
+    ext: '.PNG',
+    size: '1001.4 KB',
+    location: 'in My Files',
+    date: 'Oct 6, 2026',
+    type: 'img',
+    previewType: 'dark-img'
   }
 ]
 
+const BACKGROUND_FILES = [
+  { name: 'b2.png', owner: 'Me', date: 'Oct 6, 2026', size: '1.4 MB' },
+  { name: 'bnbg1.png', owner: 'Me', date: 'Oct 6, 2026', size: '1.2 MB' },
+  { name: 'b3.png', owner: 'Me', date: 'Oct 6, 2026', size: '477.2 KB' },
+  { name: 'b4.png', owner: 'Me', date: 'Oct 6, 2026', size: '1.4 MB' },
+  { name: 'ChatGPT Image Oct 1, 2026, 03_03_45 PM.png', owner: 'Me', date: 'Oct 6, 2026', size: '1.3 MB' },
+  { name: 'b5.png', owner: 'Me', date: 'Oct 6, 2026', size: '1.4 MB' },
+  { name: 'b7.png', owner: 'Me', date: 'Oct 6, 2026', size: '1.3 MB' },
+  { name: 'b9.png', owner: 'Me', date: 'Oct 6, 2026', size: '1.1 MB' },
+  { name: 'bnbg2.png', owner: 'Me', date: 'Oct 6, 2026', size: '1001.4 KB' }
+]
+
+// Helper to highlight matching letters in purple
+function highlightMatch(text: string, query: string) {
+  if (!query.trim()) return text
+  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const regex = new RegExp(`(${escapedQuery})`, 'gi')
+  const parts = text.split(regex)
+  return (
+    <>
+      {parts.map((part, i) =>
+        regex.test(part) ? (
+          <span key={i} className="text-[#6E60EE] font-bold">
+            {part}
+          </span>
+        ) : (
+          part
+        )
+      )}
+    </>
+  )
+}
+
 export function SearchSection() {
-  const [searchTerm, setSearchTerm] = useState('Project')
-  const [activeFilter, setActiveFilter] = useState<'all' | 'pdf' | 'img' | 'code' | 'archive'>('all')
+  const [searchTerm, setSearchTerm] = useState('b')
+  const [selectedIndex, setSelectedIndex] = useState(6) // Default selected: bnbg4.png like screenshot
 
   const filteredResults = useMemo(() => {
-    return SEARCH_DATABASE.filter(item => {
-      const matchesText =
-        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.folder.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.tags.some(t => t.toLowerCase().includes(searchTerm.toLowerCase()))
+    if (!searchTerm.trim()) return SEARCH_ITEMS.slice(0, 7)
+    return SEARCH_ITEMS.filter((item) =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.ext.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.location.toLowerCase().includes(searchTerm.toLowerCase())
+    ).slice(0, 7)
+  }, [searchTerm])
 
-      const matchesCategory =
-        activeFilter === 'all' || item.type === activeFilter
-
-      return matchesText && matchesCategory
-    })
-  }, [searchTerm, activeFilter])
-
-  const renderItemIcon = (type: SearchItem['type']) => {
-    switch (type) {
+  const renderThumbnail = (item: SearchResultItem) => {
+    switch (item.previewType) {
+      case 'white-card':
+        return (
+          <div className="w-8 h-8 rounded-lg bg-white border border-[#3A3A48] flex items-center justify-center shrink-0 overflow-hidden p-1 shadow-xs">
+            <div className="w-full h-full rounded-[2px] bg-[#F4F4F5] border border-blue-200/60 flex flex-col justify-between p-0.5">
+              <div className="flex gap-0.5">
+                <div className="w-1.5 h-1 rounded-[1px] bg-blue-500" />
+                <div className="w-2 h-1 rounded-[1px] bg-slate-300" />
+              </div>
+              <div className="w-full h-1 rounded-[1px] bg-slate-300/80" />
+            </div>
+          </div>
+        )
       case 'pdf':
-        return <FileText className="w-4 h-4 text-red-400" />
-      case 'img':
-        return <ImageIcon className="w-4 h-4 text-blue-400" />
-      case 'code':
-        return <FileCode className="w-4 h-4 text-emerald-400" />
-      case 'sheet':
-        return <FileSpreadsheet className="w-4 h-4 text-emerald-500" />
-      case 'archive':
-        return <FileArchive className="w-4 h-4 text-amber-400" />
-      case 'video':
-        return <Film className="w-4 h-4 text-purple-400" />
+        return (
+          <div className="w-8 h-8 rounded-lg bg-[#201318] border border-red-500/30 flex items-center justify-center shrink-0 text-red-400">
+            <FileText className="w-4 h-4" />
+          </div>
+        )
+      case 'yellow-dark':
+        return (
+          <div className="w-8 h-8 rounded-lg bg-[#141419] border border-[#282834] flex items-center justify-center shrink-0 overflow-hidden relative">
+            <div className="w-5 h-4 rounded-[2px] bg-[#1C1814] border border-amber-500/40 flex items-center justify-center gap-0.5 px-0.5">
+              <span className="w-1 h-1 rounded-full bg-amber-400" />
+              <span className="w-1.5 h-0.5 bg-amber-400/70 rounded-full" />
+            </div>
+          </div>
+        )
+      case 'dark-img':
+      default:
+        return (
+          <div className="w-8 h-8 rounded-lg bg-[#141419] border border-[#282834] flex items-center justify-center shrink-0 overflow-hidden relative">
+            <div className="w-5 h-4 rounded-[2px] bg-[#1E1E28] border border-[#3A3A4A] flex items-center justify-center">
+              <ImageIcon className="w-2.5 h-2.5 text-[#71717A]" />
+            </div>
+          </div>
+        )
     }
-  }
-
-  // Highlight search matching text in titles
-  const highlightMatch = (text: string, query: string) => {
-    if (!query.trim()) return text
-    const parts = text.split(new RegExp(`(${query})`, 'gi'))
-    return parts.map((part, i) =>
-      part.toLowerCase() === query.toLowerCase() ? (
-        <span key={i} className="text-[#6E60EE] bg-[#1D1935] rounded px-1 font-semibold">
-          {part}
-        </span>
-      ) : (
-        part
-      )
-    )
   }
 
   return (
@@ -144,139 +289,236 @@ export function SearchSection() {
       <LandingContainer className="relative z-10">
         {/* Section Header */}
         <div className="max-w-2xl text-left">
-          <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold tracking-tight text-[#F5F5F7] leading-[1.12]">
+          <h2 className="text-3xl sm:text-4xl lg:text-[38px] font-extrabold tracking-tight text-[#F5F5F7] leading-[1.15]">
             Find it when you need it.
           </h2>
 
-          <p className="mt-3.5 sm:mt-4 text-base sm:text-lg font-normal leading-relaxed text-[#A1A1AA]">
+          <p className="mt-2 sm:mt-2.5 max-w-xl text-sm sm:text-base font-normal leading-relaxed text-[#A1A1AA]">
             Stop digging through nested directories. Search across file names, folders,
             and document contents instantly.
           </p>
         </div>
 
-        {/* Search UI Box */}
-        <div className="mt-8 sm:mt-10 lg:mt-12 w-full rounded-2xl border border-[#24242B] bg-[#101014] overflow-hidden">
-          {/* Big Command Bar Header */}
-          <div className="p-4 sm:p-6 border-b border-[#24242B] bg-[#0D0D10]">
-            <div className="relative flex items-center">
-              <Search className="absolute left-4 w-5 h-5 text-[#6E60EE]" />
+        {/* CloudSpaceGo App Showcase Mockup with Search Overlay */}
+        <div className="mt-5 sm:mt-6 w-full rounded-2xl border border-[#24242B] bg-[#0B0B0D] overflow-hidden relative shadow-2xl min-h-[480px] sm:min-h-[520px] flex items-center justify-center p-3 sm:p-6 lg:p-8 select-none">
+
+          {/* ======================================================== */}
+          {/* BACKGROUND LAYER: Full CloudSpaceGo Application Mockup   */}
+          {/* ======================================================== */}
+          <div className="absolute inset-0 flex opacity-40 pointer-events-none select-none overflow-hidden">
+
+            {/* Left Sidebar Mockup */}
+            <div className="w-52 sm:w-60 border-r border-[#24242B] bg-[#0D0D10] p-4 hidden md:flex flex-col justify-between shrink-0">
+              <div className="space-y-6">
+                {/* Logo */}
+                <div className="flex items-center gap-2 px-2">
+                  <div className="w-7 h-7 rounded-lg bg-[#6E60EE] flex items-center justify-center text-white">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <span className="font-bold text-sm tracking-tight text-[#F5F5F7]">
+                    cloudspacego
+                  </span>
+                </div>
+
+                {/* Nav Links */}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[#71717A]">
+                    <Home className="w-4 h-4" />
+                    <span>Home</span>
+                  </div>
+                  <div className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-[#6E60EE] bg-[#1D1935]">
+                    <HardDrive className="w-4 h-4 text-[#6E60EE]" />
+                    <span>My Files</span>
+                  </div>
+                  <div className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[#71717A]">
+                    <Users className="w-4 h-4" />
+                    <span>Shared with me</span>
+                  </div>
+                  <div className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[#71717A]">
+                    <Clock className="w-4 h-4" />
+                    <span>Recent</span>
+                  </div>
+                  <div className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[#71717A]">
+                    <Star className="w-4 h-4" />
+                    <span>Starred</span>
+                  </div>
+                  <div className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[#71717A]">
+                    <Trash2 className="w-4 h-4" />
+                    <span>Trash</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sidebar Storage Widget */}
+              <div className="space-y-3 pt-4 border-t border-[#24242B]/80">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-[#F5F5F7]">Storage</span>
+                  <span className="text-[10px] font-bold text-[#6E60EE] bg-[#1D1935] px-1.5 py-0.5 rounded">
+                    FREE
+                  </span>
+                </div>
+                <div className="w-full h-1.5 rounded-full bg-[#1A1A22] overflow-hidden">
+                  <div className="h-full w-1/4 bg-[#6E60EE] rounded-full" />
+                </div>
+                <div className="flex items-center justify-between text-[10px] text-[#71717A]">
+                  <span>21.6 MB used</span>
+                  <span>15.0 GB free</span>
+                </div>
+                <div className="text-[11px] text-[#6E60EE] font-medium flex items-center justify-between cursor-pointer">
+                  <span>Upgrade Storage</span>
+                  <ChevronRight className="w-3 h-3" />
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content Pane (Table + Topbar) */}
+            <div className="flex-1 flex flex-col min-w-0 bg-[#0B0B0D]">
+              {/* Top Navigation Bar */}
+              <div className="h-14 border-b border-[#24242B] px-6 flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs text-[#71717A] bg-[#141419] px-3 py-1.5 rounded-xl border border-[#24242B] w-64">
+                  <Search className="w-3.5 h-3.5 text-[#71717A]" />
+                  <span>Search files, folders...</span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="relative p-2 text-[#71717A]">
+                    <Bell className="w-4 h-4" />
+                    <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-rose-500 rounded-full" />
+                  </div>
+                  <div className="w-7 h-7 rounded-full bg-[#24242B] border border-[#383842] flex items-center justify-center text-xs font-bold text-[#F5F5F7]">
+                    U
+                  </div>
+                </div>
+              </div>
+
+              {/* Main Files Table View */}
+              <div className="p-6 overflow-hidden">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base font-bold text-[#F5F5F7]">Files</h3>
+                  <div className="flex items-center bg-[#141419] border border-[#24242B] rounded-lg p-0.5">
+                    <div className="p-1 text-[#71717A] rounded">
+                      <Grid className="w-3.5 h-3.5" />
+                    </div>
+                    <div className="p-1 text-[#6E60EE] bg-[#1D1935] rounded">
+                      <List className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Table Header */}
+                <div className="grid grid-cols-12 text-[11px] font-semibold text-[#71717A] pb-2 border-b border-[#24242B] px-2">
+                  <div className="col-span-5 flex items-center gap-1">
+                    <span>Name</span>
+                    <ArrowUp className="w-3 h-3 text-[#6E60EE]" />
+                  </div>
+                  <div className="col-span-2">Owner</div>
+                  <div className="col-span-3">Date modified</div>
+                  <div className="col-span-1 text-right">File size</div>
+                  <div className="col-span-1 text-right">Actions</div>
+                </div>
+
+                {/* Table Rows */}
+                <div className="divide-y divide-[#24242B]/40 text-xs">
+                  {BACKGROUND_FILES.map((f, i) => (
+                    <div key={i} className="grid grid-cols-12 items-center py-2.5 px-2 text-[#A1A1AA]">
+                      <div className="col-span-5 flex items-center gap-2 text-[#F5F5F7] font-medium truncate">
+                        <div className="w-6 h-6 rounded bg-[#18181E] border border-[#24242B] flex items-center justify-center shrink-0">
+                          <ImageIcon className="w-3 h-3 text-[#71717A]" />
+                        </div>
+                        <span className="truncate">{f.name}</span>
+                      </div>
+                      <div className="col-span-2 text-[#71717A]">{f.owner}</div>
+                      <div className="col-span-3 text-[#71717A]">{f.date}</div>
+                      <div className="col-span-1 text-right text-[#71717A]">{f.size}</div>
+                      <div className="col-span-1 flex justify-end text-[#71717A]">
+                        <MoreVertical className="w-3.5 h-3.5" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ======================================================== */}
+          {/* BACKDROP DIMMER OVERLAY                                  */}
+          {/* ======================================================== */}
+          <div className="absolute inset-0 bg-[#0B0B0D]/70 backdrop-blur-[2px] z-10" />
+
+          {/* ======================================================== */}
+          {/* FOREGROUND: Live Interactive Search Modal                */}
+          {/* ======================================================== */}
+          <div className="relative z-20 w-full max-w-[500px] rounded-2xl border border-[#2D294A] bg-[#101014]/95 shadow-2xl backdrop-blur-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Top Search Input Bar */}
+            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[#24242B] bg-[#121217]">
+              <Search className="w-4.5 h-4.5 text-[#6E60EE] shrink-0" strokeWidth={2.2} />
               <input
                 type="text"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search files, folders, and shared items..."
-                className="w-full rounded-xl border border-[#24242B] bg-[#141419] py-3.5 pl-12 pr-28 text-sm sm:text-base font-medium text-[#F5F5F7] placeholder-[#71717A] focus:border-[#6E60EE] focus:outline-none transition-colors"
+                onChange={(e) => {
+                  setSearchTerm(e.target.value)
+                  setSelectedIndex(0)
+                }}
+                placeholder="Search files and folders..."
+                className="flex-1 bg-transparent text-sm font-semibold text-[#F5F5F7] placeholder-[#71717A] placeholder:font-normal focus:outline-none"
               />
-              <div className="absolute right-3 flex items-center gap-1.5">
-                <kbd className="hidden sm:inline-flex items-center gap-1 rounded bg-[#101014] border border-[#24242B] px-2 py-1 text-[11px] font-mono text-[#A1A1AA]">
-                  <Command className="w-3 h-3" /> K
-                </kbd>
-                {searchTerm && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchTerm('')}
-                    className="text-xs text-[#71717A] hover:text-[#F5F5F7] px-2 py-1 cursor-pointer"
-                  >
-                    Clear
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Filter Pills */}
-            <div className="mt-4 flex flex-wrap items-center gap-1.5">
-              {[
-                { id: 'all', label: 'All Results' },
-                { id: 'pdf', label: 'PDFs' },
-                { id: 'img', label: 'Images' },
-                { id: 'code', label: 'Code & Notes' },
-                { id: 'archive', label: 'Archives' }
-              ].map((tab) => (
+              {searchTerm && (
                 <button
-                  key={tab.id}
                   type="button"
-                  onClick={() => setActiveFilter(tab.id as any)}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
-                    activeFilter === tab.id
-                      ? 'bg-[#6E60EE] text-white'
-                      : 'bg-[#141419] border border-[#24242B] text-[#A1A1AA] hover:text-[#F5F5F7] hover:bg-[#101014]'
-                  }`}
+                  onClick={() => setSearchTerm('')}
+                  className="w-6 h-6 rounded-md flex items-center justify-center text-[#71717A] hover:text-[#F5F5F7] hover:bg-[#1A1A22] transition-colors cursor-pointer shrink-0"
+                  aria-label="Clear search"
                 >
-                  {tab.label}
+                  <X className="w-3.5 h-3.5" />
                 </button>
-              ))}
+              )}
             </div>
-          </div>
 
-          {/* Results List */}
-          <div className="p-4 sm:p-6 bg-[#101014] space-y-2.5">
-            {filteredResults.length === 0 ? (
-              <div className="text-center py-12 text-[#71717A]">
-                <Search className="w-8 h-8 mx-auto mb-2 opacity-40 text-[#6E60EE]" />
-                <p className="text-sm">No files found matching &quot;{searchTerm}&quot;</p>
-                <p className="text-xs text-[#71717A] mt-1">Try searching for &quot;Project&quot;, &quot;Deck&quot;, or &quot;Notes&quot;</p>
-              </div>
-            ) : (
-              filteredResults.map((item) => (
-                <div
-                  key={item.id}
-                  className="group flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border border-[#24242B] bg-[#141419] hover:bg-[#101014] transition-colors duration-150 gap-3"
-                >
-                  <div className="flex items-start sm:items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-lg bg-[#101014] border border-[#24242B] flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
-                      {renderItemIcon(item.type)}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-[#F5F5F7] truncate">
-                          {highlightMatch(item.title, searchTerm)}
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-[#71717A] mt-0.5">
-                        <span className="text-[#A1A1AA]">{item.folder}</span>
-                        <span>•</span>
-                        <span>{item.size}</span>
-                        <span>•</span>
-                        <span>{item.modified}</span>
-                      </div>
-                      {item.matchSnippet && (
-                        <p className="text-[11px] text-[#A1A1AA] mt-1 line-clamp-1 italic bg-[#101014] px-2 py-0.5 rounded border border-[#24242B] font-mono">
-                          {item.matchSnippet}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Actions on hover */}
-                  <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-1 rounded-lg border border-[#24242B] bg-[#101014] px-2.5 py-1 text-xs font-medium text-[#F5F5F7] hover:bg-[#141419] transition-colors"
-                    >
-                      <Eye className="w-3.5 h-3.5 text-[#6E60EE]" />
-                      <span>Preview</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="p-1.5 rounded-lg border border-[#24242B] bg-[#101014] text-[#71717A] hover:text-[#F5F5F7] hover:bg-[#141419] transition-colors"
-                      title="Share link"
-                    >
-                      <Share2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+            {/* Results List */}
+            <div className="p-2 sm:p-2.5 space-y-1 max-h-[350px] overflow-y-auto divide-y divide-[#24242B]/20">
+              {filteredResults.length === 0 ? (
+                <div className="py-8 text-center text-[#71717A] text-xs">
+                  No files found matching &quot;{searchTerm}&quot;
                 </div>
-              ))
-            )}
-          </div>
+              ) : (
+                filteredResults.map((item, idx) => {
+                  const isSelected = idx === selectedIndex
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => setSelectedIndex(idx)}
+                      onMouseEnter={() => setSelectedIndex(idx)}
+                      className={`flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-colors duration-150 group ${isSelected
+                          ? 'bg-[#1D1935] border border-[#6E60EE]/40 text-[#F5F5F7]'
+                          : 'hover:bg-[#16161D] border border-transparent text-[#A1A1AA]'
+                        }`}
+                    >
+                      {/* Left: Thumbnail Preview + Details */}
+                      <div className="flex items-center gap-3 min-w-0 flex-1 pr-3">
+                        {renderThumbnail(item)}
 
-          {/* Search Footer */}
-          <div className="px-5 py-3 border-t border-[#24242B] bg-[#0D0D10] flex flex-wrap items-center justify-between text-xs text-[#71717A] gap-2">
-            <span>Showing {filteredResults.length} indexed files</span>
-            <span className="hidden sm:inline">Use ↑ ↓ arrows to navigate results</span>
+                        <div className="flex flex-col min-w-0 flex-1 justify-center">
+                          <span className="text-xs sm:text-[13px] font-semibold text-[#F5F5F7] truncate leading-tight group-hover:text-[#6E60EE] transition-colors">
+                            {highlightMatch(item.name, searchTerm)}
+                          </span>
+                          <span className="text-[11px] text-[#71717A] font-normal truncate mt-0.5 leading-none">
+                            {item.ext} • {item.size} • {item.location}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Right: Date Modified */}
+                      <span className="text-[11px] text-[#71717A] font-normal shrink-0">
+                        {item.date}
+                      </span>
+                    </div>
+                  )
+                })
+              )}
+            </div>
           </div>
         </div>
       </LandingContainer>
     </section>
   )
 }
-
