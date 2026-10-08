@@ -16,22 +16,12 @@ import {
   FileCode,
   Search,
   Upload,
-  MoreVertical,
   CheckCircle2,
   HardDrive,
   Users,
-  ArrowUpRight,
   FolderPlus,
-  Grid,
-  List,
-  SlidersHorizontal,
   CloudUpload,
-  Download,
-  Eye,
-  Check,
-  Sparkles,
-  Link2,
-  FileArchive
+  Eye
 } from 'lucide-react'
 
 type FeatureTab = 'overview' | 'uploading' | 'search' | 'sharing' | 'storage'

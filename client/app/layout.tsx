@@ -1,11 +1,23 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Instrument_Serif, Caveat } from 'next/font/google'
 import { AppProvider } from '../providers/app-provider'
 import './globals.css'
 import { AuthProvider } from '@/providers/auth-provider'
 
 const inter = Inter({
   variable: '--font-inter',
+  subsets: ['latin']
+})
+
+const instrumentSerif = Instrument_Serif({
+  weight: '400',
+  style: ['italic', 'normal'],
+  variable: '--font-instrument-serif',
+  subsets: ['latin']
+})
+
+const caveat = Caveat({
+  variable: '--font-caveat',
   subsets: ['latin']
 })
 
@@ -20,7 +32,7 @@ export default function RootLayout ({
   children: React.ReactNode
 }) {
   return (
-    <html lang='en' className={`${inter.variable} dark h-full antialiased`} suppressHydrationWarning>
+    <html lang='en' className={`${inter.variable} ${instrumentSerif.variable} ${caveat.variable} dark h-full antialiased`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{

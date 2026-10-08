@@ -3,14 +3,15 @@
 import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { LandingContainer } from '@/components/landing/landing-container'
 
 export function LandingFooter() {
   return (
-    <footer className="border-t border-card-border bg-background px-4 py-12 sm:px-6 lg:px-8 transition-colors duration-200">
-      <div className="mx-auto max-w-6xl">
+    <footer className="bg-[#0B0B0D] py-14 sm:py-16 text-[#F5F5F7] transition-colors duration-200">
+      <LandingContainer>
         <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
           {/* Brand & Tagline */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2.5">
             <Link
               href="/"
               className="flex items-center gap-2.5 transition-opacity hover:opacity-85 select-none"
@@ -24,54 +25,66 @@ export function LandingFooter() {
                   className="w-7 h-auto object-contain shrink-0"
                 />
               </div>
-              <span className="text-lg font-bold tracking-tight font-sans text-foreground flex items-center whitespace-nowrap">
+              <span className="text-lg font-bold tracking-tight font-sans text-[#F5F5F7] flex items-center whitespace-nowrap">
                 cloud<span className="font-extrabold text-[#6E60EE]">spacego</span>
               </span>
             </Link>
-            <p className="text-xs text-text-muted max-w-sm">
-              Simple, modern, and reliable cloud storage designed to keep your files organized and always accessible.
+            <p className="text-xs text-[#71717A] max-w-sm leading-relaxed">
+              Simple, fast, private cloud storage.
             </p>
           </div>
 
           {/* Navigation Links */}
-          <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm font-medium text-text-secondary">
-            <a href="#features" className="transition-colors hover:text-[#6E60EE] dark:hover:text-[#8E82F8]">
-              Features
+          <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm font-medium text-[#A1A1AA]">
+            <a href="#organize" className="transition-colors hover:text-[#F5F5F7]">
+              Organize
             </a>
-            <a href="#how-it-works" className="transition-colors hover:text-[#6E60EE] dark:hover:text-[#8E82F8]">
-              How it works
+            <a href="#search" className="transition-colors hover:text-[#F5F5F7]">
+              Search
             </a>
-            <a href="#security" className="transition-colors hover:text-[#6E60EE] dark:hover:text-[#8E82F8]">
-              Security
+            <a href="#preview" className="transition-colors hover:text-[#F5F5F7]">
+              Preview
             </a>
-            <Link href="/login" className="transition-colors hover:text-[#6E60EE] dark:hover:text-[#8E82F8]">
+            <a href="#uploads" className="transition-colors hover:text-[#F5F5F7]">
+              Uploads
+            </a>
+            <a href="#sharing" className="transition-colors hover:text-[#F5F5F7]">
+              Sharing
+            </a>
+            <a href="#storage" className="transition-colors hover:text-[#F5F5F7]">
+              Storage
+            </a>
+            <Link href="/login" className="transition-colors hover:text-[#7C6CFF]">
               Log in
             </Link>
-            <Link href="/register" className="transition-colors hover:text-[#6E60EE] dark:hover:text-[#8E82F8]">
+            <Link href="/register" className="transition-colors hover:text-[#7C6CFF]">
               Sign up
             </Link>
           </div>
         </div>
 
         {/* Bottom Divider & Legal */}
-        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-card-border pt-6 text-xs text-text-muted sm:flex-row">
-          <span>
-            © {new Date().getFullYear()} cloud<span className="font-bold text-[#6E60EE]">spacego</span>. All rights reserved.
-          </span>
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-[#24242B] pt-6 text-xs text-[#71717A] sm:flex-row">
+          <div>
+            <span>
+              © {new Date().getFullYear()} cloud<span className="font-bold text-[#6E60EE]">spacego</span>. All rights reserved.
+            </span>
+          </div>
 
           <div className="flex items-center gap-6">
-            <a href="#" className="transition-colors hover:text-[#6E60EE] dark:hover:text-[#8E82F8]">
+            <a href="#" className="transition-colors hover:text-[#A1A1AA]">
               Privacy Policy
             </a>
-            <a href="#" className="transition-colors hover:text-[#6E60EE] dark:hover:text-[#8E82F8]">
+            <a href="#" className="transition-colors hover:text-[#A1A1AA]">
               Terms of Service
             </a>
-            <a href="#" className="transition-colors hover:text-[#6E60EE] dark:hover:text-[#8E82F8]">
-              System Status
+            <a href="#" className="transition-colors hover:text-[#A1A1AA]">
+              Security
             </a>
           </div>
         </div>
-      </div>
+      </LandingContainer>
     </footer>
   )
 }
+

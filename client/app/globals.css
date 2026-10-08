@@ -56,32 +56,32 @@
 }
 
 .dark {
-  /* Polished, premium, unified Dark Mode */
-  --background: #0D0D11;
-  /* main canvas */
-  --foreground: #F4F4F6;
+  /* Polished, premium, unified Dark Mode matching the editorial product showcase design */
+  --background: #0B0B0D;
+  /* main deep canvas */
+  --foreground: #F5F5F7;
   /* primary high-contrast text */
-  --card-bg: #14141A;
+  --card-bg: #101014;
   /* cards, modals, dropdown elevated surfaces */
-  --card-border: #23232E;
+  --card-border: #232329;
   /* crisp, refined structural border */
-  --card-hover: #191922;
+  --card-hover: #16161C;
   /* subtle interactive hover surface */
-  --sidebar-bg: #0A0A0D;
+  --sidebar-bg: #0E0E12;
   /* sidebar background */
-  --sidebar-border: #1E1E26;
+  --sidebar-border: #1F1F24;
   /* sidebar separation divider */
-  --sidebar-active-bg: rgba(110, 96, 238, 0.12);
+  --sidebar-active-bg: rgba(110, 96, 238, 0.14);
   /* brand-tinted active nav background */
   --sidebar-active-text: #8E82F8;
   /* luminous brand violet text */
-  --text-muted: #767688;
+  --text-muted: #71717A;
   /* tertiary metadata text with WCAG AA contrast */
-  --text-secondary: #A3A3B5;
+  --text-secondary: #A1A1AA;
   /* readable secondary text */
-  --input-bg: #1A1A22;
+  --input-bg: #15151A;
   /* nested controls, pills, well containers */
-  --divider: #22222C;
+  --divider: #1E1E24;
 }
 
 body {

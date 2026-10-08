@@ -2,44 +2,54 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { ArrowRight, Sparkles } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
+import { LandingContainer } from '@/components/landing/landing-container'
 
 export function CtaSection() {
   return (
-    <section className="relative px-4 py-16 sm:px-6 sm:py-24 lg:px-8 bg-background border-t border-card-border transition-colors duration-200">
-      <div className="relative mx-auto max-w-5xl rounded-2xl bg-card-bg border border-card-border px-6 py-12 text-center shadow-md dark:shadow-xl dark:shadow-black/50 sm:px-12 sm:py-16">
-        <div className="relative z-10 mx-auto max-w-2xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-card-border bg-input-bg px-3.5 py-1 text-[11px] font-semibold text-text-secondary tracking-wider uppercase mb-5">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#6E60EE]" />
-            <span>Ready to get started?</span>
+    <section className="relative py-24 sm:py-28 lg:py-32 bg-[#0B0B0D] text-[#F5F5F7] overflow-hidden">
+      <LandingContainer className="relative z-10 flex flex-col items-center">
+        <div className="mx-auto w-full max-w-3xl text-center">
+          {/* Eyebrow Label */}
+          <div className="mb-4 sm:mb-5 flex justify-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#24242B] bg-[#101014] px-3.5 py-1.5 text-xs font-semibold tracking-wider text-[#A1A1AA] uppercase select-none">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#6E60EE]" />
+              <span>START ORGANIZING TODAY</span>
+            </div>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
-            Keep your files within reach.
+          <h2 className="text-3xl sm:text-5xl lg:text-[54px] font-extrabold tracking-tight text-[#F5F5F7] leading-[1.12]">
+            Everything you need.
+            <br />
+            <span className="text-[#6E60EE]">
+              One simple space.
+            </span>
           </h2>
 
-          <p className="mx-auto mt-4 max-w-lg text-sm sm:text-base leading-relaxed text-text-secondary">
-            Start building your personal cloud workspace with CloudSpaceGo today. Fast setup, intuitive file management, and instant access.
+          <p className="mx-auto mt-5 sm:mt-6 max-w-xl text-base sm:text-lg font-normal leading-relaxed text-[#A1A1AA]">
+            Get started with 15 GB of high-speed cloud storage. Fast setup, intuitive file management, and instant access across all your devices.
           </p>
 
-          <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
+          {/* Action CTAs */}
+          <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3.5 sm:gap-4">
             <Link
               href="/register"
-              className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-[#6E60EE] px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs transition-all duration-150 hover:bg-[#6052E6] active:scale-[0.98]"
+              className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-[#6E60EE] px-7 sm:px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#6E60EE]/20 transition-all duration-150 hover:bg-[#5E50DE] active:scale-[0.98]"
             >
-              Get started free
-              <ArrowRight className="h-3.5 w-3.5" />
+              <span>Get started free</span>
+              <ArrowRight className="h-4 w-4" />
             </Link>
 
             <Link
               href="/login"
-              className="inline-flex w-full sm:w-auto items-center justify-center rounded-lg border border-card-border bg-input-bg px-5 py-2.5 text-xs sm:text-sm font-semibold text-foreground transition-all duration-150 hover:bg-card-hover active:scale-[0.98]"
+              className="inline-flex w-full sm:w-auto items-center justify-center rounded-xl border border-[#24242B] bg-[#101014] px-6 sm:px-7 py-3.5 text-sm font-medium text-[#F5F5F7] transition-all duration-150 hover:bg-[#141419] hover:border-[#383842] active:scale-[0.98]"
             >
-              Sign in
+              Sign in to your account
             </Link>
           </div>
         </div>
-      </div>
+      </LandingContainer>
     </section>
   )
 }
+
