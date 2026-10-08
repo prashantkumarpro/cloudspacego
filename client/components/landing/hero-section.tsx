@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
   ArrowRight,
   Play,
@@ -10,33 +9,124 @@ import {
   Lock,
   ShieldCheck,
   Search,
-  Command,
   Bell,
   Settings,
   Home,
-  FolderClosed,
+  HardDrive,
   Users,
   Clock,
   Star,
   Trash2,
-  HardDrive,
-  LayoutGrid,
+  Grid,
   List,
   Plus,
-  ChevronDown,
+  ChevronRight,
   MoreVertical,
   FileText,
   Image as ImageIcon,
-  Folder
+  Folder,
+  Video,
+  FileSpreadsheet,
+  Sun,
+  Moon,
+  Sparkles,
+  ArrowUp,
+  PanelLeft
 } from 'lucide-react'
 import { LandingContainer } from '@/components/landing/landing-container'
 
-export function HeroSection() {
-  const [activeView, setActiveView] = useState<'list' | 'grid'>('list')
-  const [checkedFiles, setCheckedFiles] = useState<{ [key: string]: boolean }>({})
+interface FileItem {
+  id: string
+  name: string
+  type: 'video' | 'img' | 'pdf' | 'sheet'
+  owner: string
+  date: string
+  size: string
+}
 
-  const toggleCheck = (id: string) => {
-    setCheckedFiles(prev => ({ ...prev, [id]: !prev[id] }))
+const FILES_LIST: FileItem[] = [
+  {
+    id: '1',
+    name: 'vs3.mp4',
+    type: 'video',
+    owner: 'Me',
+    date: 'Today, 2:01 PM',
+    size: '10.6 MB'
+  },
+  {
+    id: '2',
+    name: 'poster1.5.jpeg',
+    type: 'img',
+    owner: 'Me',
+    date: 'Today, 2:01 PM',
+    size: '2.1 MB'
+  },
+  {
+    id: '3',
+    name: 'Prashant_Resume.pdf',
+    type: 'pdf',
+    owner: 'Me',
+    date: 'Today, 2:01 PM',
+    size: '31.3 KB'
+  },
+  {
+    id: '4',
+    name: 'Professional_Job_Application_Tracker.xlsx',
+    type: 'sheet',
+    owner: 'Me',
+    date: 'Today, 2:01 PM',
+    size: '11.9 KB'
+  },
+  {
+    id: '5',
+    name: 'FasterQ - Full Stack Developer Internship Assignment.pdf',
+    type: 'pdf',
+    owner: 'Me',
+    date: 'Today, 2:01 PM',
+    size: '145.7 KB'
+  },
+  {
+    id: '6',
+    name: 'poster1.6.png',
+    type: 'img',
+    owner: 'Me',
+    date: 'Today, 2:01 PM',
+    size: '1.5 MB'
+  }
+]
+
+export function HeroSection() {
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
+
+  const renderFileIcon = (type: FileItem['type']) => {
+    switch (type) {
+      case 'video':
+        return (
+          <div className="w-6 h-6 rounded bg-[#18181E] border border-[#24242B] flex items-center justify-center shrink-0">
+            <Video className="w-3.5 h-3.5 text-purple-400" />
+          </div>
+        )
+      case 'img':
+        return (
+          <div className="w-6 h-6 rounded bg-[#18181E] border border-[#24242B] flex items-center justify-center shrink-0 overflow-hidden">
+            <div className="w-full h-full bg-gradient-to-tr from-slate-900 via-indigo-950 to-slate-800 flex items-center justify-center">
+              <ImageIcon className="w-3.5 h-3.5 text-sky-400" />
+            </div>
+          </div>
+        )
+      case 'pdf':
+        return (
+          <div className="w-6 h-6 rounded bg-[#201318] border border-red-500/20 flex items-center justify-center shrink-0">
+            <FileText className="w-3.5 h-3.5 text-red-400" />
+          </div>
+        )
+      case 'sheet':
+        return (
+          <div className="w-6 h-6 rounded bg-[#101D18] border border-emerald-500/20 flex items-center justify-center shrink-0">
+            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+          </div>
+        )
+    }
   }
 
   return (
@@ -53,7 +143,7 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Centered Editorial Headline - Tightened & Cohesive */}
+          {/* Centered Editorial Headline */}
           <div className="relative w-full max-w-3xl select-none">
             <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[76px] font-black tracking-tight text-[#F5F5F7] text-center flex flex-col items-center">
               {/* Line 1: YOUR FILES */}
@@ -73,12 +163,12 @@ export function HeroSection() {
             </h1>
           </div>
 
-          {/* Subtitle - Narrower & Closer */}
+          {/* Subtitle */}
           <p className="mt-3.5 sm:mt-4 max-w-md mx-auto text-sm sm:text-base font-normal leading-relaxed text-[#A1A1AA] text-center">
             Store, organize, search, preview, and share your files<br className="hidden sm:inline" /> from one simple workspace.
           </p>
 
-          {/* Hero CTAs - Flat & Clean */}
+          {/* Hero CTAs */}
           <div className="mt-5 sm:mt-6 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-3.5">
             <Link
               href="/register"
@@ -97,7 +187,7 @@ export function HeroSection() {
             </a>
           </div>
 
-          {/* Benefit Row - Smaller, Quieter, Closer Supporting Info */}
+          {/* Benefit Row */}
           <div className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-y-2 gap-x-4 sm:gap-x-6 text-[11px] sm:text-xs">
             <div className="flex items-center gap-1.5">
               <Database className="w-3.5 h-3.5 text-[#6E60EE]" />
@@ -121,368 +211,263 @@ export function HeroSection() {
         </div>
 
         {/* ========================================================================= */}
-        {/* REAL CLOUDSPACEGO PRODUCT INTERFACE PREVIEW */}
+        {/* EXACT CLOUDSPACEGO DASHBOARD PRODUCT FRAME (MATCHING SCREENSHOT)           */}
         {/* ========================================================================= */}
         <div className="relative mt-8 sm:mt-10 lg:mt-12 w-full z-20">
-          <div className="rounded-2xl border border-[#24242B] bg-[#101014] overflow-hidden">
-          
-          {/* Top App Header Bar */}
-          <div className="flex h-14 items-center justify-between border-b border-[#24242B] px-4 sm:px-6 bg-[#0D0D10]">
-            {/* Left Brand Mark */}
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 flex items-center justify-center shrink-0">
-                <Image
-                  src="/images/cloudeLogo.png"
-                  width={28}
-                  height={24}
-                  alt="cloudspacego logo"
-                  className="w-7 h-auto object-contain shrink-0"
-                />
-              </div>
-              <span className="text-base font-bold tracking-tight text-[#F5F5F7] font-sans">
-                cloud<span className="font-extrabold text-[#6E60EE]">spacego</span>
-              </span>
-            </div>
-
-            {/* Center Search Bar */}
-            <div className="relative flex-1 max-w-md mx-4">
-              <div className="flex h-9 items-center gap-2.5 rounded-xl border border-[#24242B] bg-[#141419] px-3 text-xs text-[#71717A]">
-                <Search className="w-3.5 h-3.5 text-[#71717A] shrink-0" />
-                <input
-                  type="text"
-                  readOnly
-                  placeholder="Search files, folders, and shared items..."
-                  className="w-full bg-transparent text-xs text-[#F5F5F7] placeholder-[#71717A] focus:outline-none"
-                />
-                <kbd className="hidden sm:inline-flex items-center gap-1 rounded bg-[#101014] border border-[#24242B] px-1.5 py-0.5 text-[10px] font-mono text-[#71717A]">
-                  <Command className="w-2.5 h-2.5" /> K
-                </kbd>
-              </div>
-            </div>
-
-            {/* Right Status / Actions */}
-            <div className="flex items-center gap-3">
-              <div className="p-1.5 text-[#71717A] hover:text-[#F5F5F7] cursor-pointer">
-                <Bell className="w-4 h-4" />
-              </div>
-
-              <div className="p-1.5 text-[#71717A] hover:text-[#F5F5F7] cursor-pointer">
-                <Settings className="w-4 h-4" />
-              </div>
-
-              <div className="w-7 h-7 rounded-full bg-[#6E60EE] flex items-center justify-center text-white text-[11px] font-semibold">
-                AM
-              </div>
-            </div>
-          </div>
-
-          {/* Main App Body */}
-          <div className="grid grid-cols-1 md:grid-cols-12 min-h-[480px]">
+          <div className="rounded-2xl border border-[#24242B] bg-[#0B0B0D] overflow-hidden shadow-2xl select-none">
             
-            {/* Left App Sidebar matching real app */}
-            <aside className="hidden md:flex md:col-span-3 lg:col-span-2 flex-col justify-between border-r border-[#24242B] bg-[#0A0A0C] p-3">
-              <div className="space-y-1">
-                <button
-                  type="button"
-                  className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-[#A1A1AA] hover:text-[#F5F5F7] hover:bg-[#141419] transition-colors"
-                >
-                  <Home className="w-4 h-4 text-[#71717A]" />
-                  <span>Home</span>
-                </button>
+            {/* Top Application Bar */}
+            <div className="h-14 border-b border-[#24242B] px-4 sm:px-6 bg-[#0D0D10] flex items-center justify-between">
+              {/* Left Action Buttons */}
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-[#141419] border border-[#24242B] flex items-center justify-center text-[#71717A]">
+                  <PanelLeft className="w-4 h-4" />
+                </div>
 
-                <button
-                  type="button"
-                  className="w-full flex items-center gap-2.5 rounded-xl bg-[#1D1935] px-3 py-2 text-xs font-bold text-[#6E60EE]"
-                >
-                  <FolderClosed className="w-4 h-4 text-[#6E60EE]" />
-                  <span>My Files</span>
-                </button>
+                <div className="w-8 h-8 rounded-lg bg-[#141419] border border-[#24242B] flex items-center justify-center text-[#71717A]">
+                  <Search className="w-4 h-4" />
+                </div>
 
-                <button
-                  type="button"
-                  className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-[#A1A1AA] hover:text-[#F5F5F7] hover:bg-[#141419] transition-colors"
-                >
-                  <Users className="w-4 h-4 text-[#71717A]" />
-                  <span>Shared with me</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-[#A1A1AA] hover:text-[#F5F5F7] hover:bg-[#141419] transition-colors"
-                >
-                  <Clock className="w-4 h-4 text-[#71717A]" />
-                  <span>Recent</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-[#A1A1AA] hover:text-[#F5F5F7] hover:bg-[#141419] transition-colors"
-                >
-                  <Star className="w-4 h-4 text-[#71717A]" />
-                  <span>Starred</span>
-                </button>
-
-                <div className="h-[1px] bg-[#24242B] my-1" />
-
-                <button
-                  type="button"
-                  className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-[#A1A1AA] hover:text-[#F5F5F7] hover:bg-[#141419] transition-colors"
-                >
-                  <Trash2 className="w-4 h-4 text-[#71717A]" />
-                  <span>Trash</span>
-                </button>
+                <div className="w-8 h-8 rounded-lg bg-[#6E60EE] flex items-center justify-center text-white shadow-xs">
+                  <Plus className="w-4 h-4" />
+                </div>
               </div>
 
-              {/* Bottom Storage Widget matching real app */}
-              <div className="rounded-xl border border-[#24242B] bg-[#101014] p-3 mt-6">
-                <div className="flex items-center justify-between text-xs font-semibold text-[#F5F5F7]">
-                  <div className="flex items-center gap-1.5">
-                    <HardDrive className="w-3.5 h-3.5 text-[#6E60EE]" />
-                    <span>Storage</span>
-                  </div>
-                  <span className="text-[10px] font-bold text-[#6E60EE]">
-                    16%
+              {/* Right User Bar */}
+              <div className="flex items-center gap-3">
+                <div className="relative p-1.5 text-[#71717A]">
+                  <Bell className="w-4 h-4" />
+                  <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-rose-500 rounded-full text-[9px] font-bold text-white flex items-center justify-center">
+                    3
                   </span>
                 </div>
 
-                <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-[#141419]">
-                  <div className="h-full w-[16%] rounded-full bg-[#6E60EE]" />
+                <div className="p-1.5 text-[#71717A]">
+                  <Settings className="w-4 h-4" />
                 </div>
 
-                <p className="mt-2 text-[10px] text-[#71717A]">
-                  2.4 GB used • 12.6 GB free
-                </p>
-              </div>
-            </aside>
-
-            {/* Right Content Area */}
-            <main className="md:col-span-9 lg:col-span-10 p-5 sm:p-6 bg-[#0B0B0D]">
-              {/* Header Title & Controls */}
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-xl sm:text-2xl font-bold text-[#F5F5F7]">
-                  My Files
-                </h2>
-
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center rounded-xl bg-[#101014] border border-[#24242B] p-0.5">
-                    <button
-                      type="button"
-                      onClick={() => setActiveView('grid')}
-                      className={`p-1.5 rounded-lg transition-colors ${
-                        activeView === 'grid' ? 'bg-[#141419] text-[#F5F5F7]' : 'text-[#71717A] hover:text-[#F5F5F7]'
-                      }`}
-                    >
-                      <LayoutGrid className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveView('list')}
-                      className={`p-1.5 rounded-lg transition-colors ${
-                        activeView === 'list' ? 'bg-[#141419] text-[#F5F5F7]' : 'text-[#71717A] hover:text-[#F5F5F7]'
-                      }`}
-                    >
-                      <List className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#6E60EE] px-3.5 py-2 text-xs font-semibold text-white hover:bg-[#5F52DE] transition-colors cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>New</span>
-                    <ChevronDown className="w-3 h-3 text-white/70" />
-                  </button>
+                <div className="w-7 h-7 rounded-full bg-[#24242B] border border-[#383842] flex items-center justify-center text-xs font-bold text-[#F5F5F7]">
+                  P
                 </div>
               </div>
+            </div>
 
-              {/* Folders Section matching real FolderCard */}
-              <div className="mb-6">
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#71717A] block mb-2.5">
-                  Folders
-                </span>
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {[
-                    { name: 'Documents', count: '12 files' },
-                    { name: 'Images', count: '28 files' },
-                    { name: 'Videos', count: '6 files' },
-                    { name: 'Design', count: '14 files' }
-                  ].map((folder) => (
-                    <div
-                      key={folder.name}
-                      className="group flex items-center justify-between p-3 rounded-xl border border-[#24242B] bg-[#101014] hover:bg-[#141419] transition-colors cursor-pointer"
-                    >
-                      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 pr-2">
-                        <Folder className="w-6 h-6 text-[#6E60EE] shrink-0" />
-                        <div className="flex flex-col min-w-0 flex-1">
-                          <span className="text-[13px] sm:text-sm font-semibold text-[#F5F5F7] truncate group-hover:text-[#6E60EE] transition-colors">
-                            {folder.name}
-                          </span>
-                          <span className="text-[11px] sm:text-xs font-normal text-[#A1A1AA] truncate mt-0.5">
-                            {folder.count}
-                          </span>
-                        </div>
-                      </div>
-
-                      <MoreVertical className="w-4 h-4 text-[#71717A] hover:text-[#F5F5F7] shrink-0" />
+            {/* Main Application Body Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-12 min-h-[520px]">
+              
+              {/* Left Sidebar */}
+              <aside className="hidden md:flex md:col-span-3 lg:col-span-2 flex-col justify-between border-r border-[#24242B] bg-[#0A0A0C] p-3.5 shrink-0">
+                <div className="space-y-6">
+                  {/* Logo Brand */}
+                  <div className="flex items-center gap-2 px-2">
+                    <div className="w-7 h-7 rounded-lg bg-[#6E60EE] flex items-center justify-center text-white shrink-0">
+                      <Sparkles className="w-4 h-4" />
                     </div>
-                  ))}
+                    <span className="font-bold text-sm tracking-tight text-[#F5F5F7]">
+                      cloudspacego
+                    </span>
+                  </div>
+
+                  {/* Navigation Links (My Files Active) */}
+                  <div className="space-y-1 text-xs font-medium text-[#71717A]">
+                    <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:text-[#F5F5F7] cursor-pointer">
+                      <Home className="w-4 h-4" />
+                      <span>Home</span>
+                    </div>
+
+                    <div className="flex items-center gap-3 px-3 py-2 rounded-xl text-[#6E60EE] bg-[#1D1935] font-semibold cursor-pointer">
+                      <HardDrive className="w-4 h-4 text-[#6E60EE]" />
+                      <span>My Files</span>
+                    </div>
+
+                    <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:text-[#F5F5F7] cursor-pointer">
+                      <Users className="w-4 h-4" />
+                      <span>Shared with me</span>
+                    </div>
+
+                    <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:text-[#F5F5F7] cursor-pointer">
+                      <Clock className="w-4 h-4" />
+                      <span>Recent</span>
+                    </div>
+
+                    <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:text-[#F5F5F7] cursor-pointer">
+                      <Star className="w-4 h-4" />
+                      <span>Starred</span>
+                    </div>
+
+                    <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:text-[#F5F5F7] cursor-pointer">
+                      <Trash2 className="w-4 h-4" />
+                      <span>Trash</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              {/* Files Section matching real FileList / FileCard */}
-              <div>
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#71717A] block mb-2.5">
-                  Files
-                </span>
+                {/* Bottom Storage Meter & Theme Toggle */}
+                <div className="space-y-3 pt-4 border-t border-[#24242B]/80 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-[#F5F5F7]">Storage</span>
+                    <span className="text-[10px] font-bold text-[#6E60EE] bg-[#1D1935] px-1.5 py-0.5 rounded">
+                      100%
+                    </span>
+                  </div>
 
-                {activeView === 'list' ? (
-                  <div className="rounded-xl border border-[#24242B] bg-[#101014] overflow-hidden">
-                    {/* Table Headers */}
-                    <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#24242B] text-[11px] font-semibold text-[#71717A] bg-[#0D0D10]">
-                      <div className="flex items-center gap-3 flex-1">
-                        <input
-                          type="checkbox"
-                          aria-label="Select all files"
-                          className="rounded border-[#24242B] bg-[#141419] text-[#6E60EE] focus:ring-0 cursor-pointer"
-                        />
-                        <span className="text-[#A1A1AA]">Name ˅</span>
-                      </div>
-                      <div className="hidden sm:flex items-center gap-12 text-right">
-                        <span className="w-16">Size</span>
-                        <span className="w-24">Modified ⇣</span>
-                        <span className="w-4" />
+                  <div className="w-full h-1.5 rounded-full bg-[#1A1A22] overflow-hidden">
+                    <div className="h-full w-full bg-[#6E60EE] rounded-full" />
+                  </div>
+
+                  <div className="flex items-center justify-between text-[10px] text-[#71717A]">
+                    <span>199.6 MB used</span>
+                    <span>378.5 KB free</span>
+                  </div>
+
+                  <div className="text-[11px] text-[#6E60EE] font-medium flex items-center justify-between cursor-pointer">
+                    <span>Upgrade Storage</span>
+                    <ChevronRight className="w-3 h-3" />
+                  </div>
+
+                  {/* Theme Switcher Pill */}
+                  <div className="pt-2 flex items-center justify-between p-1 bg-[#141419] border border-[#24242B] rounded-lg text-[10px]">
+                    <div className="flex items-center gap-1 text-[#71717A] px-2 py-0.5">
+                      <Sun className="w-3 h-3 text-amber-400" />
+                      <span>Light</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-[#F5F5F7] bg-[#1D1935] px-2 py-0.5 rounded font-semibold">
+                      <Moon className="w-3 h-3 text-[#6E60EE]" />
+                      <span>Dark</span>
+                    </div>
+                  </div>
+                </div>
+              </aside>
+
+              {/* Main Content Area: My Files */}
+              <main className="md:col-span-9 lg:col-span-10 p-5 sm:p-6 bg-[#0B0B0D] flex flex-col justify-between">
+                <div className="space-y-5">
+                  
+                  {/* Main Heading */}
+                  <div>
+                    <h2 className="text-xl sm:text-2xl font-bold text-[#F5F5F7] tracking-tight">
+                      My Files
+                    </h2>
+                  </div>
+
+                  {/* FOLDERS Section */}
+                  <div>
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-[#71717A] block mb-2.5">
+                      FOLDERS
+                    </span>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {['pkdev', 'images', 'docs', 'videos'].map((folder) => (
+                        <div
+                          key={folder}
+                          className="p-3 rounded-xl border border-[#24242B] bg-[#101014] flex items-center justify-between hover:bg-[#141419] transition-colors cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <Folder className="w-5 h-5 text-[#6E60EE] shrink-0" />
+                            <div className="min-w-0">
+                              <span className="text-xs font-semibold text-[#F5F5F7] block truncate">{folder}</span>
+                              <span className="text-[10px] text-[#71717A]">0 files</span>
+                            </div>
+                          </div>
+                          <MoreVertical className="w-3.5 h-3.5 text-[#71717A] shrink-0" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Files Section Header with Grid/List Toggle */}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-xs font-bold text-[#F5F5F7]">Files</span>
+                      <div className="flex items-center bg-[#101014] border border-[#24242B] rounded-lg p-0.5">
+                        <button
+                          type="button"
+                          onClick={() => setViewMode('grid')}
+                          className={`p-1 rounded cursor-pointer transition-colors ${
+                            viewMode === 'grid' ? 'bg-[#1D1935] text-[#6E60EE]' : 'text-[#71717A] hover:text-[#F5F5F7]'
+                          }`}
+                        >
+                          <Grid className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setViewMode('list')}
+                          className={`p-1 rounded cursor-pointer transition-colors ${
+                            viewMode === 'list' ? 'bg-[#1D1935] text-[#6E60EE]' : 'text-[#71717A] hover:text-[#F5F5F7]'
+                          }`}
+                        >
+                          <List className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </div>
 
-                    {/* File Rows */}
-                    <div className="divide-y divide-[#24242B]">
-                      {/* Row 1: Project Plan.pdf */}
-                      <div className="flex items-center justify-between px-4 py-3 hover:bg-[#141419] transition-colors cursor-pointer group">
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <input
-                            type="checkbox"
-                            checked={!!checkedFiles['1']}
-                            onChange={() => toggleCheck('1')}
-                            aria-label="Select Project Plan.pdf"
-                            className="rounded border-[#24242B] bg-[#141419] text-[#6E60EE] focus:ring-0 cursor-pointer"
-                          />
-                          <div className="w-7 h-7 rounded-lg bg-[#141419] border border-[#24242B] flex items-center justify-center shrink-0">
-                            <span className="text-[9px] font-bold text-red-400 font-mono">PDF</span>
+                    {/* Files List View */}
+                    {viewMode === 'list' ? (
+                      <div className="rounded-xl border border-[#24242B] bg-[#101014] overflow-hidden text-xs">
+                        {/* Table Header */}
+                        <div className="grid grid-cols-12 text-[11px] font-semibold text-[#71717A] py-2 px-3 border-b border-[#24242B] bg-[#0D0D10]">
+                          <div className="col-span-5 flex items-center gap-1">
+                            <span>Name</span>
+                            <ArrowUp className="w-3 h-3 text-[#6E60EE]" />
                           </div>
-                          <span className="text-xs font-semibold text-[#F5F5F7] truncate group-hover:text-[#6E60EE] transition-colors">
-                            Project Plan.pdf
-                          </span>
+                          <div className="col-span-2">Owner</div>
+                          <div className="col-span-3">Date modified</div>
+                          <div className="col-span-1 text-right">File size</div>
+                          <div className="col-span-1 text-right">Actions</div>
                         </div>
 
-                        <div className="flex items-center gap-6 sm:gap-12 text-xs text-[#A1A1AA] shrink-0">
-                          <span className="w-16 text-right font-mono">842 KB</span>
-                          <span className="w-24 text-right hidden sm:inline text-[#71717A]">2 hours ago</span>
-                          <button type="button" className="text-[#71717A] hover:text-[#F5F5F7] p-1">
-                            <MoreVertical className="w-3.5 h-3.5" />
-                          </button>
+                        {/* Table Rows matching screenshot */}
+                        <div className="divide-y divide-[#24242B]/40">
+                          {FILES_LIST.map((f) => (
+                            <div
+                              key={f.id}
+                              className="grid grid-cols-12 items-center py-2.5 px-3 text-[#A1A1AA] hover:bg-[#141419] transition-colors"
+                            >
+                              <div className="col-span-5 flex items-center gap-2.5 text-[#F5F5F7] font-medium truncate">
+                                {renderFileIcon(f.type)}
+                                <span className="truncate">{f.name}</span>
+                              </div>
+                              <div className="col-span-2 text-[#71717A]">{f.owner}</div>
+                              <div className="col-span-3 text-[#71717A]">{f.date}</div>
+                              <div className="col-span-1 text-right text-[#71717A]">{f.size}</div>
+                              <div className="col-span-1 flex justify-end text-[#71717A]">
+                                <MoreVertical className="w-3.5 h-3.5" />
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
-
-                      {/* Row 2: Cover Image.jpg */}
-                      <div className="flex items-center justify-between px-4 py-3 hover:bg-[#141419] transition-colors cursor-pointer group">
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <input
-                            type="checkbox"
-                            checked={!!checkedFiles['2']}
-                            onChange={() => toggleCheck('2')}
-                            aria-label="Select Cover Image.jpg"
-                            className="rounded border-[#24242B] bg-[#141419] text-[#6E60EE] focus:ring-0 cursor-pointer"
-                          />
-                          <div className="w-7 h-7 rounded-lg bg-[#141419] border border-[#24242B] flex items-center justify-center shrink-0">
-                            <ImageIcon className="w-3.5 h-3.5 text-blue-400" />
+                    ) : (
+                      /* Grid View Alternative */
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {FILES_LIST.map((f) => (
+                          <div
+                            key={f.id}
+                            className="p-3 rounded-xl border border-[#24242B] bg-[#101014] flex flex-col justify-between hover:bg-[#141419] transition-colors cursor-pointer"
+                          >
+                            <div className="w-full h-20 rounded-lg bg-[#0B0B0D] border border-[#24242B]/60 flex items-center justify-center mb-2">
+                              {renderFileIcon(f.type)}
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <div className="min-w-0 pr-1">
+                                <span className="text-xs font-semibold text-[#F5F5F7] block truncate">
+                                  {f.name}
+                                </span>
+                                <span className="text-[10px] text-[#71717A]">{f.size}</span>
+                              </div>
+                              <MoreVertical className="w-3.5 h-3.5 text-[#71717A] shrink-0" />
+                            </div>
                           </div>
-                          <span className="text-xs font-semibold text-[#F5F5F7] truncate group-hover:text-[#6E60EE] transition-colors">
-                            Cover Image.jpg
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-6 sm:gap-12 text-xs text-[#A1A1AA] shrink-0">
-                          <span className="w-16 text-right font-mono">2.8 MB</span>
-                          <span className="w-24 text-right hidden sm:inline text-[#71717A]">5 hours ago</span>
-                          <button type="button" className="text-[#71717A] hover:text-[#F5F5F7] p-1">
-                            <MoreVertical className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
+                        ))}
                       </div>
-
-                      {/* Row 3: Design System.fig */}
-                      <div className="flex items-center justify-between px-4 py-3 hover:bg-[#141419] transition-colors cursor-pointer group">
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <input
-                            type="checkbox"
-                            checked={!!checkedFiles['3']}
-                            onChange={() => toggleCheck('3')}
-                            aria-label="Select Design System.fig"
-                            className="rounded border-[#24242B] bg-[#141419] text-[#6E60EE] focus:ring-0 cursor-pointer"
-                          />
-                          <div className="w-7 h-7 rounded-lg bg-[#141419] border border-[#24242B] flex items-center justify-center shrink-0">
-                            <FileText className="w-3.5 h-3.5 text-[#6E60EE]" />
-                          </div>
-                          <span className="text-xs font-semibold text-[#F5F5F7] truncate group-hover:text-[#6E60EE] transition-colors">
-                            Design System.fig
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-6 sm:gap-12 text-xs text-[#A1A1AA] shrink-0">
-                          <span className="w-16 text-right font-mono">4.1 MB</span>
-                          <span className="w-24 text-right hidden sm:inline text-[#71717A]">1 day ago</span>
-                          <button type="button" className="text-[#71717A] hover:text-[#F5F5F7] p-1">
-                            <MoreVertical className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                    )}
                   </div>
-                ) : (
-                  /* Grid view matching real FileCard */
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {[
-                      { name: 'Project Plan.pdf', size: 'PDF • 842 KB', icon: 'pdf' },
-                      { name: 'Cover Image.jpg', size: 'JPG • 2.8 MB', icon: 'img' },
-                      { name: 'Design System.fig', size: 'FIG • 4.1 MB', icon: 'fig' }
-                    ].map((file) => (
-                      <div
-                        key={file.name}
-                        className="bg-[#101014] rounded-xl border border-[#24242B] hover:bg-[#141419] p-2.5 sm:p-3 flex flex-col gap-2.5 group cursor-pointer transition-colors"
-                      >
-                        <div className="bg-[#0B0B0D] rounded-lg h-24 flex items-center justify-center border border-[#24242B]/60">
-                          {file.icon === 'pdf' ? (
-                            <span className="text-xs font-bold text-red-400 font-mono">PDF</span>
-                          ) : file.icon === 'img' ? (
-                            <ImageIcon className="w-6 h-6 text-blue-400" />
-                          ) : (
-                            <FileText className="w-6 h-6 text-[#6E60EE]" />
-                          )}
-                        </div>
-                        <div className="flex items-center justify-between gap-1.5 w-full min-w-0">
-                          <div className="flex flex-col min-w-0 flex-1 text-left">
-                            <span className="text-xs sm:text-sm font-semibold text-[#F5F5F7] truncate group-hover:text-[#6E60EE] transition-colors">
-                              {file.name}
-                            </span>
-                            <span className="text-[11px] font-medium text-[#A1A1AA] truncate mt-0.5">
-                              {file.size}
-                            </span>
-                          </div>
-                          <MoreVertical className="w-4 h-4 text-[#71717A] shrink-0" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </main>
+                </div>
+              </main>
+            </div>
           </div>
         </div>
-      </div>
-    </LandingContainer>
-  </section>
-)
+      </LandingContainer>
+    </section>
+  )
 }
-
