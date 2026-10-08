@@ -1,81 +1,191 @@
 'use client'
 
 import React from 'react'
+import Link from 'next/link'
+import { Check, ArrowRight } from 'lucide-react'
 import { LandingContainer } from '@/components/landing/landing-container'
 
-export function StorageSection() {
-  const categories = [
-    { name: 'Documents & PDFs', size: '5.4 MB', count: '14 files', color: 'bg-red-400', pct: 23 },
-    { name: 'Images & Photos', size: '11.8 MB', count: '124 files', color: 'bg-blue-400', pct: 50 },
-    { name: 'Archives & ZIPs', size: '4.2 MB', count: '6 files', color: 'bg-amber-400', pct: 18 },
-    { name: 'Code & Data', size: '2.0 MB', count: '32 files', color: 'bg-emerald-400', pct: 9 }
-  ]
+interface PricingPlan {
+  id: string
+  name: string
+  tagline: string
+  storage: string
+  storageLabel: string
+  badge?: string
+  isPopular?: boolean
+  cta: {
+    text: string
+    href: string
+    primary: boolean
+  }
+  features: string[]
+}
 
+const PLANS: PricingPlan[] = [
+  {
+    id: 'free',
+    name: 'Free',
+    tagline: 'A simple way to get started.',
+    storage: '200 MB',
+    storageLabel: 'of storage',
+    cta: {
+      text: 'Get started free',
+      href: '/register',
+      primary: true
+    },
+    features: [
+      'Store and organize your files',
+      'File previews',
+      'Basic search',
+      'Secure and private'
+    ]
+  },
+  {
+    id: 'pro',
+    name: 'Pro',
+    tagline: 'More space for your personal files.',
+    storage: '10 GB',
+    storageLabel: 'of storage',
+    badge: 'MOST POPULAR',
+    isPopular: true,
+    cta: {
+      text: 'Choose Pro',
+      href: '/register',
+      primary: true
+    },
+    features: [
+      'Everything in Free',
+      '10 GB of storage',
+      'Advanced search',
+      'File sharing',
+      'Priority support'
+    ]
+  },
+  {
+    id: 'business',
+    name: 'Business',
+    tagline: 'For teams and growing businesses.',
+    storage: '1 TB',
+    storageLabel: 'of storage',
+    cta: {
+      text: 'Choose Business',
+      href: '/register',
+      primary: false
+    },
+    features: [
+      'Everything in Pro',
+      '1 TB of storage',
+      'Team collaboration',
+      'Advanced sharing controls',
+      'Priority support'
+    ]
+  }
+]
+
+export function StorageSection() {
   return (
-    <section id="storage" className="relative py-10 sm:py-14 lg:py-16 bg-[#0B0B0D] text-[#F5F5F7] overflow-hidden">
-      <LandingContainer className="relative z-10">
-        {/* Section Header */}
-        <div className="max-w-2xl text-left">
-          <h2 className="text-3xl sm:text-4xl lg:text-[38px] font-extrabold tracking-tight text-[#F5F5F7] leading-[1.15]">
-            A workspace that grows with you.
+    <section id="storage" className="relative py-12 sm:py-16 lg:py-20 bg-[#0B0B0D] text-[#F5F5F7] overflow-hidden">
+      <LandingContainer className="relative z-10 flex flex-col items-center">
+        
+        {/* Section Eyebrow */}
+        <div className="mb-3 sm:mb-4 flex justify-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#24242B] bg-[#101014] px-3.5 py-1.5 text-xs font-semibold tracking-wider text-[#A1A1AA] uppercase select-none">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#6E60EE]" />
+            <span>PRICING</span>
+          </div>
+        </div>
+
+        {/* Section Headline */}
+        <div className="max-w-2xl text-center">
+          <h2 className="text-3xl sm:text-5xl lg:text-[56px] font-black tracking-tight leading-[1.08]">
+            <span className="text-[#F5F5F7] block">Simple storage.</span>
+            <span className="text-[#6E60EE] block">Clear plans.</span>
           </h2>
 
-          <p className="mt-2 sm:mt-2.5 max-w-xl text-sm sm:text-base font-normal leading-relaxed text-[#A1A1AA]">
-            15 GB of fast cloud storage with clear visibility into how your space is allocated across documents, images, code, and archives.
+          <p className="mt-3 sm:mt-4 max-w-lg mx-auto text-sm sm:text-base font-normal leading-relaxed text-[#A1A1AA]">
+            Choose the plan that fits your needs. Upgrade anytime as you grow.
           </p>
         </div>
 
-        {/* Large Storage Showcase Card */}
-        <div className="mt-5 sm:mt-6 w-full rounded-2xl border border-[#24242B] bg-[#101014] overflow-hidden">
-          <div className="p-6 sm:p-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#24242B] pb-6">
+        {/* 3-Tier Pricing Grid with Shared Internal Rhythm */}
+        <div className="mt-8 sm:mt-12 w-full grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 items-stretch max-w-6xl">
+          {PLANS.map((plan) => (
+            <div
+              key={plan.id}
+              className={`rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-colors ${
+                plan.isPopular
+                  ? 'border border-[#6E60EE] bg-[#141226]'
+                  : 'border border-[#24242B] bg-[#101014] hover:border-[#383842]'
+              }`}
+            >
+              {/* Top Block: Reserved badge area, Title, Tagline, Metric, and CTA */}
               <div>
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#71717A]">
-                  Your Cloud Storage
-                </span>
-                <div className="mt-2 flex items-baseline gap-3">
-                  <span className="text-3xl sm:text-4xl font-bold text-[#F5F5F7]">
-                    23.4 MB
-                  </span>
-                  <span className="text-sm font-medium text-[#A1A1AA]">
-                    used of <strong className="text-[#F5F5F7]">15.0 GB</strong> free tier
-                  </span>
+                {/* 1. Reserved Badge Row */}
+                <div className="h-6 mb-3 flex items-center">
+                  {plan.badge ? (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#1D1935] text-[#6E60EE] text-[10.5px] font-bold uppercase tracking-wider">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#6E60EE]" />
+                      <span>{plan.badge}</span>
+                    </div>
+                  ) : (
+                    <div className="h-6" aria-hidden="true" />
+                  )}
                 </div>
-              </div>
-            </div>
 
-            {/* Segmented Progress Meter */}
-            <div className="mt-6">
-              <div className="flex items-center justify-between text-xs text-[#71717A] mb-2.5">
-                <span>Space Allocation</span>
-                <span>0.15% utilized</span>
-              </div>
+                {/* 2. Plan Title */}
+                <h3 className="text-xl sm:text-2xl font-bold text-[#F5F5F7] tracking-tight">
+                  {plan.name}
+                </h3>
 
-              <div className="h-2.5 w-full rounded-full bg-[#141419] overflow-hidden flex gap-1 p-0.5 border border-[#24242B]">
-                <div className="h-full bg-red-400 rounded-full" style={{ width: '23%' }} title="Documents: 23%" />
-                <div className="h-full bg-blue-400 rounded-full" style={{ width: '50%' }} title="Images: 50%" />
-                <div className="h-full bg-amber-400 rounded-full" style={{ width: '18%' }} title="Archives: 18%" />
-                <div className="h-full bg-emerald-400 rounded-full" style={{ width: '9%' }} title="Code: 9%" />
-              </div>
-            </div>
+                {/* 3. Description */}
+                <p className="text-xs sm:text-sm text-[#71717A] mt-1 h-5 flex items-center">
+                  {plan.tagline}
+                </p>
 
-            {/* Category Breakdown Grid - Un-boxed & Clean */}
-            <div className="mt-6 pt-6 border-t border-[#24242B] grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {categories.map((cat) => (
-                <div key={cat.name} className="flex flex-col">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <div className={`w-2 h-2 rounded-full ${cat.color}`} />
-                    <span className="text-xs text-[#A1A1AA] truncate">{cat.name}</span>
+                {/* 4. Storage Amount & Label */}
+                <div className="mt-6 sm:mt-8">
+                  <div className="text-3xl sm:text-4xl font-extrabold text-[#F5F5F7] tracking-tight">
+                    {plan.storage}
                   </div>
-                  <p className="text-sm sm:text-base font-bold text-[#F5F5F7]">{cat.size}</p>
-                  <p className="text-[10px] text-[#71717A] mt-0.5">{cat.count}</p>
+                  <div className="text-xs text-[#71717A] mt-1 font-medium">
+                    {plan.storageLabel}
+                  </div>
                 </div>
-              ))}
+
+                {/* 5. CTA Button */}
+                <Link
+                  href={plan.cta.href}
+                  className={`w-full h-11 px-4 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 mt-6 transition-all duration-150 active:scale-[0.98] ${
+                    plan.cta.primary
+                      ? 'bg-[#6E60EE] hover:bg-[#5E50DE] text-white shadow-xs'
+                      : 'bg-[#101014] border border-[#24242B] hover:border-[#383842] hover:bg-[#141419] text-[#F5F5F7]'
+                  }`}
+                >
+                  <span>{plan.cta.text}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+
+              {/* 6. Divider & 7. Feature List */}
+              <div className="mt-6 pt-6 border-t border-[#24242B]">
+                <div className="space-y-3.5 text-xs sm:text-sm text-[#A1A1AA]">
+                  {plan.features.map((feature, idx) => (
+                    <div key={idx} className="flex items-center gap-2.5">
+                      <Check className="w-4 h-4 text-[#6E60EE] shrink-0" />
+                      <span>{feature}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
+
+        {/* Bottom Guarantee Note */}
+        <p className="mt-8 sm:mt-10 text-xs sm:text-sm text-[#71717A] text-center font-normal">
+          You can upgrade or downgrade at any time. All plans include end-to-end encryption.
+        </p>
       </LandingContainer>
     </section>
   )
 }
-

@@ -44,7 +44,7 @@ interface FileItem {
   size: string
 }
 
-const FILES_LIST: FileItem[] = [
+const RECENTLY_OPENED_FILES: FileItem[] = [
   {
     id: '1',
     name: 'vs3.mp4',
@@ -76,22 +76,6 @@ const FILES_LIST: FileItem[] = [
     owner: 'Me',
     date: 'Today, 2:01 PM',
     size: '11.9 KB'
-  },
-  {
-    id: '5',
-    name: 'FasterQ - Full Stack Developer Internship Assignment.pdf',
-    type: 'pdf',
-    owner: 'Me',
-    date: 'Today, 2:01 PM',
-    size: '145.7 KB'
-  },
-  {
-    id: '6',
-    name: 'poster1.6.png',
-    type: 'img',
-    owner: 'Me',
-    date: 'Today, 2:01 PM',
-    size: '1.5 MB'
   }
 ]
 
@@ -268,15 +252,15 @@ export function HeroSection() {
                     </span>
                   </div>
 
-                  {/* Navigation Links (My Files Active) */}
+                  {/* Navigation Links (Home Active) */}
                   <div className="space-y-1 text-xs font-medium text-[#71717A]">
-                    <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:text-[#F5F5F7] cursor-pointer">
-                      <Home className="w-4 h-4" />
+                    <div className="flex items-center gap-3 px-3 py-2 rounded-xl text-[#6E60EE] bg-[#1D1935] font-semibold cursor-pointer">
+                      <Home className="w-4 h-4 text-[#6E60EE]" />
                       <span>Home</span>
                     </div>
 
-                    <div className="flex items-center gap-3 px-3 py-2 rounded-xl text-[#6E60EE] bg-[#1D1935] font-semibold cursor-pointer">
-                      <HardDrive className="w-4 h-4 text-[#6E60EE]" />
+                    <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:text-[#F5F5F7] cursor-pointer">
+                      <HardDrive className="w-4 h-4" />
                       <span>My Files</span>
                     </div>
 
@@ -339,22 +323,41 @@ export function HeroSection() {
                 </div>
               </aside>
 
-              {/* Main Content Area: My Files */}
+              {/* Main Content Area: Home View */}
               <main className="md:col-span-9 lg:col-span-10 p-5 sm:p-6 bg-[#0B0B0D] flex flex-col justify-between">
                 <div className="space-y-5">
                   
-                  {/* Main Heading */}
+                  {/* Greeting */}
                   <div>
                     <h2 className="text-xl sm:text-2xl font-bold text-[#F5F5F7] tracking-tight">
-                      My Files
+                      Good afternoon, Prashant
                     </h2>
+                    <p className="text-xs text-[#71717A] mt-0.5">
+                      Everything you need, right where you left it.
+                    </p>
                   </div>
 
-                  {/* FOLDERS Section */}
+                  {/* CONTINUE: pkdev */}
+                  <div className="flex items-center justify-between p-3 rounded-xl border border-[#24242B] bg-[#101014] max-w-xl">
+                    <div className="flex items-center gap-2.5 text-xs text-[#A1A1AA]">
+                      <div className="w-6 h-6 rounded bg-[#1D1935] flex items-center justify-center text-[#6E60EE]">
+                        <Folder className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="text-[10px] font-mono uppercase text-[#71717A]">CONTINUE:</span>
+                      <span className="font-semibold text-[#F5F5F7]">pkdev</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-[11px] text-[#71717A]">
+                      <span>Recently</span>
+                      <ChevronRight className="w-3 h-3" />
+                    </div>
+                  </div>
+
+                  {/* Your folders */}
                   <div>
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-[#71717A] block mb-2.5">
-                      FOLDERS
-                    </span>
+                    <div className="flex items-center justify-between mb-2.5">
+                      <h3 className="text-xs font-bold text-[#F5F5F7]">Your folders</h3>
+                      <span className="text-[11px] text-[#6E60EE] font-medium cursor-pointer">View all</span>
+                    </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       {['pkdev', 'images', 'docs', 'videos'].map((folder) => (
@@ -375,10 +378,10 @@ export function HeroSection() {
                     </div>
                   </div>
 
-                  {/* Files Section Header with Grid/List Toggle */}
+                  {/* Recently Opened */}
                   <div>
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-bold text-[#F5F5F7]">Files</span>
+                      <span className="text-xs font-bold text-[#F5F5F7]">Recently Opened</span>
                       <div className="flex items-center bg-[#101014] border border-[#24242B] rounded-lg p-0.5">
                         <button
                           type="button"
@@ -401,7 +404,7 @@ export function HeroSection() {
                       </div>
                     </div>
 
-                    {/* Files List View */}
+                    {/* Recently Opened Table / List */}
                     {viewMode === 'list' ? (
                       <div className="rounded-xl border border-[#24242B] bg-[#101014] overflow-hidden text-xs">
                         {/* Table Header */}
@@ -418,7 +421,7 @@ export function HeroSection() {
 
                         {/* Table Rows matching screenshot */}
                         <div className="divide-y divide-[#24242B]/40">
-                          {FILES_LIST.map((f) => (
+                          {RECENTLY_OPENED_FILES.map((f) => (
                             <div
                               key={f.id}
                               className="grid grid-cols-12 items-center py-2.5 px-3 text-[#A1A1AA] hover:bg-[#141419] transition-colors"
@@ -438,9 +441,9 @@ export function HeroSection() {
                         </div>
                       </div>
                     ) : (
-                      /* Grid View Alternative */
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        {FILES_LIST.map((f) => (
+                      /* Grid View */
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        {RECENTLY_OPENED_FILES.map((f) => (
                           <div
                             key={f.id}
                             className="p-3 rounded-xl border border-[#24242B] bg-[#101014] flex flex-col justify-between hover:bg-[#141419] transition-colors cursor-pointer"

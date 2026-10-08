@@ -6,7 +6,6 @@ import { PreviewSection } from '@/components/landing/preview-section'
 import { UploadSection } from '@/components/landing/upload-section'
 import { ShareSection } from '@/components/landing/share-section'
 import { StorageSection } from '@/components/landing/storage-section'
-import { CtaSection } from '@/components/landing/cta-section'
 import { LandingFooter } from '@/components/landing/landing-footer'
 
 export default function HomePage() {
@@ -34,9 +33,6 @@ export default function HomePage() {
 
         {/* 7. Storage */}
         <StorageSection />
-
-        {/* 8. Final CTA */}
-        <CtaSection />
       </main>
       <LandingFooter />
     </div>
