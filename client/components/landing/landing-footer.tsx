@@ -7,7 +7,7 @@ import { LandingContainer } from '@/components/landing/landing-container'
 
 export function LandingFooter() {
   return (
-    <footer className="bg-[#0B0B0D] py-14 sm:py-16 text-[#F5F5F7] transition-colors duration-200">
+    <footer className="bg-[#0B0B0D] py-12 sm:py-14 text-[#F5F5F7] transition-colors duration-200">
       <LandingContainer>
         <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
           {/* Brand & Tagline */}

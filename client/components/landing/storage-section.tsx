@@ -12,7 +12,7 @@ export function StorageSection() {
   ]
 
   return (
-    <section id="storage" className="relative py-20 sm:py-24 lg:py-28 bg-[#0B0B0D] text-[#F5F5F7] overflow-hidden">
+    <section id="storage" className="relative py-10 sm:py-14 lg:py-16 bg-[#0B0B0D] text-[#F5F5F7] overflow-hidden">
       <LandingContainer className="relative z-10">
         {/* Section Header */}
         <div className="max-w-2xl text-left">
@@ -26,7 +26,7 @@ export function StorageSection() {
         </div>
 
         {/* Large Storage Showcase Card */}
-        <div className="mt-10 sm:mt-12 lg:mt-14 w-full rounded-2xl border border-[#24242B] bg-[#101014] overflow-hidden">
+        <div className="mt-8 sm:mt-10 lg:mt-12 w-full rounded-2xl border border-[#24242B] bg-[#101014] overflow-hidden">
           <div className="p-6 sm:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#24242B] pb-6">
               <div>

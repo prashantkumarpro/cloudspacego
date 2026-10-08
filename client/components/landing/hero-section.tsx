@@ -40,49 +40,49 @@ export function HeroSection() {
   }
 
   return (
-    <section className="relative w-full pt-10 pb-16 sm:pt-14 sm:pb-20 lg:pt-16 lg:pb-24 bg-[#0B0B0D] text-[#F5F5F7] overflow-hidden flex flex-col items-center justify-center">
+    <section className="relative w-full pt-6 pb-10 sm:pt-8 sm:pb-14 lg:pt-10 lg:pb-16 bg-[#0B0B0D] text-[#F5F5F7] overflow-hidden flex flex-col items-center justify-center">
       <LandingContainer className="relative z-10 flex flex-col items-center">
         {/* Hero Header Content - Centered in Max-W Container */}
         <div className="w-full max-w-3xl text-center flex flex-col items-center">
           
           {/* Eyebrow: CLOUD STORAGE */}
-          <div className="mb-4 sm:mb-5 flex justify-center">
+          <div className="mb-3 sm:mb-4 flex justify-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#24242B] bg-[#101014] px-3.5 py-1.5 text-xs font-semibold tracking-wider text-[#A1A1AA] uppercase select-none">
               <span className="h-1.5 w-1.5 rounded-full bg-[#6E60EE]" />
               <span>CLOUD STORAGE</span>
             </div>
           </div>
 
-          {/* Centered Editorial Headline */}
+          {/* Centered Editorial Headline - Tightened & Cohesive */}
           <div className="relative w-full max-w-3xl select-none">
-            <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[88px] font-black tracking-tight text-[#F5F5F7] text-center">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[76px] font-black tracking-tight text-[#F5F5F7] text-center flex flex-col items-center">
               {/* Line 1: YOUR FILES */}
-              <div className="font-extrabold uppercase tracking-tight leading-[0.96]">
+              <div className="font-extrabold uppercase tracking-tight leading-[0.95]">
                 YOUR <span className="text-[#6E60EE]">FILES</span>
               </div>
 
               {/* Line 2: in one simple */}
-              <div className="font-serif italic font-normal text-[#F5F5F7] text-6xl sm:text-8xl md:text-9xl lg:text-[98px] leading-[0.88] my-0.5 sm:my-1 font-[var(--font-instrument-serif)]">
+              <div className="font-serif italic font-normal text-[#F5F5F7] text-5xl sm:text-7xl md:text-[80px] lg:text-[86px] leading-[0.88] -my-1 sm:-my-2 font-[var(--font-instrument-serif)]">
                 in one simple
               </div>
 
               {/* Line 3: SPACE. */}
-              <div className="font-black uppercase tracking-tight text-[#6E60EE] leading-[0.96]">
+              <div className="font-black uppercase tracking-tight text-[#6E60EE] leading-[0.95]">
                 SPACE.
               </div>
             </h1>
           </div>
 
-          {/* Subtitle */}
-          <p className="mt-5 sm:mt-6 max-w-xl mx-auto text-base sm:text-lg font-normal leading-relaxed text-[#A1A1AA] text-center">
+          {/* Subtitle - Narrower & Closer */}
+          <p className="mt-3.5 sm:mt-4 max-w-md mx-auto text-sm sm:text-base font-normal leading-relaxed text-[#A1A1AA] text-center">
             Store, organize, search, preview, and share your files<br className="hidden sm:inline" /> from one simple workspace.
           </p>
 
-          {/* Hero CTAs */}
-          <div className="mt-7 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5 sm:gap-4">
+          {/* Hero CTAs - Flat & Clean */}
+          <div className="mt-5 sm:mt-6 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-3.5">
             <Link
               href="/register"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#6E60EE] px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#6E60EE]/20 transition-all duration-150 hover:bg-[#5E50DE] active:scale-[0.98]"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#6E60EE] px-6 py-2.5 sm:py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-[#5E50DE] active:scale-[0.98]"
             >
               <span>Get started free</span>
               <ArrowRight className="h-4 w-4" />
@@ -90,32 +90,32 @@ export function HeroSection() {
 
             <a
               href="#organize"
-              className="inline-flex items-center justify-center gap-2.5 rounded-xl border border-[#24242B] bg-[#101014] px-6 py-3.5 text-sm font-medium text-[#F5F5F7] transition-all duration-150 hover:bg-[#141419] hover:border-[#383842] active:scale-[0.98]"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#24242B] bg-[#101014] px-5 sm:px-6 py-2.5 sm:py-3 text-sm font-medium text-[#F5F5F7] transition-all duration-150 hover:bg-[#141419] hover:border-[#383842] active:scale-[0.98]"
             >
-              <Play className="h-4 w-4 text-[#7C6CFF] stroke-[2]" />
+              <Play className="h-3.5 w-3.5 text-[#6E60EE] fill-[#6E60EE]/20" />
               <span>See how it works</span>
             </a>
           </div>
 
-          {/* Proof Strip */}
-          <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-y-3 gap-x-6 sm:gap-x-8 text-xs font-medium text-[#A1A1AA]">
-            <div className="flex items-center gap-2">
-              <Database className="w-4 h-4 text-[#7C6CFF]" />
-              <span>Free 15 GB storage</span>
+          {/* Benefit Row - Smaller, Quieter, Closer Supporting Info */}
+          <div className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-y-2 gap-x-4 sm:gap-x-6 text-[11px] sm:text-xs">
+            <div className="flex items-center gap-1.5">
+              <Database className="w-3.5 h-3.5 text-[#6E60EE]" />
+              <span className="text-[#A1A1AA]">Free 15 GB storage</span>
             </div>
 
-            <div className="h-4 w-[1px] bg-[#24242B] hidden sm:block" />
+            <span className="text-[#24242B] hidden sm:inline">•</span>
 
-            <div className="flex items-center gap-2">
-              <Lock className="w-4 h-4 text-[#7C6CFF]" />
-              <span>No credit card required</span>
+            <div className="flex items-center gap-1.5">
+              <Lock className="w-3.5 h-3.5 text-[#6E60EE]" />
+              <span className="text-[#A1A1AA]">No credit card required</span>
             </div>
 
-            <div className="h-4 w-[1px] bg-[#24242B] hidden sm:block" />
+            <span className="text-[#24242B] hidden sm:inline">•</span>
 
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-[#7C6CFF]" />
-              <span>End-to-end encrypted</span>
+            <div className="flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#6E60EE]" />
+              <span className="text-[#A1A1AA]">End-to-end encrypted</span>
             </div>
           </div>
         </div>
@@ -123,7 +123,7 @@ export function HeroSection() {
         {/* ========================================================================= */}
         {/* REAL CLOUDSPACEGO PRODUCT INTERFACE PREVIEW */}
         {/* ========================================================================= */}
-        <div className="relative mt-12 sm:mt-16 w-full z-20">
+        <div className="relative mt-8 sm:mt-10 lg:mt-12 w-full z-20">
           <div className="rounded-2xl border border-[#24242B] bg-[#101014] overflow-hidden">
           
           {/* Top App Header Bar */}

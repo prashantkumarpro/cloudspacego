@@ -140,7 +140,7 @@ export function SearchSection() {
   }
 
   return (
-    <section id="search" className="relative py-20 sm:py-24 lg:py-28 bg-[#0B0B0D] text-[#F5F5F7] overflow-hidden">
+    <section id="search" className="relative py-10 sm:py-14 lg:py-16 bg-[#0B0B0D] text-[#F5F5F7] overflow-hidden">
       <LandingContainer className="relative z-10">
         {/* Section Header */}
         <div className="max-w-2xl text-left">
@@ -155,7 +155,7 @@ export function SearchSection() {
         </div>
 
         {/* Search UI Box */}
-        <div className="mt-10 sm:mt-12 lg:mt-14 w-full rounded-2xl border border-[#24242B] bg-[#101014] overflow-hidden">
+        <div className="mt-8 sm:mt-10 lg:mt-12 w-full rounded-2xl border border-[#24242B] bg-[#101014] overflow-hidden">
           {/* Big Command Bar Header */}
           <div className="p-4 sm:p-6 border-b border-[#24242B] bg-[#0D0D10]">
             <div className="relative flex items-center">

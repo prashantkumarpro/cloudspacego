@@ -7,7 +7,7 @@ import { LandingContainer } from '@/components/landing/landing-container'
 
 export function CtaSection() {
   return (
-    <section className="relative py-24 sm:py-28 lg:py-32 bg-[#0B0B0D] text-[#F5F5F7] overflow-hidden">
+    <section className="relative py-16 sm:py-20 lg:py-24 bg-[#0B0B0D] text-[#F5F5F7] overflow-hidden">
       <LandingContainer className="relative z-10 flex flex-col items-center">
         <div className="mx-auto w-full max-w-3xl text-center">
           {/* Eyebrow Label */}

@@ -38,7 +38,7 @@ export function UploadSection() {
   }, [isPaused])
 
   return (
-    <section id="uploads" className="relative py-20 sm:py-24 lg:py-28 bg-[#0B0B0D] text-[#F5F5F7] overflow-hidden">
+    <section id="uploads" className="relative py-10 sm:py-14 lg:py-16 bg-[#0B0B0D] text-[#F5F5F7] overflow-hidden">
       <LandingContainer className="relative z-10">
         {/* Section Header */}
         <div className="max-w-2xl text-left">
@@ -52,7 +52,7 @@ export function UploadSection() {
         </div>
 
         {/* CloudSpaceGo Upload Manager UI */}
-        <div className="mt-10 sm:mt-12 lg:mt-14 w-full rounded-2xl border border-[#24242B] bg-[#101014] overflow-hidden">
+        <div className="mt-8 sm:mt-10 lg:mt-12 w-full rounded-2xl border border-[#24242B] bg-[#101014] overflow-hidden">
           {/* Manager Header Bar */}
           <div className="flex items-center justify-between border-b border-[#24242B] px-5 sm:px-6 py-4 bg-[#0D0D10]">
             <div className="flex items-center gap-2.5">

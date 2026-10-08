@@ -84,7 +84,7 @@ export function PreviewSection() {
   }
 
   return (
-    <section id="preview" className="relative py-20 sm:py-24 lg:py-28 bg-[#0B0B0D] text-[#F5F5F7] overflow-hidden">
+    <section id="preview" className="relative py-10 sm:py-14 lg:py-16 bg-[#0B0B0D] text-[#F5F5F7] overflow-hidden">
       <LandingContainer className="relative z-10">
         {/* Section Header */}
         <div className="max-w-2xl text-left">
@@ -99,7 +99,7 @@ export function PreviewSection() {
         </div>
 
         {/* CloudSpaceGo Preview Showcase UI */}
-        <div className="mt-10 sm:mt-12 lg:mt-14 w-full rounded-2xl border border-[#24242B] bg-[#101014] overflow-hidden">
+        <div className="mt-8 sm:mt-10 lg:mt-12 w-full rounded-2xl border border-[#24242B] bg-[#101014] overflow-hidden">
           {/* Preview Modal Header */}
           <div className="flex flex-wrap items-center justify-between border-b border-[#24242B] px-5 sm:px-6 py-3.5 bg-[#0D0D10] gap-3">
             <div className="flex items-center gap-3 min-w-0">
