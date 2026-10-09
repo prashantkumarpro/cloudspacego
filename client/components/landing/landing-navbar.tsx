@@ -111,21 +111,12 @@ export function LandingNavbar() {
           </Link>
         </div>
 
-        {/* Mobile Header Controls */}
-        <div className="flex items-center gap-2 sm:hidden">
-          {/* Get started button - shown when width permits (>=380px) to prevent collisions on narrow devices */}
-          <Link
-            href="/register"
-            className="hidden min-[380px]:inline-flex items-center gap-1 rounded-lg bg-[#6E60EE] px-2.5 py-1.5 text-xs font-semibold text-white shadow-xs transition-all duration-150 hover:bg-[#5E50DE] active:scale-95"
-          >
-            <span>Get started</span>
-          </Link>
-
-          {/* Accessible Hamburger Menu Button */}
+        {/* Mobile Header Controls (Hamburger Menu Only) */}
+        <div className="flex items-center sm:hidden">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             type="button"
-            className="inline-flex items-center justify-center w-9.5 h-9.5 rounded-lg text-[#A1A1AA] hover:bg-[#141419] hover:text-[#F5F5F7] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6E60EE] cursor-pointer transition-colors duration-150 active:scale-95"
+            className="inline-flex items-center justify-center w-10 h-10 rounded-lg text-[#A1A1AA] hover:bg-[#141419] hover:text-[#F5F5F7] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6E60EE] cursor-pointer transition-colors duration-150 active:scale-95"
             aria-expanded={mobileMenuOpen}
             aria-label="Toggle navigation menu"
           >
