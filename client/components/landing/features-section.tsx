@@ -10,7 +10,7 @@ const features = [
     description:
       'Keep documents, images, video, and design assets cleanly structured with nested folders and color-coded tags.',
     tag: 'Cloud Storage',
-    metric: '50 GB Free Tier'
+    metric: '1 GB Free Tier'
   },
   {
     icon: Search,

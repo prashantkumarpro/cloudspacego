@@ -175,7 +175,7 @@ export function HeroSection() {
           <div className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-y-2 gap-x-4 sm:gap-x-6 text-[11px] sm:text-xs animate-hero-fade-up animation-delay-480">
             <div className="flex items-center gap-1.5">
               <Database className="w-3.5 h-3.5 text-[#6E60EE]" />
-              <span className="text-[#A1A1AA]">Free 15 GB storage</span>
+              <span className="text-[#A1A1AA]">1 GB free storage</span>
             </div>
 
             <span className="text-[#24242B] hidden sm:inline">•</span>

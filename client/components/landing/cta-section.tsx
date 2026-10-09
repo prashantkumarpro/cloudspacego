@@ -27,7 +27,7 @@ export function CtaSection() {
           </h2>
 
           <p className="mx-auto mt-5 sm:mt-6 max-w-xl text-base sm:text-lg font-normal leading-relaxed text-[#A1A1AA]">
-            Get started with 15 GB of high-speed cloud storage. Fast setup, intuitive file management, and instant access across all your devices.
+            Get started with 1 GB of high-speed cloud storage. Fast setup, intuitive file management, and instant access across all your devices.
           </p>
 
           {/* Action CTAs */}

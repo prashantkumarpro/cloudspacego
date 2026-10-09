@@ -366,7 +366,7 @@ export function SearchSection() {
                   </div>
                   <div className="flex items-center justify-between text-[10px] text-[#71717A]">
                     <span>21.6 MB used</span>
-                    <span>15.0 GB free</span>
+                    <span>1.0 GB free</span>
                   </div>
                   <div className="text-[11px] text-[#6E60EE] font-medium flex items-center justify-between cursor-pointer">
                     <span>Upgrade Storage</span>

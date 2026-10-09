@@ -2,22 +2,25 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Check, ArrowRight } from 'lucide-react'
+import { Check, ArrowRight, Database } from 'lucide-react'
 import { LandingContainer } from '@/components/landing/landing-container'
 import { ScrollReveal } from '@/components/landing/scroll-reveal'
 
 interface PricingPlan {
   id: string
   name: string
-  tagline: string
+  price: string
+  period: string
+  annualPrice?: string
   storage: string
   storageLabel: string
+  tagline: string
   badge?: string
   isPopular?: boolean
   cta: {
     text: string
-    href: string
-    primary: boolean
+    href?: string
+    isLive: boolean
   }
   features: string[]
 }
@@ -26,58 +29,63 @@ const PLANS: PricingPlan[] = [
   {
     id: 'free',
     name: 'Free',
+    price: '$0',
+    period: 'forever',
+    annualPrice: 'No credit card required',
     tagline: 'A simple way to get started.',
-    storage: '200 MB',
-    storageLabel: 'of storage',
+    storage: '1 GB',
+    storageLabel: 'Free tier',
     cta: {
       text: 'Get started free',
       href: '/register',
-      primary: true
+      isLive: true
     },
     features: [
-      'Store and organize your files',
-      'File previews',
-      'Basic search',
-      'Secure and private'
+      '1 GB cloud storage',
+      'Basic file and folder management',
+      'File previews and basic search',
+      'Secure, private file access'
     ]
   },
   {
     id: 'pro',
     name: 'Pro',
+    price: '$2.99',
+    period: '/ month',
+    annualPrice: 'or $29.99 / year billed annually',
     tagline: 'More space for your personal files.',
     storage: '10 GB',
-    storageLabel: 'of storage',
-    badge: 'MOST POPULAR',
+    storageLabel: 'Pro tier',
+    badge: 'RECOMMENDED',
     isPopular: true,
     cta: {
-      text: 'Choose Pro',
-      href: '/register',
-      primary: true
+      text: 'Coming soon',
+      isLive: false
     },
     features: [
-      'Everything in Free',
-      '10 GB of storage',
-      'Advanced search',
-      'File sharing',
-      'Priority support'
+      'Everything included in Free',
+      '10 GB high-speed cloud storage',
+      'Advanced search and fast previews',
+      'Priority upload speed'
     ]
   },
   {
     id: 'business',
     name: 'Business',
-    tagline: 'For teams and growing businesses.',
+    price: '$19.99',
+    period: '/ month',
+    annualPrice: 'or $199.99 / year billed annually',
+    tagline: 'For teams and growing projects.',
     storage: '1 TB',
-    storageLabel: 'of storage',
+    storageLabel: 'Business tier',
     cta: {
-      text: 'Choose Business',
-      href: '/register',
-      primary: false
+      text: 'Coming soon',
+      isLive: false
     },
     features: [
-      'Everything in Pro',
-      '1 TB of storage',
-      'Team collaboration',
-      'Advanced sharing controls',
+      '1 TB business-focused storage',
+      'Team sharing and folder permissions',
+      'Access controls and protected links',
       'Priority support'
     ]
   }
@@ -125,7 +133,7 @@ export function StorageSection() {
                     : 'border border-[#24242B] bg-[#101014] hover:border-[#383842]'
                 }`}
               >
-                {/* Top Block: Reserved badge area, Title, Tagline, Metric, and CTA */}
+                {/* Top Block: Reserved badge area, Title, Tagline, Price, Storage, and CTA */}
                 <div>
                   {/* 1. Reserved Badge Row */}
                   <div className="h-6 mb-3 flex items-center">
@@ -149,31 +157,57 @@ export function StorageSection() {
                     {plan.tagline}
                   </p>
 
-                  {/* 4. Storage Amount & Label */}
-                  <div className="mt-6 sm:mt-8">
-                    <div className="text-3xl sm:text-4xl font-extrabold text-[#F5F5F7] tracking-tight">
-                      {plan.storage}
+                  {/* 4. Price & Billing Note */}
+                  <div className="mt-5">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-3xl sm:text-4xl font-black text-[#F5F5F7] tracking-tight">
+                        {plan.price}
+                      </span>
+                      <span className="text-xs text-[#71717A] font-medium">
+                        {plan.period}
+                      </span>
                     </div>
-                    <div className="text-xs text-[#71717A] mt-1 font-medium">
-                      {plan.storageLabel}
-                    </div>
+                    <p className="text-[11px] text-[#71717A] mt-1 h-4 truncate">
+                      {plan.annualPrice}
+                    </p>
                   </div>
 
-                  {/* 5. CTA Button */}
-                  <Link
-                    href={plan.cta.href}
-                    className={`w-full h-11 px-4 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 mt-6 transition-all duration-150 hover:scale-[1.01] active:scale-[0.98] ${
-                      plan.cta.primary
-                        ? 'bg-[#6E60EE] hover:bg-[#5E50DE] text-white shadow-xs'
-                        : 'bg-[#101014] border border-[#24242B] hover:border-[#383842] hover:bg-[#141419] text-[#F5F5F7]'
-                    }`}
-                  >
-                    <span>{plan.cta.text}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
+                  {/* 5. Storage Highlight Callout */}
+                  <div className="mt-4 p-3 rounded-xl bg-[#0D0D10] border border-[#24242B]/60 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Database className="w-4 h-4 text-[#6E60EE]" />
+                      <span className="text-xs font-semibold text-[#F5F5F7]">
+                        {plan.storage} Storage
+                      </span>
+                    </div>
+                    <span className="text-[10.5px] text-[#71717A] font-medium">
+                      {plan.storageLabel}
+                    </span>
+                  </div>
+
+                  {/* 6. CTA Button */}
+                  {plan.cta.isLive && plan.cta.href ? (
+                    <Link
+                      href={plan.cta.href}
+                      className="w-full h-11 px-4 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 mt-5 transition-all duration-150 bg-[#101014] border border-[#24242B] hover:border-[#383842] hover:bg-[#141419] text-[#F5F5F7] active:scale-[0.98]"
+                    >
+                      <span>{plan.cta.text}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  ) : (
+                    <div
+                      className={`w-full h-11 px-4 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 mt-5 select-none ${
+                        plan.isPopular
+                          ? 'bg-[#6E60EE]/90 text-white/90 shadow-xs'
+                          : 'bg-[#141419] border border-[#24242B]/60 text-[#71717A]'
+                      }`}
+                    >
+                      <span>{plan.cta.text}</span>
+                    </div>
+                  )}
                 </div>
 
-                {/* 6. Divider & 7. Feature List */}
+                {/* 7. Divider & 8. Feature List */}
                 <div className="mt-6 pt-6 border-t border-[#24242B]/70">
                   <div className="space-y-3.5 text-xs sm:text-sm text-[#A1A1AA]">
                     {plan.features.map((feature, idx) => (
