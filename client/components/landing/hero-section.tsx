@@ -136,7 +136,7 @@ export function HeroSection() {
               </div>
 
               {/* Line 2: in one simple */}
-              <div className="font-serif italic font-normal text-[#F5F5F7] text-5xl sm:text-7xl md:text-[80px] lg:text-[86px] leading-[0.88] -my-1 sm:-my-2 font-[var(--font-instrument-serif)] animate-hero-fade-up animation-delay-160">
+              <div className="font-serif italic font-normal text-[#F5F5F7] text-5xl sm:text-7xl md:text-[80px] lg:text-[86px] leading-[0.88] -my-1 sm:-my-2 animate-hero-fade-up animation-delay-160">
                 in one simple
               </div>
 

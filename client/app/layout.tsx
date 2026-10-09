@@ -1,24 +1,21 @@
 import type { Metadata } from 'next'
-import { Inter, Instrument_Serif, Caveat } from 'next/font/google'
+import { Plus_Jakarta_Sans, Instrument_Serif } from 'next/font/google'
 import { AppProvider } from '../providers/app-provider'
 import './globals.css'
 import { AuthProvider } from '@/providers/auth-provider'
 
-const inter = Inter({
-  variable: '--font-inter',
-  subsets: ['latin']
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-plus-jakarta-sans',
+  display: 'swap',
 })
 
 const instrumentSerif = Instrument_Serif({
   weight: '400',
   style: ['italic', 'normal'],
   variable: '--font-instrument-serif',
-  subsets: ['latin']
-})
-
-const caveat = Caveat({
-  variable: '--font-caveat',
-  subsets: ['latin']
+  subsets: ['latin'],
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
@@ -32,7 +29,7 @@ export default function RootLayout ({
   children: React.ReactNode
 }) {
   return (
-    <html lang='en' className={`${inter.variable} ${instrumentSerif.variable} ${caveat.variable} dark h-full antialiased`} suppressHydrationWarning>
+    <html lang='en' className={`${plusJakartaSans.variable} ${instrumentSerif.variable} dark h-full antialiased`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
