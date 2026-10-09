@@ -215,7 +215,7 @@ export function UploadSection() {
                 </div>
 
                 {/* Theme Pill */}
-                <div className="pt-2 flex items-center justify-between p-1 bg-[#141419] border border-[#24242B] rounded-lg text-[10px]">
+                <div className="pt-2 flex items-center justify-between p-1 bg-[#141419] rounded-lg text-[10px]">
                   <div className="flex items-center gap-1 text-[#71717A] px-2 py-0.5">
                     <Sun className="w-3 h-3 text-amber-400" />
                     <span>Light</span>
@@ -234,9 +234,9 @@ export function UploadSection() {
             <div className="flex-1 flex flex-col min-w-0 bg-[#0B0B0D] overflow-hidden">
               
               {/* Top Navigation Bar */}
-              <div className="h-14 border-b border-[#24242B] px-4 sm:px-6 flex items-center justify-between shrink-0">
+              <div className="h-14 border-b border-[#24242B]/80 px-4 sm:px-6 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-[#141419] border border-[#24242B] flex items-center justify-center text-[#71717A]">
+                  <div className="w-8 h-8 rounded-lg bg-[#141419] flex items-center justify-center text-[#71717A]">
                     <Search className="w-4 h-4" />
                   </div>
                   <div className="w-8 h-8 rounded-lg bg-[#6E60EE] flex items-center justify-center text-white shadow-xs">
@@ -254,7 +254,7 @@ export function UploadSection() {
                   <div className="p-1.5 text-[#71717A]">
                     <Settings className="w-4 h-4" />
                   </div>
-                  <div className="w-7 h-7 rounded-full bg-[#24242B] border border-[#383842] flex items-center justify-center text-xs font-bold text-[#F5F5F7]">
+                  <div className="w-7 h-7 rounded-full bg-[#24242B] flex items-center justify-center text-xs font-bold text-[#F5F5F7]">
                     P
                   </div>
                 </div>
@@ -328,7 +328,7 @@ export function UploadSection() {
                     {RECENT_FILES.map((f, i) => (
                       <div key={i} className="grid grid-cols-12 items-center py-2 px-1 text-[#A1A1AA] hover:bg-[#141419] rounded-lg transition-colors">
                         <div className="col-span-7 flex items-center gap-2 text-[#F5F5F7] font-medium truncate">
-                          <div className="w-5 h-5 rounded bg-[#18181E] border border-[#24242B] flex items-center justify-center shrink-0">
+                          <div className="w-5 h-5 rounded bg-[#18181E] flex items-center justify-center shrink-0">
                             <ImageIcon className="w-3 h-3 text-[#71717A]" />
                           </div>
                           <span className="truncate">{f.name}</span>
@@ -390,7 +390,7 @@ export function UploadSection() {
                       className="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#15151C] transition-colors gap-3"
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                        <div className="w-7 h-7 rounded-lg bg-[#141419] border border-[#24242B] flex items-center justify-center shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-[#141419] flex items-center justify-center shrink-0">
                           {renderFileIcon(item.type)}
                         </div>
                         <div className="min-w-0 flex-1">

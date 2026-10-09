@@ -12,16 +12,20 @@ export function LandingNavbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 8)
+      const scrolled = window.scrollY > 10
+      setIsScrolled((prev) => (prev !== scrolled ? scrolled : prev))
     }
+    handleScroll()
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-colors duration-200 border-b border-[#24242B] ${
-        isScrolled ? 'bg-[#0B0B0D]/95 backdrop-blur-md' : 'bg-[#0B0B0D]'
+      className={`sticky top-0 z-50 w-full border-b border-[#24242B] transition-colors duration-200 motion-reduce:transition-none ${
+        isScrolled
+          ? 'bg-[#0B0B0D]/88 backdrop-blur-md'
+          : 'bg-[#0B0B0D]'
       }`}
     >
       <LandingContainer className="flex h-16 items-center justify-between">

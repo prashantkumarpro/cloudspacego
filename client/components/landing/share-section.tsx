@@ -93,7 +93,7 @@ export function ShareSection() {
             <div className="p-5 sm:p-6 border-b border-[#24242B] bg-[#0D0D10]">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#141419] border border-[#24242B] flex items-center justify-center text-[#6E60EE] shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-[#141419] flex items-center justify-center text-[#6E60EE] shrink-0">
                     <Folder className="w-5 h-5" />
                   </div>
                   <div>
@@ -213,7 +213,7 @@ export function ShareSection() {
                         transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
                         transitionDelay: `${idx * 35}ms, ${idx * 35}ms, 0ms`
                       }}
-                      className="flex items-center justify-between p-2.5 rounded-xl border border-[#24242B] bg-[#141419] hover:bg-[#181822] hover:border-[#32323D] transition-colors"
+                      className="flex items-center justify-between p-2.5 rounded-xl border border-[#24242B]/80 bg-[#141419] hover:bg-[#181822] hover:border-[#32323D] transition-colors"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div
@@ -242,7 +242,7 @@ export function ShareSection() {
                             value={c.role}
                             onChange={(e) => handleRoleChange(c.id, e.target.value as Collaborator['role'])}
                             aria-label={`Permission role for ${c.name}`}
-                            className="text-[11px] font-medium text-[#6E60EE] bg-[#1D1935] border border-[#24242B] rounded-lg px-2 py-0.5 focus:outline-none focus:border-[#6E60EE] cursor-pointer transition-colors duration-150"
+                            className="text-[11px] font-medium text-[#6E60EE] bg-[#1D1935] rounded-lg px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-[#6E60EE] cursor-pointer transition-colors duration-150"
                           >
                             <option value="Editor">Editor</option>
                             <option value="Viewer">Viewer</option>

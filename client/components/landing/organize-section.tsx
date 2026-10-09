@@ -236,10 +236,10 @@ export function OrganizeSection() {
                             transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
                             transitionDelay: `${idx * 40}ms, ${idx * 40}ms, 0ms`
                           }}
-                          className="flex items-center justify-between p-2.5 rounded-xl border border-[#24242B] bg-[#141419] hover:bg-[#181822] hover:border-[#32323D] transition-colors"
+                          className="flex items-center justify-between p-2.5 rounded-xl border border-[#24242B]/80 bg-[#141419] hover:bg-[#181822] hover:border-[#32323D] transition-colors"
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
-                            <div className="w-7 h-7 rounded-lg bg-[#101014] border border-[#24242B] flex items-center justify-center shrink-0">
+                            <div className="w-7 h-7 rounded-lg bg-[#101014] flex items-center justify-center shrink-0">
                               {renderFileIcon(file.type)}
                             </div>
                             <div className="min-w-0">

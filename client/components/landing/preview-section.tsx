@@ -219,7 +219,7 @@ export function PreviewSection() {
                 {BACKGROUND_FILES.map((f, i) => (
                   <div key={i} className="flex items-center justify-between py-2 text-[#71717A]">
                     <div className="flex items-center gap-2 text-[#F5F5F7] truncate">
-                      <div className="w-5 h-5 rounded bg-[#18181E] border border-[#24242B] flex items-center justify-center shrink-0">
+                      <div className="w-5 h-5 rounded bg-[#18181E] flex items-center justify-center shrink-0">
                         <ImageIcon className="w-3 h-3 text-[#71717A]" />
                       </div>
                       <span className="truncate">{f.name}</span>
@@ -262,11 +262,11 @@ export function PreviewSection() {
                     {currentSlide.name}
                   </h3>
 
-                  <span className="text-[11px] font-medium text-[#71717A] bg-[#141419] border border-[#24242B] px-2 py-0.5 rounded-full shrink-0">
+                  <span className="text-[11px] font-medium text-[#71717A] bg-[#141419] px-2 py-0.5 rounded-full shrink-0">
                     {currentSlide.index} of {currentSlide.total}
                   </span>
 
-                  <span className="text-[11px] font-medium text-[#71717A] bg-[#141419] border border-[#24242B] px-2 py-0.5 rounded-full shrink-0 hidden sm:inline-block">
+                  <span className="text-[11px] font-medium text-[#71717A] bg-[#141419] px-2 py-0.5 rounded-full shrink-0 hidden sm:inline-block">
                     {currentSlide.size}
                   </span>
                 </div>

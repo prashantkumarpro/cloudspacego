@@ -250,8 +250,8 @@ export function SearchSection() {
     switch (item.previewType) {
       case 'white-card':
         return (
-          <div className="w-8 h-8 rounded-lg bg-white border border-[#3A3A48] flex items-center justify-center shrink-0 overflow-hidden p-1 shadow-xs">
-            <div className="w-full h-full rounded-[2px] bg-[#F4F4F5] border border-blue-200/60 flex flex-col justify-between p-0.5">
+          <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shrink-0 overflow-hidden p-1 shadow-xs">
+            <div className="w-full h-full rounded-[2px] bg-[#F4F4F5] flex flex-col justify-between p-0.5">
               <div className="flex gap-0.5">
                 <div className="w-1.5 h-1 rounded-[1px] bg-blue-500" />
                 <div className="w-2 h-1 rounded-[1px] bg-slate-300" />
@@ -262,14 +262,14 @@ export function SearchSection() {
         )
       case 'pdf':
         return (
-          <div className="w-8 h-8 rounded-lg bg-[#201318] border border-red-500/30 flex items-center justify-center shrink-0 text-red-400">
+          <div className="w-8 h-8 rounded-lg bg-[#201318] flex items-center justify-center shrink-0 text-red-400">
             <FileText className="w-4 h-4" />
           </div>
         )
       case 'yellow-dark':
         return (
-          <div className="w-8 h-8 rounded-lg bg-[#141419] border border-[#282834] flex items-center justify-center shrink-0 overflow-hidden relative">
-            <div className="w-5 h-4 rounded-[2px] bg-[#1C1814] border border-amber-500/40 flex items-center justify-center gap-0.5 px-0.5">
+          <div className="w-8 h-8 rounded-lg bg-[#181820] flex items-center justify-center shrink-0 overflow-hidden relative">
+            <div className="w-5 h-4 rounded-[2px] bg-[#1C1814] flex items-center justify-center gap-0.5 px-0.5">
               <span className="w-1 h-1 rounded-full bg-amber-400" />
               <span className="w-1.5 h-0.5 bg-amber-400/70 rounded-full" />
             </div>
@@ -278,8 +278,8 @@ export function SearchSection() {
       case 'dark-img':
       default:
         return (
-          <div className="w-8 h-8 rounded-lg bg-[#141419] border border-[#282834] flex items-center justify-center shrink-0 overflow-hidden relative">
-            <div className="w-5 h-4 rounded-[2px] bg-[#1E1E28] border border-[#3A3A4A] flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-[#181820] flex items-center justify-center shrink-0 overflow-hidden relative">
+            <div className="w-5 h-4 rounded-[2px] bg-[#1E1E28] flex items-center justify-center">
               <ImageIcon className="w-2.5 h-2.5 text-[#71717A]" />
             </div>
           </div>
@@ -426,7 +426,7 @@ export function SearchSection() {
                     {BACKGROUND_FILES.map((f, i) => (
                       <div key={i} className="grid grid-cols-12 items-center py-2.5 px-2 text-[#A1A1AA]">
                         <div className="col-span-5 flex items-center gap-2 text-[#F5F5F7] font-medium truncate">
-                          <div className="w-6 h-6 rounded bg-[#18181E] border border-[#24242B] flex items-center justify-center shrink-0">
+                          <div className="w-6 h-6 rounded bg-[#18181E] flex items-center justify-center shrink-0">
                             <ImageIcon className="w-3 h-3 text-[#71717A]" />
                           </div>
                           <span className="truncate">{f.name}</span>

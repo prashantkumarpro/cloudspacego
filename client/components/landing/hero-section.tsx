@@ -86,13 +86,13 @@ export function HeroSection() {
     switch (type) {
       case 'video':
         return (
-          <div className="w-6 h-6 rounded bg-[#18181E] border border-[#24242B] flex items-center justify-center shrink-0">
+          <div className="w-6 h-6 rounded bg-[#18181E] flex items-center justify-center shrink-0">
             <Video className="w-3.5 h-3.5 text-purple-400" />
           </div>
         )
       case 'img':
         return (
-          <div className="w-6 h-6 rounded bg-[#18181E] border border-[#24242B] flex items-center justify-center shrink-0 overflow-hidden">
+          <div className="w-6 h-6 rounded bg-[#18181E] flex items-center justify-center shrink-0 overflow-hidden">
             <div className="w-full h-full bg-gradient-to-tr from-slate-900 via-indigo-950 to-slate-800 flex items-center justify-center">
               <ImageIcon className="w-3.5 h-3.5 text-sky-400" />
             </div>
@@ -100,13 +100,13 @@ export function HeroSection() {
         )
       case 'pdf':
         return (
-          <div className="w-6 h-6 rounded bg-[#201318] border border-red-500/20 flex items-center justify-center shrink-0">
+          <div className="w-6 h-6 rounded bg-[#201318] flex items-center justify-center shrink-0">
             <FileText className="w-3.5 h-3.5 text-red-400" />
           </div>
         )
       case 'sheet':
         return (
-          <div className="w-6 h-6 rounded bg-[#101D18] border border-emerald-500/20 flex items-center justify-center shrink-0">
+          <div className="w-6 h-6 rounded bg-[#101D18] flex items-center justify-center shrink-0">
             <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
           </div>
         )
@@ -201,14 +201,14 @@ export function HeroSection() {
           <div className="rounded-2xl border border-[#24242B] bg-[#0B0B0D] overflow-hidden shadow-2xl select-none">
             
             {/* Top Application Bar */}
-            <div className="h-14 border-b border-[#24242B] px-4 sm:px-6 bg-[#0D0D10] flex items-center justify-between">
+            <div className="h-14 border-b border-[#24242B]/80 px-4 sm:px-6 bg-[#0D0D10] flex items-center justify-between">
               {/* Left Action Buttons */}
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-[#141419] border border-[#24242B] flex items-center justify-center text-[#71717A]">
+                <div className="w-8 h-8 rounded-lg bg-[#141419] flex items-center justify-center text-[#71717A]">
                   <PanelLeft className="w-4 h-4" />
                 </div>
 
-                <div className="w-8 h-8 rounded-lg bg-[#141419] border border-[#24242B] flex items-center justify-center text-[#71717A]">
+                <div className="w-8 h-8 rounded-lg bg-[#141419] flex items-center justify-center text-[#71717A]">
                   <Search className="w-4 h-4" />
                 </div>
 
@@ -230,7 +230,7 @@ export function HeroSection() {
                   <Settings className="w-4 h-4" />
                 </div>
 
-                <div className="w-7 h-7 rounded-full bg-[#24242B] border border-[#383842] flex items-center justify-center text-xs font-bold text-[#F5F5F7]">
+                <div className="w-7 h-7 rounded-full bg-[#24242B] flex items-center justify-center text-xs font-bold text-[#F5F5F7]">
                   P
                 </div>
               </div>
@@ -310,7 +310,7 @@ export function HeroSection() {
                   </div>
 
                   {/* Theme Switcher Pill */}
-                  <div className="pt-2 flex items-center justify-between p-1 bg-[#141419] border border-[#24242B] rounded-lg text-[10px]">
+                  <div className="pt-2 flex items-center justify-between p-1 bg-[#141419] rounded-lg text-[10px]">
                     <div className="flex items-center gap-1 text-[#71717A] px-2 py-0.5">
                       <Sun className="w-3 h-3 text-amber-400" />
                       <span>Light</span>
@@ -406,9 +406,9 @@ export function HeroSection() {
 
                     {/* Recently Opened Table / List */}
                     {viewMode === 'list' ? (
-                      <div className="rounded-xl border border-[#24242B] bg-[#101014] overflow-hidden text-xs">
+                      <div className="rounded-xl border border-[#24242B]/80 bg-[#101014] overflow-hidden text-xs">
                         {/* Table Header */}
-                        <div className="grid grid-cols-12 text-[11px] font-semibold text-[#71717A] py-2 px-3 border-b border-[#24242B] bg-[#0D0D10]">
+                        <div className="grid grid-cols-12 text-[11px] font-semibold text-[#71717A] py-2 px-3 border-b border-[#24242B]/80 bg-[#0D0D10]">
                           <div className="col-span-5 flex items-center gap-1">
                             <span>Name</span>
                             <ArrowUp className="w-3 h-3 text-[#6E60EE]" />
@@ -420,7 +420,7 @@ export function HeroSection() {
                         </div>
 
                         {/* Table Rows matching screenshot */}
-                        <div className="divide-y divide-[#24242B]/40">
+                        <div className="divide-y divide-[#24242B]/30">
                           {RECENTLY_OPENED_FILES.map((f) => (
                             <div
                               key={f.id}

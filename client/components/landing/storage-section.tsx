@@ -174,7 +174,7 @@ export function StorageSection() {
                 </div>
 
                 {/* 6. Divider & 7. Feature List */}
-                <div className="mt-6 pt-6 border-t border-[#24242B]">
+                <div className="mt-6 pt-6 border-t border-[#24242B]/70">
                   <div className="space-y-3.5 text-xs sm:text-sm text-[#A1A1AA]">
                     {plan.features.map((feature, idx) => (
                       <div key={idx} className="flex items-center gap-2.5">
