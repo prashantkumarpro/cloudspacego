@@ -35,7 +35,7 @@ export function UploadManager() {
   return (
     <div
       className={cn(
-        'fixed bottom-5 right-5 z-50 w-[calc(100vw-32px)] xs:w-[360px] sm:w-[380px] bg-card-bg border border-card-border rounded-xl shadow-lg overflow-hidden flex flex-col transition-all duration-200 select-none animate-in fade-in slide-in-from-bottom-2',
+        'fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:bottom-5 right-4 sm:right-5 z-50 w-[calc(100vw-32px)] xs:w-[360px] sm:w-[380px] bg-card-bg border border-card-border rounded-xl shadow-lg overflow-hidden flex flex-col transition-all duration-200 select-none animate-in fade-in slide-in-from-bottom-2',
         isMinimized ? 'h-auto' : 'max-h-[380px]'
       )}
       role="region"

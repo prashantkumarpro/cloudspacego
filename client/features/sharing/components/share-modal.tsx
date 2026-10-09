@@ -110,7 +110,7 @@ export function ShareModal() {
 
         {/* Invite Form */}
         <form onSubmit={handleShare} className="flex flex-col gap-2.5">
-          <div className="flex items-end gap-2">
+          <div className="flex flex-col min-[380px]:flex-row items-stretch min-[380px]:items-end gap-2">
             <div className="flex-1 min-w-0">
               <Input
                 label="Add people or groups"
@@ -126,23 +126,25 @@ export function ShareModal() {
                 autoFocus
               />
             </div>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value as 'Viewer' | 'Editor')}
-              className="h-9.5 bg-input-bg border border-card-border text-foreground text-xs font-medium rounded-lg px-2.5 focus:outline-none focus:border-[#6E60EE]/60 focus:ring-2 focus:ring-[#6E60EE]/20 transition-all cursor-pointer"
-            >
-              <option value="Viewer">Viewer</option>
-              <option value="Editor">Editor</option>
-            </select>
-            <Button
-              type="submit"
-              variant="primary"
-              size="sm"
-              disabled={!email.trim()}
-              className="h-9.5 px-3.5 text-xs font-semibold bg-[#6E60EE] hover:bg-[#6052E6] text-white shadow-xs disabled:opacity-50"
-            >
-              Invite
-            </Button>
+            <div className="flex items-center gap-2 shrink-0">
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value as 'Viewer' | 'Editor')}
+                className="h-9.5 flex-1 min-[380px]:flex-initial bg-input-bg border border-card-border text-foreground text-xs font-medium rounded-lg px-2.5 focus:outline-none focus:border-[#6E60EE]/60 focus:ring-2 focus:ring-[#6E60EE]/20 transition-all cursor-pointer"
+              >
+                <option value="Viewer">Viewer</option>
+                <option value="Editor">Editor</option>
+              </select>
+              <Button
+                type="submit"
+                variant="primary"
+                size="sm"
+                disabled={!email.trim()}
+                className="h-9.5 px-3.5 text-xs font-semibold bg-[#6E60EE] hover:bg-[#6052E6] text-white shadow-xs disabled:opacity-50"
+              >
+                Invite
+              </Button>
+            </div>
           </div>
         </form>
 

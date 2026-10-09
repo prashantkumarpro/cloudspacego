@@ -60,7 +60,7 @@ export function StorageUpgradeModal({ isOpen, onClose }: StorageUpgradeModalProp
         </div>
 
         {/* Plan Cards */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
           {/* Pro Tier */}
           <div
             onClick={() => setSelectedTier('pro')}
@@ -126,7 +126,7 @@ export function StorageUpgradeModal({ isOpen, onClose }: StorageUpgradeModalProp
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-card-border/60">
+        <div className="flex flex-col-reverse xs:flex-row items-stretch xs:items-center justify-end gap-2 xs:gap-2.5 pt-2 border-t border-card-border/60">
           <Button
             type="button"
             variant="ghost"

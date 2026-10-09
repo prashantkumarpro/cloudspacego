@@ -441,7 +441,7 @@ export function FileList({
       {/* Empty State vs Loading vs Content */}
       {isLoading && displayList.length === 0 ? (
         activeViewMode === 'grid' ? (
-          <div className='grid grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-3 sm:gap-4'>
+          <div className='grid grid-cols-1 min-[380px]:grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-3 sm:gap-4'>
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
@@ -515,7 +515,7 @@ export function FileList({
           {/* Bottom Pagination Skeletons matching active view */}
           {isLoadingMore && (
             activeViewMode === 'grid' ? (
-              <div className='grid grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-3 sm:gap-4 mt-1'>
+              <div className='grid grid-cols-1 min-[380px]:grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-3 sm:gap-4 mt-1'>
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div
                     key={`pagination-grid-skeleton-${i}`}

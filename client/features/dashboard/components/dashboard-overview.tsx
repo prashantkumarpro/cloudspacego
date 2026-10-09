@@ -272,7 +272,7 @@ export default function DashboardOverview() {
 
         {/* Folders Presentation: Loading / Error / Content */}
         {isDirectoryLoading ? (
-          <div className='grid grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-3 sm:gap-4'>
+          <div className='grid grid-cols-1 min-[440px]:grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-3 sm:gap-4'>
             {[1, 2, 3, 4].map(idx => (
               <div
                 key={idx}
@@ -317,7 +317,7 @@ export default function DashboardOverview() {
             </Button>
           </div>
         ) : (
-          <div className='grid grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-3 sm:gap-4'>
+          <div className='grid grid-cols-1 min-[440px]:grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-3 sm:gap-4'>
             {displayedFolders.map(folder => {
               const dropdownItems = getFolderDropdownItems(folder)
 

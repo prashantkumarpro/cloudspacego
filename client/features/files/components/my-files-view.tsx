@@ -96,27 +96,27 @@ export default function MyFilesView () {
     : (isFilesLoading && filesToDisplay.length === 0)
 
   return (
-    <div className='flex flex-col gap-6'>
+    <div className='flex flex-col gap-6 w-full min-w-0'>
       {/* Current Location Header Breadcrumb */}
-      <div className='flex items-center justify-between border-b border-card-border pb-3 shrink-0 select-none'>
-        <h1 className='text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2 flex-wrap'>
+      <div className='flex items-center justify-between border-b border-card-border pb-3 shrink-0 select-none min-w-0'>
+        <h1 className='text-lg sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0'>
           {breadcrumbs.map((crumb, idx) => {
             const isLast = idx === breadcrumbs.length - 1
             return (
               <React.Fragment key={crumb.id ?? 'root'}>
                 {idx > 0 && (
-                  <span className='text-text-muted text-lg sm:text-xl font-normal select-none px-0.5'>
+                  <span className='text-text-muted text-base sm:text-xl font-normal select-none px-0.5'>
                     ›
                   </span>
                 )}
                 {isLast ? (
-                  <span className='text-foreground truncate max-w-[300px]'>
+                  <span className='text-foreground truncate max-w-[130px] min-[360px]:max-w-[170px] xs:max-w-[220px] sm:max-w-[340px]'>
                     {crumb.name}
                   </span>
                 ) : (
                   <button
                     onClick={() => setActiveFolderId(crumb.id)}
-                    className='text-text-secondary hover:text-foreground cursor-pointer transition-colors focus:outline-none truncate max-w-[300px]'
+                    className='text-text-secondary hover:text-foreground cursor-pointer transition-colors focus:outline-none truncate max-w-[110px] min-[360px]:max-w-[140px] xs:max-w-[200px] sm:max-w-[300px]'
                     title={crumb.name}
                   >
                     {crumb.name}

@@ -122,7 +122,7 @@ export function FolderGrid ({
         <h4 className='text-[10px] font-bold uppercase tracking-[1px] text-text-muted'>
           Folders
         </h4>
-        <div className='grid grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-3 sm:gap-4'>
+        <div className='grid grid-cols-1 min-[440px]:grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-3 sm:gap-4'>
           {[1, 2, 3, 4].map(idx => (
             <div
               key={idx}
@@ -147,7 +147,7 @@ export function FolderGrid ({
       <h4 className='text-[10px] font-bold uppercase tracking-[1px] text-text-muted'>
         Folders
       </h4>
-      <div className='grid grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-3 sm:gap-4'>
+      <div className='grid grid-cols-1 min-[440px]:grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-3 sm:gap-4'>
         {folders.map(folder => {
           const count = folderCounts[folder.id] ?? 0
           const itemsCountText = `${count} ${count === 1 ? 'file' : 'files'}`
