@@ -20,6 +20,8 @@ import {
   Minus,
   X,
   ChevronRight,
+  MoreVertical,
+  Video,
   Sun,
   Moon,
   ArrowUp
@@ -80,11 +82,39 @@ const INITIAL_UPLOADS: UploadFileItem[] = [
   }
 ]
 
-const RECENT_FILES = [
-  { name: 'b2.png', owner: 'Me', date: 'Oct 6, 2026' },
-  { name: 'bnbg1.png', owner: 'Me', date: 'Oct 6, 2026' },
-  { name: 'b3.png', owner: 'Me', date: 'Oct 6, 2026' },
-  { name: 'b4.png', owner: 'Me', date: 'Oct 6, 2026' }
+const RECENTLY_OPENED_FILES = [
+  {
+    id: '1',
+    name: 'vs3.mp4',
+    type: 'video',
+    owner: 'Me',
+    date: 'Today, 2:01 PM',
+    size: '10.6 MB'
+  },
+  {
+    id: '2',
+    name: 'poster1.5.jpeg',
+    type: 'img',
+    owner: 'Me',
+    date: 'Today, 2:01 PM',
+    size: '2.1 MB'
+  },
+  {
+    id: '3',
+    name: 'Prashant_Resume.pdf',
+    type: 'pdf',
+    owner: 'Me',
+    date: 'Today, 2:01 PM',
+    size: '31.3 KB'
+  },
+  {
+    id: '4',
+    name: 'Professional_Job_Application_Tracker.xlsx',
+    type: 'sheet',
+    owner: 'Me',
+    date: 'Today, 2:01 PM',
+    size: '11.9 KB'
+  }
 ]
 
 export function UploadSection() {
@@ -119,6 +149,41 @@ export function UploadSection() {
 
     return () => clearInterval(interval)
   }, [])
+
+  const renderRecentFileIcon = (type: string) => {
+    switch (type) {
+      case 'video':
+        return (
+          <div className="w-6 h-6 rounded bg-[#2A1835] border border-purple-500/20 flex items-center justify-center shrink-0 text-purple-400">
+            <Video className="w-3.5 h-3.5" />
+          </div>
+        )
+      case 'img':
+        return (
+          <div className="w-6 h-6 rounded bg-[#122338] border border-cyan-500/20 flex items-center justify-center shrink-0 text-cyan-400">
+            <ImageIcon className="w-3.5 h-3.5" />
+          </div>
+        )
+      case 'pdf':
+        return (
+          <div className="w-6 h-6 rounded bg-[#301618] border border-rose-500/20 flex items-center justify-center shrink-0 text-rose-400">
+            <FileText className="w-3.5 h-3.5" />
+          </div>
+        )
+      case 'sheet':
+        return (
+          <div className="w-6 h-6 rounded bg-[#122A1E] border border-emerald-500/20 flex items-center justify-center shrink-0 text-emerald-400">
+            <FileSpreadsheet className="w-3.5 h-3.5" />
+          </div>
+        )
+      default:
+        return (
+          <div className="w-6 h-6 rounded bg-[#18181E] flex items-center justify-center shrink-0 text-[#71717A]">
+            <FileText className="w-3.5 h-3.5" />
+          </div>
+        )
+    }
+  }
 
   const renderFileIcon = (type: UploadFileItem['type']) => {
     switch (type) {
@@ -297,82 +362,105 @@ export function UploadSection() {
               </div>
 
               {/* Dashboard Scrollable Area */}
-              <div className="p-4 sm:p-6 space-y-6 overflow-hidden">
+              <div className="p-6 sm:p-8 space-y-6 overflow-hidden">
                 
                 {/* Greeting */}
                 <div>
-                  <h3 className="text-lg sm:text-xl font-bold text-[#F5F5F7] tracking-tight">
+                  <h2 className="text-2xl sm:text-[26px] font-extrabold text-[#F5F5F7] tracking-tight font-sans">
                     Good afternoon, Prashant
-                  </h3>
-                  <p className="text-xs text-[#71717A] mt-0.5">
+                  </h2>
+                  <p className="text-xs sm:text-sm text-[#71717A] mt-1 font-normal">
                     Everything you need, right where you left it.
                   </p>
                 </div>
 
-                {/* Continue Card */}
-                <div className="flex items-center justify-between p-3 rounded-xl border border-[#24242B] bg-[#101014] max-w-xl">
-                  <div className="flex items-center gap-2.5 text-xs text-[#A1A1AA]">
-                    <div className="w-6 h-6 rounded bg-[#1D1935] flex items-center justify-center text-[#6E60EE]">
-                      <Folder className="w-3.5 h-3.5" />
+                {/* CONTINUE: pkdev Banner */}
+                <div className="w-full flex items-center justify-between p-3.5 rounded-xl border border-[#24242B] bg-[#101014] hover:border-[#383842] transition-colors cursor-pointer">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-[#1D1935] border border-[#6E60EE]/20 flex items-center justify-center text-[#6E60EE] shrink-0">
+                      <Folder className="w-4.5 h-4.5 text-[#6E60EE]" />
                     </div>
-                    <span className="text-[10px] font-mono uppercase text-[#71717A]">CONTINUE:</span>
-                    <span className="font-semibold text-[#F5F5F7]">pkdev</span>
+                    <span className="text-[10px] font-mono uppercase text-[#71717A] tracking-wider">CONTINUE:</span>
+                    <span className="text-sm font-bold text-[#F5F5F7]">pkdev</span>
                   </div>
-                  <div className="flex items-center gap-1 text-[11px] text-[#71717A]">
+                  <div className="flex items-center gap-1 text-xs text-[#71717A]">
                     <span>Recently</span>
-                    <ChevronRight className="w-3 h-3" />
+                    <ChevronRight className="w-3.5 h-3.5" />
                   </div>
                 </div>
 
                 {/* Your Folders Section */}
                 <div>
-                  <div className="flex items-center justify-between mb-3 max-w-xl">
-                    <h4 className="text-xs font-bold text-[#F5F5F7]">Your folders</h4>
-                    <span className="text-[11px] text-[#6E60EE] font-medium cursor-pointer">View all</span>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-bold text-[#F5F5F7] tracking-tight">Your folders</h3>
+                    <span className="text-xs font-semibold text-[#6E60EE] hover:underline cursor-pointer">View all</span>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 max-w-xl">
-                    {['pkdev', 'videos', 'documents', 'projects'].map((name, i) => (
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+                    {[
+                      { name: 'pkdev', files: '0 files' },
+                      { name: 'images', files: '0 files' },
+                      { name: 'docs', files: '0 files' },
+                      { name: 'videos', files: '0 files' }
+                    ].map((folder) => (
                       <div
-                        key={i}
-                        className="p-3 rounded-xl border border-[#24242B] bg-[#101014] flex flex-col justify-between h-20 hover:bg-[#141419] transition-colors cursor-pointer"
+                        key={folder.name}
+                        className="p-3.5 rounded-xl border border-[#24242B] bg-[#101014] flex items-center justify-between hover:bg-[#141419] hover:border-[#383842] transition-all cursor-pointer group"
                       >
-                        <Folder className="w-5 h-5 text-[#6E60EE]" />
-                        <div>
-                          <span className="text-xs font-semibold text-[#F5F5F7] block truncate">{name}</span>
-                          <span className="text-[10px] text-[#71717A]">0 files</span>
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-8 h-8 rounded-lg bg-[#1D1935] border border-[#6E60EE]/20 flex items-center justify-center text-[#6E60EE] shrink-0">
+                            <Folder className="w-4.5 h-4.5 text-[#6E60EE]" />
+                          </div>
+                          <div className="min-w-0">
+                            <span className="text-xs font-bold text-[#F5F5F7] block truncate">{folder.name}</span>
+                            <span className="text-[11px] text-[#71717A]">{folder.files}</span>
+                          </div>
                         </div>
+                        <MoreVertical className="w-4 h-4 text-[#71717A] group-hover:text-white shrink-0 transition-colors" />
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Recently Opened Section */}
-                <div className="max-w-xl">
-                  <h4 className="text-xs font-bold text-[#F5F5F7] mb-3">Recently Opened</h4>
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-bold text-[#F5F5F7] tracking-tight">Recently Opened</h3>
+                  </div>
 
-                  <div className="space-y-1 text-xs">
-                    <div className="grid grid-cols-12 text-[10px] font-semibold text-[#71717A] pb-1.5 border-b border-[#24242B] px-1">
-                      <div className="col-span-7 flex items-center gap-1">
+                  <div className="rounded-xl border border-[#24242B] bg-[#101014] overflow-hidden text-xs">
+                    {/* Table Header */}
+                    <div className="grid grid-cols-12 text-[11px] font-semibold text-[#71717A] py-2.5 px-4 border-b border-[#24242B] bg-[#0D0D10]/90 select-none">
+                      <div className="col-span-5 flex items-center gap-1.5">
                         <span>Name</span>
                         <ArrowUp className="w-3 h-3 text-[#6E60EE]" />
                       </div>
                       <div className="col-span-2">Owner</div>
-                      <div className="col-span-3 text-right">Date modified</div>
+                      <div className="col-span-3">Date modified</div>
+                      <div className="col-span-1 text-right">File size</div>
+                      <div className="col-span-1 text-right pr-1">Actions</div>
                     </div>
 
-                    {RECENT_FILES.map((f, i) => (
-                      <div key={i} className="grid grid-cols-12 items-center py-2 px-1 text-[#A1A1AA] hover:bg-[#141419] rounded-lg transition-colors">
-                        <div className="col-span-7 flex items-center gap-2 text-[#F5F5F7] font-medium truncate">
-                          <div className="w-5 h-5 rounded bg-[#18181E] flex items-center justify-center shrink-0">
-                            <ImageIcon className="w-3 h-3 text-[#71717A]" />
+                    {/* Table Rows matching real dashboard */}
+                    <div className="divide-y divide-[#24242B]/50">
+                      {RECENTLY_OPENED_FILES.map((f) => (
+                        <div
+                          key={f.id}
+                          className="grid grid-cols-12 items-center py-3 px-4 text-[#A1A1AA] hover:bg-[#141419] transition-colors cursor-pointer group"
+                        >
+                          <div className="col-span-5 flex items-center gap-3 text-[#F5F5F7] font-semibold truncate min-w-0 pr-2">
+                            {renderRecentFileIcon(f.type)}
+                            <span className="truncate">{f.name}</span>
                           </div>
-                          <span className="truncate">{f.name}</span>
+                          <div className="col-span-2 text-xs text-[#71717A]">{f.owner}</div>
+                          <div className="col-span-3 text-xs text-[#71717A]">{f.date}</div>
+                          <div className="col-span-1 text-xs text-[#71717A] text-right font-medium">{f.size}</div>
+                          <div className="col-span-1 flex justify-end text-[#71717A] group-hover:text-white transition-colors">
+                            <MoreVertical className="w-4 h-4" />
+                          </div>
                         </div>
-                        <div className="col-span-2 text-[#71717A] text-[11px]">{f.owner}</div>
-                        <div className="col-span-3 text-right text-[#71717A] text-[11px]">{f.date}</div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
