@@ -77,41 +77,43 @@ export function ActionMenu ({ items, className, triggerClassName, align = 'right
       </Tooltip>
 
       {/* Context menu dropdown overlay */}
-      {isOpen && (
-        <div
-          className={cn(
-            'absolute w-48 bg-card-bg rounded-xl shadow-lg border border-card-border py-1.5 z-50 divide-y divide-card-border/40',
-            placement === 'top' && 'bottom-9 right-0 animate-in fade-in slide-in-from-bottom-2 duration-150',
-            placement === 'bottom' && 'top-8.5 right-0 animate-in fade-in slide-in-from-top-2 duration-150',
-            placement === 'right' && 'left-full top-0 ml-2.5 animate-in fade-in slide-in-from-left-2 duration-150',
-            placement === 'bottom-right' && 'right-0 top-8.5 animate-in fade-in slide-in-from-top-2 duration-150',
-            placement === 'bottom-left' && 'left-0 top-8.5 animate-in fade-in slide-in-from-top-2 duration-150'
-          )}
-        >
-          <div className='py-0.5'>
-            {items.map((item, idx) => (
-              <button
-                key={idx}
-                onClick={() => {
-                  item.onClick()
-                  close()
-                }}
-                className={cn(
-                  'w-full px-3.5 py-2 text-left text-xs font-semibold flex items-center gap-2.5 transition-colors cursor-pointer focus:outline-none rounded-lg mx-1 w-[calc(100%-8px)]',
-                  item.danger
-                    ? 'text-rose-500 hover:bg-rose-500/10'
-                    : 'text-text-secondary hover:text-foreground hover:bg-input-bg'
-                )}
-              >
-                <span className={item.danger ? 'text-rose-500' : 'text-text-secondary'}>
-                  {item.icon}
-                </span>
-                <span>{item.label}</span>
-              </button>
-            ))}
-          </div>
+      <div
+        className={cn(
+          'absolute w-48 bg-card-bg rounded-xl shadow-lg border border-card-border py-1.5 z-50 divide-y divide-card-border/40 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]',
+          placement === 'top' && 'bottom-9 right-0 origin-bottom-right',
+          placement === 'bottom' && 'top-8.5 right-0 origin-top-right',
+          placement === 'right' && 'left-full top-0 ml-2.5 origin-top-left',
+          placement === 'bottom-right' && 'right-0 top-8.5 origin-top-right',
+          placement === 'bottom-left' && 'left-0 top-8.5 origin-top-left',
+          isOpen
+            ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto'
+            : 'opacity-0 scale-95 -translate-y-1.5 pointer-events-none'
+        )}
+        aria-hidden={!isOpen}
+      >
+        <div className='py-0.5'>
+          {items.map((item, idx) => (
+            <button
+              key={idx}
+              onClick={() => {
+                item.onClick()
+                close()
+              }}
+              className={cn(
+                'w-full px-3.5 py-2 text-left text-xs font-semibold flex items-center gap-2.5 transition-colors cursor-pointer focus:outline-none rounded-lg mx-1 w-[calc(100%-8px)]',
+                item.danger
+                  ? 'text-rose-500 hover:bg-rose-500/10'
+                  : 'text-text-secondary hover:text-foreground hover:bg-input-bg'
+              )}
+            >
+              <span className={item.danger ? 'text-rose-500' : 'text-text-secondary'}>
+                {item.icon}
+              </span>
+              <span>{item.label}</span>
+            </button>
+          ))}
         </div>
-      )}
+      </div>
     </div>
   )
 }

@@ -34,37 +34,50 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
 
   const menuItems = getNavItems();
 
-  // Prevent background scrolling when open
+  // Prevent background scrolling when open & handle Escape key
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      document.addEventListener('keydown', handleKeyDown);
     } else {
       document.body.style.overflow = '';
     }
     return () => {
       document.body.style.overflow = '';
+      document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
   return (
-    <div className={cn(
-      "fixed inset-0 z-50 lg:hidden transition-all duration-300",
-      isOpen ? "visible" : "invisible pointer-events-none"
-    )}>
+    <div
+      className={cn(
+        "fixed inset-0 z-50 lg:hidden",
+        isOpen ? "pointer-events-auto" : "pointer-events-none"
+      )}
+      aria-hidden={!isOpen}
+    >
       {/* Backdrop overlay */}
       <div
         className={cn(
-          "fixed inset-0 bg-black/40 dark:bg-black/70 transition-opacity duration-300 ease-in-out",
+          "fixed inset-0 bg-black/50 dark:bg-black/75 backdrop-blur-[2px] transition-opacity duration-300 ease-in-out",
           isOpen ? "opacity-100" : "opacity-0"
         )}
         onClick={onClose}
+        aria-hidden="true"
       />
 
       {/* Navigation panel */}
-      <div className={cn(
-        "fixed inset-y-0 left-0 w-64 bg-sidebar-bg border-r border-sidebar-border flex flex-col justify-between pt-2.5 pb-3 px-4 shadow-2xl transition-transform duration-300 ease-in-out",
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
+      <div
+        className={cn(
+          "fixed inset-y-0 left-0 w-64 bg-sidebar-bg border-r border-sidebar-border flex flex-col justify-between pt-2.5 pb-3 px-4 shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
         {/* Brand Header */}
         <div className='flex shrink-0 w-full mt-1.5'>
           <div className='flex w-full items-center justify-between min-w-0'>

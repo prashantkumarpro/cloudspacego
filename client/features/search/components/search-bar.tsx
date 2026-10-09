@@ -100,28 +100,32 @@ export function SearchBar() {
         </Tooltip>
 
         {/* Compact Popover Menu */}
-        {isPlusMenuOpen && (
-          <div
-            role="menu"
-            aria-orientation="vertical"
-            className="absolute top-full left-0 mt-2 w-44 bg-card-bg border border-card-border rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)] p-1 flex flex-col gap-0.5 z-50 select-none animate-in fade-in zoom-in-95 duration-150 focus:outline-none"
-          >
-            {actions.map(action => {
-              const Icon = action.icon;
-              return (
-                <button
-                  key={action.id}
-                  role="menuitem"
-                  onClick={action.onClick}
-                  className="flex items-center gap-2.5 px-2.5 py-2 w-full rounded-lg text-xs font-semibold text-foreground hover:text-[#6E60EE] hover:bg-input-bg transition-colors duration-150 cursor-pointer select-none text-left focus:outline-none focus-visible:bg-input-bg"
-                >
-                  <Icon className="w-4 h-4 text-[#6E60EE] shrink-0" strokeWidth={2} />
-                  <span className="truncate">{action.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        )}
+        <div
+          role="menu"
+          aria-orientation="vertical"
+          aria-hidden={!isPlusMenuOpen}
+          className={cn(
+            "absolute top-full left-0 mt-2 w-44 bg-card-bg border border-card-border rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)] p-1 flex flex-col gap-0.5 z-50 select-none focus:outline-none transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] origin-top-left",
+            isPlusMenuOpen
+              ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
+              : "opacity-0 scale-95 -translate-y-1.5 pointer-events-none"
+          )}
+        >
+          {actions.map(action => {
+            const Icon = action.icon;
+            return (
+              <button
+                key={action.id}
+                role="menuitem"
+                onClick={action.onClick}
+                className="flex items-center gap-2.5 px-2.5 py-2 w-full rounded-lg text-xs font-semibold text-foreground hover:text-[#6E60EE] hover:bg-input-bg transition-colors duration-150 cursor-pointer select-none text-left focus:outline-none focus-visible:bg-input-bg"
+              >
+                <Icon className="w-4 h-4 text-[#6E60EE] shrink-0" strokeWidth={2} />
+                <span className="truncate">{action.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

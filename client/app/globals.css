@@ -197,6 +197,37 @@ input:-webkit-autofill:active {
   animation-delay: 560ms;
 }
 
+/* Mobile Navigation Dropdown Smooth Accordion Transitions */
+.mobile-menu-dropdown {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: grid-template-rows 350ms cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 280ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 350ms cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0s linear 350ms;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.mobile-menu-dropdown.is-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  visibility: visible;
+  transition: grid-template-rows 350ms cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 300ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 350ms cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0s linear 0s;
+}
+
+.mobile-menu-dropdown-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-hero-fade-up,
   .animate-hero-fade-in {

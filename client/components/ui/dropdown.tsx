@@ -46,38 +46,40 @@ export function Dropdown({ trigger, items, align = 'right', className }: Dropdow
       </div>
 
       {/* Dropdown Content */}
-      {isOpen && (
-        <div
-          className={cn(
-            "absolute z-40 mt-2.5 w-60 bg-card-bg border border-card-border rounded-2xl shadow-2xl focus:outline-none transition-all duration-150 p-1.5 flex flex-col gap-0.5",
-            align === 'right' ? 'right-0' : 'left-0'
-          )}
-        >
-          {/* Dropdown Items list */}
-          <div className="flex flex-col gap-0.5 w-full" role="menu" aria-orientation="vertical">
-            {items.map((item, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  if (!item.disabled) {
-                    item.onClick();
-                    close();
-                  }
-                }}
-                disabled={item.disabled}
-                className={cn(
-                  "w-full text-left px-3 py-2.5 text-sm font-semibold text-text-secondary hover:text-foreground hover:bg-input-bg transition-colors flex items-center gap-3 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer select-none",
-                  item.className
-                )}
-                role="menuitem"
-              >
-                {item.icon && <span className="shrink-0 flex items-center justify-center">{item.icon}</span>}
-                <span className="truncate">{item.label}</span>
-              </button>
-            ))}
-          </div>
+      <div
+        className={cn(
+          "absolute z-40 mt-2.5 w-60 bg-card-bg border border-card-border rounded-2xl shadow-2xl focus:outline-none p-1.5 flex flex-col gap-0.5 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]",
+          align === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left',
+          isOpen
+            ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto'
+            : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
+        )}
+        aria-hidden={!isOpen}
+      >
+        {/* Dropdown Items list */}
+        <div className="flex flex-col gap-0.5 w-full" role="menu" aria-orientation="vertical">
+          {items.map((item, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                if (!item.disabled) {
+                  item.onClick();
+                  close();
+                }
+              }}
+              disabled={item.disabled}
+              className={cn(
+                "w-full text-left px-3 py-2.5 text-sm font-semibold text-text-secondary hover:text-foreground hover:bg-input-bg transition-colors flex items-center gap-3 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer select-none",
+                item.className
+              )}
+              role="menuitem"
+            >
+              {item.icon && <span className="shrink-0 flex items-center justify-center">{item.icon}</span>}
+              <span className="truncate">{item.label}</span>
+            </button>
+          ))}
         </div>
-      )}
+      </div>
     </div>
   );
 }
