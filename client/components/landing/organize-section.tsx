@@ -159,16 +159,16 @@ export function OrganizeSection() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12">
+            <div className="grid grid-cols-1 md:grid-cols-12">
               {/* Left Column: Folders Grid */}
-              <div className="p-4 sm:p-5 lg:col-span-5 border-b lg:border-b-0 lg:border-r border-[#24242B] bg-[#0A0A0C]">
+              <div className="p-4 sm:p-5 md:col-span-5 border-b md:border-b-0 md:border-r border-[#24242B] bg-[#0A0A0C]">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-semibold uppercase tracking-wider text-[#71717A]">
                     Directories ({FOLDERS.length})
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 gap-2 sm:gap-2.5">
                   {FOLDERS.map((folder, index) => {
                     const isSelected = folder.id === selectedFolderId
                     return (
@@ -212,7 +212,7 @@ export function OrganizeSection() {
               </div>
 
               {/* Right Column: Folder Contents & Interactive File Table */}
-              <div className="p-4 sm:p-5 lg:col-span-7 bg-[#101014] flex flex-col justify-between">
+              <div className="p-4 sm:p-5 md:col-span-7 bg-[#101014] flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
