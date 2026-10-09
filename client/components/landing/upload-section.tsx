@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import Image from 'next/image'
 import {
   FileText,
   Image as ImageIcon,
@@ -19,7 +20,6 @@ import {
   Minus,
   X,
   ChevronRight,
-  Sparkles,
   Sun,
   Moon,
   ArrowUp
@@ -153,76 +153,90 @@ export function UploadSection() {
             {/* ======================================================== */}
             {/* LEFT SIDEBAR MOCKUP                                      */}
             {/* ======================================================== */}
-            <div className="w-52 sm:w-60 border-r border-[#24242B] bg-[#0D0D10] p-4 hidden md:flex flex-col justify-between shrink-0">
+            <div className="w-52 sm:w-60 border-r border-[#24242B] bg-[#0B0B0D] p-4 hidden md:flex flex-col justify-between shrink-0">
               <div className="space-y-6">
-                {/* Logo */}
-                <div className="flex items-center gap-2 px-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#6E60EE] flex items-center justify-center text-white">
-                    <Sparkles className="w-4 h-4" />
+                {/* Brand Logo */}
+                <div className="h-16 flex items-center gap-2.5 px-2 shrink-0">
+                  <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                    <Image
+                      src="/images/cloudeLogo.png"
+                      width={32}
+                      height={28}
+                      alt="cloudspacego logo"
+                      className="w-8 h-auto object-contain shrink-0"
+                    />
                   </div>
-                  <span className="font-bold text-sm tracking-tight text-[#F5F5F7]">
-                    cloudspacego
+                  <span className="text-xl font-bold tracking-tight font-sans truncate text-[#F5F5F7] flex items-center whitespace-nowrap">
+                    cloud<span className="font-extrabold text-[#6E60EE]">spacego</span>
                   </span>
                 </div>
 
                 {/* Navigation Links */}
-                <div className="space-y-1 text-xs font-medium text-[#71717A]">
-                  <div className="flex items-center gap-3 px-3 py-2 rounded-xl text-[#6E60EE] bg-[#1D1935] font-semibold">
-                    <Home className="w-4 h-4 text-[#6E60EE]" />
+                <div className="space-y-1 text-xs font-semibold text-[#A1A1AA]">
+                  <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[#6E60EE] bg-[#1D1935] font-bold">
+                    <Home className="w-4.5 h-4.5 text-[#6E60EE]" strokeWidth={2.2} />
                     <span>Home</span>
                   </div>
-                  <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:text-[#F5F5F7] transition-colors">
-                    <HardDrive className="w-4 h-4" />
+                  <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:text-[#F5F5F7] hover:bg-[#141419] transition-colors">
+                    <HardDrive className="w-4.5 h-4.5 text-[#71717A]" strokeWidth={1.8} />
                     <span>My Files</span>
                   </div>
-                  <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:text-[#F5F5F7] transition-colors">
-                    <Users className="w-4 h-4" />
+                  <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:text-[#F5F5F7] hover:bg-[#141419] transition-colors">
+                    <Users className="w-4.5 h-4.5 text-[#71717A]" strokeWidth={1.8} />
                     <span>Shared with me</span>
                   </div>
-                  <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:text-[#F5F5F7] transition-colors">
-                    <Clock className="w-4 h-4" />
+                  <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:text-[#F5F5F7] hover:bg-[#141419] transition-colors">
+                    <Clock className="w-4.5 h-4.5 text-[#71717A]" strokeWidth={1.8} />
                     <span>Recent</span>
                   </div>
-                  <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:text-[#F5F5F7] transition-colors">
-                    <Star className="w-4 h-4" />
+                  <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:text-[#F5F5F7] hover:bg-[#141419] transition-colors">
+                    <Star className="w-4.5 h-4.5 text-[#71717A]" strokeWidth={1.8} />
                     <span>Starred</span>
                   </div>
-                  <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:text-[#F5F5F7] transition-colors">
-                    <Trash2 className="w-4 h-4" />
+
+                  {/* Divider before Trash */}
+                  <div className="h-[1px] bg-[#24242B] my-1 mx-1 shrink-0" />
+
+                  <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:text-[#F5F5F7] hover:bg-[#141419] transition-colors">
+                    <Trash2 className="w-4.5 h-4.5 text-[#71717A]" strokeWidth={1.8} />
                     <span>Trash</span>
                   </div>
                 </div>
               </div>
 
               {/* Sidebar Bottom: Storage Meter & Theme Toggle */}
-              <div className="space-y-3 pt-4 border-t border-[#24242B]/80 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-[#F5F5F7]">Storage</span>
-                  <span className="text-[10px] font-bold text-[#6E60EE] bg-[#1D1935] px-1.5 py-0.5 rounded">
-                    12%
-                  </span>
-                </div>
-                <div className="w-full h-1.5 rounded-full bg-[#1A1A22] overflow-hidden">
-                  <div className="h-full w-[12%] bg-[#6E60EE] rounded-full transition-all duration-700 ease-out" />
-                </div>
-                <div className="flex items-center justify-between text-[10px] text-[#71717A]">
-                  <span>23.3 MB used</span>
-                  <span>176.7 MB free</span>
-                </div>
-                <div className="text-[11px] text-[#6E60EE] font-medium flex items-center justify-between cursor-pointer">
-                  <span>Upgrade Storage</span>
-                  <ChevronRight className="w-3 h-3" />
+              <div className="space-y-3 pt-4 border-t border-[#24242B] text-xs mt-auto">
+                <div className="w-full bg-[#101014] rounded-xl border border-[#24242B] p-3 shadow-xs flex flex-col gap-2.5 select-none">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#F5F5F7]">Storage</span>
+                    <span className="text-[10px] font-bold text-white bg-[#6E60EE] px-2 py-0.5 rounded-full">
+                      12%
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <div className="w-full h-1.5 rounded-full bg-[#141419] border border-[#24242B]/60 overflow-hidden">
+                      <div className="h-full w-[12%] bg-[#6E60EE] rounded-full transition-all duration-700 ease-out" />
+                    </div>
+                    <div className="flex items-center justify-between text-[10px] text-[#71717A]">
+                      <span>23.3 MB used</span>
+                      <span>176.7 MB free</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] font-semibold text-[#6E60EE] pt-0.5 cursor-pointer">
+                    <span>Upgrade Storage</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-[#6E60EE]" />
+                  </div>
                 </div>
 
                 {/* Theme Pill */}
-                <div className="pt-2 flex items-center justify-between p-1 bg-[#141419] rounded-lg text-[10px]">
-                  <div className="flex items-center gap-1 text-[#71717A] px-2 py-0.5">
-                    <Sun className="w-3 h-3 text-amber-400" />
-                    <span>Light</span>
+                <div className="w-full p-1 bg-[#141419] rounded-xl flex items-center justify-between select-none relative border border-[#24242B] gap-1 text-xs">
+                  <div className="w-1/2 flex items-center justify-center gap-1.5 py-1 px-2 rounded-lg text-[#71717A]">
+                    <Sun className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="text-[11px] font-medium">Light</span>
                   </div>
-                  <div className="flex items-center gap-1 text-[#F5F5F7] bg-[#1D1935] px-2 py-0.5 rounded font-semibold">
-                    <Moon className="w-3 h-3 text-[#6E60EE]" />
-                    <span>Dark</span>
+                  <div className="w-1/2 flex items-center justify-center gap-1.5 py-1 px-2 rounded-lg bg-[#101014] text-[#6E60EE] font-bold shadow-xs border border-[#24242B]/60">
+                    <Moon className="w-3.5 h-3.5 text-[#6E60EE]" />
+                    <span className="text-[11px] font-bold text-white">Dark</span>
                   </div>
                 </div>
               </div>
@@ -234,27 +248,49 @@ export function UploadSection() {
             <div className="flex-1 flex flex-col min-w-0 bg-[#0B0B0D] overflow-hidden">
               
               {/* Top Navigation Bar */}
-              <div className="h-14 border-b border-[#24242B]/80 px-4 sm:px-6 flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-[#141419] flex items-center justify-center text-[#71717A]">
-                    <Search className="w-4 h-4" />
+              <div className="h-16 border-b border-[#24242B] px-4 sm:px-6 bg-[#0B0B0D] flex items-center justify-between shrink-0">
+                {/* Left Side: Mobile Menu + Pill Capsule */}
+                <div className="flex items-center gap-2.5 min-w-0">
+                  {/* Mobile hamburger menu toggle */}
+                  <div className="md:hidden flex w-8 h-8 items-center justify-center text-[#71717A] hover:text-[#F5F5F7] rounded-full">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 8h16M4 16h10" />
+                    </svg>
                   </div>
-                  <div className="w-8 h-8 rounded-lg bg-[#6E60EE] flex items-center justify-center text-white shadow-xs">
-                    <Plus className="w-4 h-4" />
+
+                  {/* Left Action Buttons Pill Capsule (Matching Real Header SearchBar) */}
+                  <div className="flex items-center bg-[#141419] border border-[#24242B] rounded-full p-1 gap-2 shadow-none shrink-0 h-10">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-[#71717A]">
+                      <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                        <rect width="18" height="18" x="3" y="3" rx="2" />
+                        <path d="M9 3v18" />
+                      </svg>
+                    </div>
+
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-[#71717A]">
+                      <Search className="w-4.5 h-4.5 text-[#71717A]" strokeWidth={2.2} />
+                    </div>
+
+                    <div className="w-7 h-7 rounded-full bg-[#6E60EE] flex items-center justify-center text-white shadow-xs">
+                      <Plus className="w-4 h-4 text-white" strokeWidth={2.5} />
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="relative p-1.5 text-[#71717A]">
-                    <Bell className="w-4 h-4" />
-                    <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-rose-500 rounded-full text-[9px] font-bold text-white flex items-center justify-center">
+                {/* Right User Bar Cluster */}
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-9 h-9 rounded-full bg-transparent flex items-center justify-center text-[#71717A] relative">
+                    <Bell className="w-5 h-5 text-[#71717A]" strokeWidth={2} />
+                    <span className="absolute top-1 right-1 bg-red-500 text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center ring-2 ring-[#0B0B0D]">
                       3
                     </span>
                   </div>
-                  <div className="p-1.5 text-[#71717A]">
-                    <Settings className="w-4 h-4" />
+
+                  <div className="w-9 h-9 rounded-full bg-transparent flex items-center justify-center text-[#71717A]">
+                    <Settings className="w-5 h-5 text-[#71717A]" strokeWidth={2} />
                   </div>
-                  <div className="w-7 h-7 rounded-full bg-[#24242B] flex items-center justify-center text-xs font-bold text-[#F5F5F7]">
+
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#18181D] border border-[#24242B] flex items-center justify-center text-xs font-bold text-[#F5F5F7] shadow-xs select-none">
                     P
                   </div>
                 </div>
