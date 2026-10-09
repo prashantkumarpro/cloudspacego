@@ -6,6 +6,7 @@ import { AuthProvider } from '@/providers/auth-provider'
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
   variable: '--font-plus-jakarta-sans',
   display: 'swap',
 })
@@ -29,7 +30,7 @@ export default function RootLayout ({
   children: React.ReactNode
 }) {
   return (
-    <html lang='en' className={`${plusJakartaSans.variable} ${instrumentSerif.variable} dark h-full antialiased`} suppressHydrationWarning>
+    <html lang='en' className={`${plusJakartaSans.variable} ${instrumentSerif.variable} ${plusJakartaSans.className} font-sans dark h-full antialiased`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -51,7 +52,7 @@ export default function RootLayout ({
           }}
         />
       </head>
-      <body className='min-h-full flex flex-col selection:bg-[#6E60EE]/25 selection:text-foreground bg-background text-foreground transition-colors duration-200'>
+      <body className={`${plusJakartaSans.className} font-sans min-h-full flex flex-col selection:bg-[#6E60EE]/25 selection:text-foreground bg-background text-foreground transition-colors duration-200`}>
         <AuthProvider>
           <AppProvider>{children}</AppProvider>
         </AuthProvider>
@@ -59,3 +60,4 @@ export default function RootLayout ({
     </html>
   )
 }
+
