@@ -216,21 +216,23 @@ export function PreviewSection() {
               <h3 className="text-base font-bold text-[#F5F5F7] mb-4">My Files</h3>
 
               {/* Folders Row */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
-                <div className="flex items-center gap-3 p-3 rounded-xl border border-[#24242B] bg-[#141419]">
-                  <Folder className="w-6 h-6 text-[#6E60EE]" />
-                  <div>
-                    <span className="text-xs font-semibold text-[#F5F5F7] block">pkdev</span>
-                    <span className="text-[10px] text-[#71717A]">0 files</span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                {[
+                  { name: 'pkdev', files: '0 files' },
+                  { name: 'images', files: '0 files' },
+                  { name: 'docs', files: '0 files' },
+                  { name: 'videos', files: '0 files' }
+                ].map((folder) => (
+                  <div key={folder.name} className="flex items-center gap-2.5 p-3 rounded-xl border border-[#24242B] bg-[#101014] min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-[#1D1935] border border-[#6E60EE]/20 flex items-center justify-center text-[#6E60EE] shrink-0">
+                      <Folder className="w-4.5 h-4.5 text-[#6E60EE]" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-xs font-bold text-[#F5F5F7] block truncate">{folder.name}</span>
+                      <span className="text-[10px] text-[#71717A] block truncate">{folder.files}</span>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-3 p-3 rounded-xl border border-[#24242B] bg-[#141419]">
-                  <Folder className="w-6 h-6 text-[#6E60EE]" />
-                  <div>
-                    <span className="text-xs font-semibold text-[#F5F5F7] block">videos</span>
-                    <span className="text-[10px] text-[#71717A]">0 files</span>
-                  </div>
-                </div>
+                ))}
               </div>
 
               {/* Files Table Header */}

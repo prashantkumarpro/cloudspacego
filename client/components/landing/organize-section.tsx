@@ -168,7 +168,7 @@ export function OrganizeSection() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
                   {FOLDERS.map((folder, index) => {
                     const isSelected = folder.id === selectedFolderId
                     return (
@@ -184,20 +184,24 @@ export function OrganizeSection() {
                           transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
                           transitionDelay: `${index * 35}ms, ${index * 35}ms, 0ms, 0ms`
                         }}
-                        className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-left cursor-pointer active:scale-[0.98] ${
+                        className={`flex items-center gap-2 sm:gap-2.5 p-2 sm:p-2.5 rounded-xl border text-left cursor-pointer active:scale-[0.98] transition-all min-w-0 ${
                           isSelected
-                            ? 'border-[#6E60EE] bg-[#1D1935]'
-                            : 'border-[#24242B] bg-[#101014] hover:bg-[#141419]'
+                            ? 'border-[#6E60EE] bg-[#1D1935] shadow-xs ring-1 ring-[#6E60EE]/50'
+                            : 'border-[#24242B] bg-[#101014] hover:bg-[#141419] hover:border-[#383842]'
                         }`}
                       >
-                        <Folder className="w-4 h-4 text-[#6E60EE] shrink-0" />
+                        <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                          isSelected ? 'bg-[#6E60EE]/20 border border-[#6E60EE]/40' : 'bg-[#1D1935] border border-[#6E60EE]/20'
+                        }`}>
+                          <Folder className="w-4 h-4 text-[#6E60EE]" />
+                        </div>
                         <div className="min-w-0 flex-1">
-                          <span className={`text-xs font-semibold block truncate ${
+                          <span className={`text-xs font-bold block truncate ${
                             isSelected ? 'text-[#6E60EE]' : 'text-[#F5F5F7]'
                           }`}>
                             {folder.name}
                           </span>
-                          <span className="text-[10px] text-[#71717A] block truncate">
+                          <span className="text-[10px] text-[#71717A] block truncate mt-0.5">
                             {folder.count} files • {folder.size}
                           </span>
                         </div>
