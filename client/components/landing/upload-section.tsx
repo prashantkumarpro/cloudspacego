@@ -22,6 +22,8 @@ import {
   ChevronRight,
   MoreVertical,
   Video,
+  Check,
+  ChevronUp,
   Sun,
   Moon,
   ArrowUp
@@ -45,23 +47,23 @@ const INITIAL_UPLOADS: UploadFileItem[] = [
     name: 'Prashant_Resume.pdf',
     size: '31.3 KB',
     type: 'pdf',
-    progress: 88,
-    status: 'uploading'
+    progress: 100,
+    status: 'completed'
   },
   {
     id: '2',
     name: 'Professional_Job_Application_Tracker.xlsx',
     size: '11.9 KB',
     type: 'sheet',
-    progress: 54,
-    status: 'uploading'
+    progress: 100,
+    status: 'completed'
   },
   {
     id: '3',
     name: 'FasterQ - Full Stack Developer Internship A...',
     size: '145.7 KB',
     type: 'pdf',
-    progress: 18,
+    progress: 68,
     status: 'uploading'
   },
   {
@@ -69,8 +71,8 @@ const INITIAL_UPLOADS: UploadFileItem[] = [
     name: 'poster1.jpeg',
     size: '529.6 KB',
     type: 'img',
-    progress: 0,
-    status: 'queued'
+    progress: 32,
+    status: 'uploading'
   },
   {
     id: '5',
@@ -469,28 +471,43 @@ export function UploadSection() {
             {/* ======================================================== */}
             {/* FLOATING UPLOAD WIDGET (BOTTOM-RIGHT)                    */}
             {/* ======================================================== */}
-            <div className="absolute bottom-4 sm:bottom-6 right-4 sm:right-6 z-30 w-[300px] sm:w-[360px] rounded-2xl border border-[#2D294A] bg-[#101014]/98 shadow-2xl backdrop-blur-xl overflow-hidden transition-all duration-300">
+            {/* ======================================================== */}
+            {/* FLOATING UPLOAD WIDGET (BOTTOM-RIGHT)                    */}
+            {/* ======================================================== */}
+            <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 z-30 w-[calc(100%-2rem)] xs:w-[340px] sm:w-[380px] rounded-xl border border-[#24242B] bg-[#101014]/98 shadow-2xl backdrop-blur-xl overflow-hidden flex flex-col transition-all duration-300 select-none">
               {/* Widget Header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-[#24242B] bg-[#121217]">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs sm:text-sm font-bold text-[#F5F5F7]">
-                    Uploading 49 files
+              <div
+                className="flex items-center justify-between px-4 py-3 bg-[#101014] border-b border-[#24242B] cursor-pointer select-none"
+                onClick={() => setIsMinimized(!isMinimized)}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-[13px] font-semibold text-[#F5F5F7] truncate">
+                    Uploading 2 of 49 files
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1">
+                <div
+                  className="flex items-center gap-1 shrink-0 ml-2"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <button
                     type="button"
                     onClick={() => setIsMinimized(!isMinimized)}
                     className="w-6 h-6 rounded-md flex items-center justify-center text-[#71717A] hover:text-[#F5F5F7] hover:bg-[#1A1A22] transition-colors cursor-pointer"
                     title={isMinimized ? 'Expand' : 'Minimize'}
+                    aria-label={isMinimized ? 'Expand upload manager' : 'Minimize upload manager'}
                   >
-                    <Minus className="w-3.5 h-3.5" />
+                    {isMinimized ? (
+                      <ChevronUp className="w-3.5 h-3.5" />
+                    ) : (
+                      <Minus className="w-3.5 h-3.5" />
+                    )}
                   </button>
                   <button
                     type="button"
                     className="w-6 h-6 rounded-md flex items-center justify-center text-[#71717A] hover:text-[#F5F5F7] hover:bg-[#1A1A22] transition-colors cursor-pointer"
                     title="Close"
+                    aria-label="Close upload manager"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -499,65 +516,89 @@ export function UploadSection() {
 
               {/* Widget Body: File Upload Rows with Smooth Animated Progress */}
               {!isMinimized && (
-                <div className="p-2 space-y-1 max-h-[280px] overflow-y-auto divide-y divide-[#24242B]/30">
-                  {uploads.map((item, idx) => (
-                    <div
-                      key={item.id}
-                      style={{
-                        opacity: isInView ? 1 : 0,
-                        transform: isInView ? 'translateY(0px)' : 'translateY(4px)',
-                        transitionProperty: 'opacity, transform, background-color',
-                        transitionDuration: '250ms, 250ms, 150ms',
-                        transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
-                        transitionDelay: `${idx * 30}ms, ${idx * 30}ms, 0ms`
-                      }}
-                      className="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#15151C] transition-colors gap-3"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                        <div className="w-7 h-7 rounded-lg bg-[#141419] flex items-center justify-center shrink-0">
-                          {renderFileIcon(item.type)}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs font-semibold text-[#F5F5F7] truncate leading-tight">
-                            {item.name}
-                          </p>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <p className="text-[10.5px] text-[#71717A] leading-none">
-                              {item.size}
-                            </p>
-                            {item.status !== 'queued' && (
-                              <div className="flex-1 h-1 bg-[#1A1A22] rounded-full overflow-hidden max-w-[70px]">
-                                <div
-                                  className={`h-full rounded-full transition-all duration-300 ease-out ${
-                                    item.status === 'completed' ? 'bg-emerald-500' : 'bg-[#6E60EE]'
-                                  }`}
-                                  style={{ width: `${item.progress}%` }}
-                                />
+                <>
+                  <div className="overflow-y-auto max-h-[260px] divide-y divide-[#24242B]/40 py-1">
+                    {uploads.map((item, idx) => (
+                      <div
+                        key={item.id}
+                        style={{
+                          opacity: isInView ? 1 : 0,
+                          transform: isInView ? 'translateY(0px)' : 'translateY(4px)',
+                          transitionProperty: 'opacity, transform, background-color',
+                          transitionDuration: '250ms, 250ms, 150ms',
+                          transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                          transitionDelay: `${idx * 30}ms, ${idx * 30}ms, 0ms`
+                        }}
+                        className="group flex flex-col py-2.5 px-4 hover:bg-[#141419]/60 transition-colors select-none"
+                      >
+                        <div className="flex items-center justify-between gap-3 min-w-0">
+                          {/* Left: Icon & File Meta */}
+                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                            <div className="shrink-0 flex items-center justify-center">
+                              {renderFileIcon(item.type)}
+                            </div>
+                            <div className="flex flex-col min-w-0 flex-1">
+                              <span
+                                className={`text-xs font-semibold truncate leading-tight ${
+                                  item.status === 'completed' ? 'text-[#A1A1AA]' : 'text-[#F5F5F7]'
+                                }`}
+                              >
+                                {item.name}
+                              </span>
+                              <span className="text-[11px] text-[#71717A] mt-0.5 leading-none">
+                                {item.size}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Right: Progress % / Completed Check / Queued */}
+                          <div className="flex items-center gap-2 shrink-0">
+                            {item.status === 'uploading' && (
+                              <span className="text-xs font-semibold text-[#6E60EE] tabular-nums">
+                                {item.progress}%
+                              </span>
+                            )}
+
+                            {item.status === 'completed' && (
+                              <div className="w-4 h-4 rounded-full flex items-center justify-center text-emerald-400">
+                                <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                               </div>
+                            )}
+
+                            {item.status === 'queued' && (
+                              <span className="text-[11px] text-[#71717A]">
+                                Queued
+                              </span>
                             )}
                           </div>
                         </div>
+
+                        {/* Thin subtle progress bar for actively uploading items only */}
+                        {item.status === 'uploading' && (
+                          <div className="w-full h-1 bg-[#24242B] rounded-full overflow-hidden mt-1.5">
+                            <div
+                              className="h-full bg-[#6E60EE] rounded-full transition-all duration-300 ease-out"
+                              style={{ width: `${item.progress}%` }}
+                            />
+                          </div>
+                        )}
                       </div>
+                    ))}
+                  </div>
 
-                      {/* Progress Indicator */}
-                      <span className={`text-xs font-mono font-medium shrink-0 transition-colors duration-200 ${
-                        item.status === 'completed' ? 'text-emerald-400' : 'text-[#6E60EE]'
-                      }`}>
-                        {item.status === 'completed' ? 'Done' : `${item.progress}%`}
-                      </span>
-                    </div>
-                  ))}
-
-                  {/* Footer Action */}
-                  <div className="pt-2 px-2 pb-1 flex justify-end">
+                  {/* Footer */}
+                  <div className="flex items-center justify-between px-4 py-2 border-t border-[#24242B]/60 bg-[#101014] text-xs">
+                    <span className="text-[#71717A] text-[11px]">
+                      47 of 49 files complete
+                    </span>
                     <button
                       type="button"
-                      className="text-[11px] text-[#71717A] hover:text-[#F5F5F7] transition-colors cursor-pointer"
+                      className="text-xs text-[#71717A] hover:text-[#6E60EE] transition-colors cursor-pointer font-medium"
                     >
                       Clear completed
                     </button>
                   </div>
-                </div>
+                </>
               )}
             </div>
           </div>
