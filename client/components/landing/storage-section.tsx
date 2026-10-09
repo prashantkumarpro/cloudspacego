@@ -189,7 +189,7 @@ export function StorageSection() {
                   {plan.cta.isLive && plan.cta.href ? (
                     <Link
                       href={plan.cta.href}
-                      className="w-full h-11 px-4 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 mt-5 transition-all duration-150 bg-[#101014] border border-[#24242B] hover:border-[#383842] hover:bg-[#141419] text-[#F5F5F7] active:scale-[0.98]"
+                      className="w-full h-11 px-4 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 mt-5 transition-all duration-150 bg-[#101014] border border-[#24242B] hover:border-[#383842] hover:bg-[#141419] text-[#F5F5F7] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6E60EE]"
                     >
                       <span>{plan.cta.text}</span>
                       <ArrowRight className="w-4 h-4" />

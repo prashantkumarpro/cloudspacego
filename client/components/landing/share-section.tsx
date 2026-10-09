@@ -121,7 +121,7 @@ export function ShareSection() {
                   <button
                     type="button"
                     onClick={handleCopy}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#6E60EE] px-4 py-2 text-xs font-semibold text-white hover:bg-[#5F52DE] active:scale-[0.98] transition-all duration-150 cursor-pointer shrink-0"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#6E60EE] px-4 py-2 text-xs font-semibold text-white hover:bg-[#5F52DE] shadow-xs active:scale-[0.98] transition-all duration-150 cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6E60EE]"
                   >
                     {copied ? <Check className="w-3.5 h-3.5 text-white" /> : <Link2 className="w-3.5 h-3.5" />}
                     <span>{copied ? 'Copied!' : 'Copy'}</span>

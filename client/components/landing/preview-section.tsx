@@ -276,7 +276,7 @@ export function PreviewSection() {
               <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#24242B] bg-[#141419] hover:bg-[#1A1A22] text-xs font-semibold text-[#F5F5F7] transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#24242B] bg-[#141419] hover:bg-[#1A1A22] hover:border-[#383842] text-xs font-semibold text-[#F5F5F7] transition-all duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6E60EE] cursor-pointer"
                 >
                   <ExternalLink className="w-3.5 h-3.5 text-[#71717A]" />
                   <span className="hidden sm:inline">Open in tab</span>
@@ -284,7 +284,7 @@ export function PreviewSection() {
 
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#6E60EE] hover:bg-[#5F52DE] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#6E60EE] hover:bg-[#5F52DE] text-white text-xs font-semibold shadow-xs transition-all duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6E60EE] cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Download</span>

@@ -156,7 +156,7 @@ export function HeroSection() {
           <div className="mt-5 sm:mt-6 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-3.5 animate-hero-fade-up animation-delay-400">
             <Link
               href="/register"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#6E60EE] px-6 py-2.5 sm:py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-[#5E50DE] hover:scale-[1.01] active:scale-[0.98]"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#6E60EE] px-6 py-3 text-sm font-semibold text-white shadow-xs transition-all duration-150 hover:bg-[#5E50DE] hover:scale-[1.01] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6E60EE] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0B0D]"
             >
               <span>Get started free</span>
               <ArrowRight className="h-4 w-4" />
@@ -164,7 +164,7 @@ export function HeroSection() {
 
             <a
               href="#organize"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#24242B] bg-[#101014] px-5 sm:px-6 py-2.5 sm:py-3 text-sm font-medium text-[#F5F5F7] transition-all duration-150 hover:bg-[#141419] hover:border-[#383842] hover:scale-[1.01] active:scale-[0.98]"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#24242B] bg-[#101014] px-6 py-3 text-sm font-medium text-[#F5F5F7] transition-all duration-150 hover:bg-[#141419] hover:border-[#383842] hover:scale-[1.01] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6E60EE] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0B0D]"
             >
               <Play className="h-3.5 w-3.5 text-[#6E60EE] fill-[#6E60EE]/20" />
               <span>See how it works</span>

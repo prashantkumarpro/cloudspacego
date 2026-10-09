@@ -34,7 +34,7 @@ export function CtaSection() {
           <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3.5 sm:gap-4">
             <Link
               href="/register"
-              className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-[#6E60EE] px-7 sm:px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#6E60EE]/20 transition-all duration-150 hover:bg-[#5E50DE] active:scale-[0.98]"
+              className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-[#6E60EE] px-7 sm:px-8 py-3.5 text-sm font-semibold text-white shadow-xs transition-all duration-150 hover:bg-[#5E50DE] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6E60EE]"
             >
               <span>Get started free</span>
               <ArrowRight className="h-4 w-4" />
@@ -42,7 +42,7 @@ export function CtaSection() {
 
             <Link
               href="/login"
-              className="inline-flex w-full sm:w-auto items-center justify-center rounded-xl border border-[#24242B] bg-[#101014] px-6 sm:px-7 py-3.5 text-sm font-medium text-[#F5F5F7] transition-all duration-150 hover:bg-[#141419] hover:border-[#383842] active:scale-[0.98]"
+              className="inline-flex w-full sm:w-auto items-center justify-center rounded-xl border border-[#24242B] bg-[#101014] px-6 sm:px-7 py-3.5 text-sm font-medium text-[#F5F5F7] transition-all duration-150 hover:bg-[#141419] hover:border-[#383842] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6E60EE]"
             >
               Sign in to your account
             </Link>
