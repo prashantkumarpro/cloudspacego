@@ -4,6 +4,7 @@ import React from 'react'
 import Link from 'next/link'
 import { Check, ArrowRight } from 'lucide-react'
 import { LandingContainer } from '@/components/landing/landing-container'
+import { ScrollReveal } from '@/components/landing/scroll-reveal'
 
 interface PricingPlan {
   id: string
@@ -87,16 +88,16 @@ export function StorageSection() {
     <section id="storage" className="relative py-12 sm:py-16 lg:py-20 bg-[#0B0B0D] text-[#F5F5F7] overflow-hidden">
       <LandingContainer className="relative z-10 flex flex-col items-center">
         
-        {/* Section Eyebrow */}
-        <div className="mb-3 sm:mb-4 flex justify-center">
+        {/* Section Eyebrow with Scroll Reveal */}
+        <ScrollReveal className="mb-3 sm:mb-4 flex justify-center" duration={450} distance={12}>
           <div className="inline-flex items-center gap-2 rounded-full border border-[#24242B] bg-[#101014] px-3.5 py-1.5 text-xs font-semibold tracking-wider text-[#A1A1AA] uppercase select-none">
             <span className="h-1.5 w-1.5 rounded-full bg-[#6E60EE]" />
             <span>PRICING</span>
           </div>
-        </div>
+        </ScrollReveal>
 
-        {/* Section Headline */}
-        <div className="max-w-2xl text-center">
+        {/* Section Headline with Scroll Reveal */}
+        <ScrollReveal className="max-w-2xl text-center" delay={60} duration={500} distance={16}>
           <h2 className="text-3xl sm:text-5xl lg:text-[56px] font-black tracking-tight leading-[1.08]">
             <span className="text-[#F5F5F7] block">Simple storage.</span>
             <span className="text-[#6E60EE] block">Clear plans.</span>
@@ -105,86 +106,95 @@ export function StorageSection() {
           <p className="mt-3 sm:mt-4 max-w-lg mx-auto text-sm sm:text-base font-normal leading-relaxed text-[#A1A1AA]">
             Choose the plan that fits your needs. Upgrade anytime as you grow.
           </p>
-        </div>
+        </ScrollReveal>
 
-        {/* 3-Tier Pricing Grid with Shared Internal Rhythm */}
+        {/* 3-Tier Pricing Grid with Staggered Scroll Reveal */}
         <div className="mt-8 sm:mt-12 w-full grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 items-stretch max-w-6xl">
-          {PLANS.map((plan) => (
-            <div
+          {PLANS.map((plan, index) => (
+            <ScrollReveal
               key={plan.id}
-              className={`rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-colors ${
-                plan.isPopular
-                  ? 'border border-[#6E60EE] bg-[#141226]'
-                  : 'border border-[#24242B] bg-[#101014] hover:border-[#383842]'
-              }`}
+              delay={120 + index * 90}
+              duration={500}
+              distance={18}
+              className="flex"
             >
-              {/* Top Block: Reserved badge area, Title, Tagline, Metric, and CTA */}
-              <div>
-                {/* 1. Reserved Badge Row */}
-                <div className="h-6 mb-3 flex items-center">
-                  {plan.badge ? (
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#1D1935] text-[#6E60EE] text-[10.5px] font-bold uppercase tracking-wider">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#6E60EE]" />
-                      <span>{plan.badge}</span>
-                    </div>
-                  ) : (
-                    <div className="h-6" aria-hidden="true" />
-                  )}
-                </div>
-
-                {/* 2. Plan Title */}
-                <h3 className="text-xl sm:text-2xl font-bold text-[#F5F5F7] tracking-tight">
-                  {plan.name}
-                </h3>
-
-                {/* 3. Description */}
-                <p className="text-xs sm:text-sm text-[#71717A] mt-1 h-5 flex items-center">
-                  {plan.tagline}
-                </p>
-
-                {/* 4. Storage Amount & Label */}
-                <div className="mt-6 sm:mt-8">
-                  <div className="text-3xl sm:text-4xl font-extrabold text-[#F5F5F7] tracking-tight">
-                    {plan.storage}
+              <div
+                className={`w-full rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-colors duration-200 ${
+                  plan.isPopular
+                    ? 'border border-[#6E60EE] bg-[#141226]'
+                    : 'border border-[#24242B] bg-[#101014] hover:border-[#383842]'
+                }`}
+              >
+                {/* Top Block: Reserved badge area, Title, Tagline, Metric, and CTA */}
+                <div>
+                  {/* 1. Reserved Badge Row */}
+                  <div className="h-6 mb-3 flex items-center">
+                    {plan.badge ? (
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#1D1935] text-[#6E60EE] text-[10.5px] font-bold uppercase tracking-wider">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#6E60EE]" />
+                        <span>{plan.badge}</span>
+                      </div>
+                    ) : (
+                      <div className="h-6" aria-hidden="true" />
+                    )}
                   </div>
-                  <div className="text-xs text-[#71717A] mt-1 font-medium">
-                    {plan.storageLabel}
+
+                  {/* 2. Plan Title */}
+                  <h3 className="text-xl sm:text-2xl font-bold text-[#F5F5F7] tracking-tight">
+                    {plan.name}
+                  </h3>
+
+                  {/* 3. Description */}
+                  <p className="text-xs sm:text-sm text-[#71717A] mt-1 h-5 flex items-center">
+                    {plan.tagline}
+                  </p>
+
+                  {/* 4. Storage Amount & Label */}
+                  <div className="mt-6 sm:mt-8">
+                    <div className="text-3xl sm:text-4xl font-extrabold text-[#F5F5F7] tracking-tight">
+                      {plan.storage}
+                    </div>
+                    <div className="text-xs text-[#71717A] mt-1 font-medium">
+                      {plan.storageLabel}
+                    </div>
+                  </div>
+
+                  {/* 5. CTA Button */}
+                  <Link
+                    href={plan.cta.href}
+                    className={`w-full h-11 px-4 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 mt-6 transition-all duration-150 hover:scale-[1.01] active:scale-[0.98] ${
+                      plan.cta.primary
+                        ? 'bg-[#6E60EE] hover:bg-[#5E50DE] text-white shadow-xs'
+                        : 'bg-[#101014] border border-[#24242B] hover:border-[#383842] hover:bg-[#141419] text-[#F5F5F7]'
+                    }`}
+                  >
+                    <span>{plan.cta.text}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+
+                {/* 6. Divider & 7. Feature List */}
+                <div className="mt-6 pt-6 border-t border-[#24242B]">
+                  <div className="space-y-3.5 text-xs sm:text-sm text-[#A1A1AA]">
+                    {plan.features.map((feature, idx) => (
+                      <div key={idx} className="flex items-center gap-2.5">
+                        <Check className="w-4 h-4 text-[#6E60EE] shrink-0" />
+                        <span>{feature}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-
-                {/* 5. CTA Button */}
-                <Link
-                  href={plan.cta.href}
-                  className={`w-full h-11 px-4 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 mt-6 transition-all duration-150 active:scale-[0.98] ${
-                    plan.cta.primary
-                      ? 'bg-[#6E60EE] hover:bg-[#5E50DE] text-white shadow-xs'
-                      : 'bg-[#101014] border border-[#24242B] hover:border-[#383842] hover:bg-[#141419] text-[#F5F5F7]'
-                  }`}
-                >
-                  <span>{plan.cta.text}</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
               </div>
-
-              {/* 6. Divider & 7. Feature List */}
-              <div className="mt-6 pt-6 border-t border-[#24242B]">
-                <div className="space-y-3.5 text-xs sm:text-sm text-[#A1A1AA]">
-                  {plan.features.map((feature, idx) => (
-                    <div key={idx} className="flex items-center gap-2.5">
-                      <Check className="w-4 h-4 text-[#6E60EE] shrink-0" />
-                      <span>{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            </ScrollReveal>
           ))}
         </div>
 
-        {/* Bottom Guarantee Note */}
-        <p className="mt-8 sm:mt-10 text-xs sm:text-sm text-[#71717A] text-center font-normal">
-          You can upgrade or downgrade at any time. All plans include end-to-end encryption.
-        </p>
+        {/* Bottom Guarantee Note with Scroll Reveal */}
+        <ScrollReveal delay={420} duration={450} distance={10}>
+          <p className="mt-8 sm:mt-10 text-xs sm:text-sm text-[#71717A] text-center font-normal">
+            You can upgrade or downgrade at any time. All plans include end-to-end encryption.
+          </p>
+        </ScrollReveal>
       </LandingContainer>
     </section>
   )

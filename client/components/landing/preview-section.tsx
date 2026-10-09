@@ -26,6 +26,8 @@ import {
   Sparkles
 } from 'lucide-react'
 import { LandingContainer } from '@/components/landing/landing-container'
+import { ScrollReveal } from '@/components/landing/scroll-reveal'
+import { useInView } from '@/hooks/use-in-view'
 
 interface PreviewSlideItem {
   id: string
@@ -76,6 +78,7 @@ export function PreviewSection() {
   const [slideIndex, setSlideIndex] = useState(0)
   const [zoomLevel, setZoomLevel] = useState(100)
   const [rotation, setRotation] = useState(0)
+  const { ref: mockupRef } = useInView<HTMLDivElement>({ threshold: 0.15 })
 
   const currentSlide = PREVIEW_SLIDES[slideIndex]
 
@@ -98,8 +101,8 @@ export function PreviewSection() {
   return (
     <section id="preview" className="relative py-10 sm:py-14 lg:py-16 bg-[#0B0B0D] text-[#F5F5F7] overflow-hidden">
       <LandingContainer className="relative z-10">
-        {/* Section Header */}
-        <div className="max-w-2xl text-left">
+        {/* Section Header with Scroll Reveal */}
+        <ScrollReveal className="max-w-2xl text-left" duration={500} distance={16}>
           <h2 className="text-3xl sm:text-4xl lg:text-[38px] font-extrabold tracking-tight text-[#F5F5F7] leading-[1.15]">
             Preview without losing context.
           </h2>
@@ -108,10 +111,11 @@ export function PreviewSection() {
             Inspect PDFs, high-resolution imagery, and code directly inside your workspace.
             Navigate smoothly through files without having to download.
           </p>
-        </div>
+        </ScrollReveal>
 
         {/* CloudSpaceGo In-App Modal Preview Mockup */}
-        <div className="mt-5 sm:mt-6 w-full rounded-2xl border border-[#24242B] bg-[#0B0B0D] overflow-hidden relative shadow-2xl min-h-[520px] sm:min-h-[580px] flex flex-col justify-between select-none">
+        <ScrollReveal delay={120} duration={550} distance={18}>
+          <div ref={mockupRef} className="mt-5 sm:mt-6 w-full rounded-2xl border border-[#24242B] bg-[#0B0B0D] overflow-hidden relative shadow-2xl min-h-[520px] sm:min-h-[580px] flex flex-col justify-between select-none">
           
           {/* ======================================================== */}
           {/* BACKGROUND LAYER: Dimmed CloudSpaceGo App Interface      */}
@@ -321,7 +325,8 @@ export function PreviewSection() {
 
               {/* Main Artwork Preview Card (Exact Replica of Screenshot) */}
               <div
-                className="w-full max-w-[400px] sm:max-w-[440px] aspect-square rounded-2xl border border-[#2A2A35] bg-[#121217] shadow-2xl p-6 sm:p-9 flex flex-col justify-center relative overflow-hidden transition-all duration-300 select-none"
+                key={currentSlide.id}
+                className="w-full max-w-[400px] sm:max-w-[440px] aspect-square rounded-2xl border border-[#2A2A35] bg-[#121217] shadow-2xl p-6 sm:p-9 flex flex-col justify-center relative overflow-hidden transition-transform duration-200 ease-out select-none animate-hero-fade-in"
                 style={{
                   transform: `scale(${zoomLevel / 100}) rotate(${rotation}deg)`
                 }}
@@ -434,6 +439,7 @@ export function PreviewSection() {
             </div>
           </div>
         </div>
+        </ScrollReveal>
       </LandingContainer>
     </section>
   )

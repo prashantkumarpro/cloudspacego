@@ -120,7 +120,7 @@ export function HeroSection() {
         <div className="w-full max-w-3xl text-center flex flex-col items-center">
           
           {/* Eyebrow: CLOUD STORAGE */}
-          <div className="mb-3 sm:mb-4 flex justify-center">
+          <div className="mb-3 sm:mb-4 flex justify-center animate-hero-fade-in animation-delay-0">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#24242B] bg-[#101014] px-3.5 py-1.5 text-xs font-semibold tracking-wider text-[#A1A1AA] uppercase select-none">
               <span className="h-1.5 w-1.5 rounded-full bg-[#6E60EE]" />
               <span>CLOUD STORAGE</span>
@@ -131,32 +131,32 @@ export function HeroSection() {
           <div className="relative w-full max-w-3xl select-none">
             <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[76px] font-black tracking-tight text-[#F5F5F7] text-center flex flex-col items-center">
               {/* Line 1: YOUR FILES */}
-              <div className="font-extrabold uppercase tracking-tight leading-[0.95]">
+              <div className="font-extrabold uppercase tracking-tight leading-[0.95] animate-hero-fade-up animation-delay-80">
                 YOUR <span className="text-[#6E60EE]">FILES</span>
               </div>
 
               {/* Line 2: in one simple */}
-              <div className="font-serif italic font-normal text-[#F5F5F7] text-5xl sm:text-7xl md:text-[80px] lg:text-[86px] leading-[0.88] -my-1 sm:-my-2 font-[var(--font-instrument-serif)]">
+              <div className="font-serif italic font-normal text-[#F5F5F7] text-5xl sm:text-7xl md:text-[80px] lg:text-[86px] leading-[0.88] -my-1 sm:-my-2 font-[var(--font-instrument-serif)] animate-hero-fade-up animation-delay-160">
                 in one simple
               </div>
 
               {/* Line 3: SPACE. */}
-              <div className="font-black uppercase tracking-tight text-[#6E60EE] leading-[0.95]">
+              <div className="font-black uppercase tracking-tight text-[#6E60EE] leading-[0.95] animate-hero-fade-up animation-delay-240">
                 SPACE.
               </div>
             </h1>
           </div>
 
           {/* Subtitle */}
-          <p className="mt-3.5 sm:mt-4 max-w-md mx-auto text-sm sm:text-base font-normal leading-relaxed text-[#A1A1AA] text-center">
+          <p className="mt-3.5 sm:mt-4 max-w-md mx-auto text-sm sm:text-base font-normal leading-relaxed text-[#A1A1AA] text-center animate-hero-fade-up animation-delay-320">
             Store, organize, search, preview, and share your files<br className="hidden sm:inline" /> from one simple workspace.
           </p>
 
           {/* Hero CTAs */}
-          <div className="mt-5 sm:mt-6 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-3.5">
+          <div className="mt-5 sm:mt-6 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-3.5 animate-hero-fade-up animation-delay-400">
             <Link
               href="/register"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#6E60EE] px-6 py-2.5 sm:py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-[#5E50DE] active:scale-[0.98]"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#6E60EE] px-6 py-2.5 sm:py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-[#5E50DE] hover:scale-[1.01] active:scale-[0.98]"
             >
               <span>Get started free</span>
               <ArrowRight className="h-4 w-4" />
@@ -164,7 +164,7 @@ export function HeroSection() {
 
             <a
               href="#organize"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#24242B] bg-[#101014] px-5 sm:px-6 py-2.5 sm:py-3 text-sm font-medium text-[#F5F5F7] transition-all duration-150 hover:bg-[#141419] hover:border-[#383842] active:scale-[0.98]"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#24242B] bg-[#101014] px-5 sm:px-6 py-2.5 sm:py-3 text-sm font-medium text-[#F5F5F7] transition-all duration-150 hover:bg-[#141419] hover:border-[#383842] hover:scale-[1.01] active:scale-[0.98]"
             >
               <Play className="h-3.5 w-3.5 text-[#6E60EE] fill-[#6E60EE]/20" />
               <span>See how it works</span>
@@ -172,7 +172,7 @@ export function HeroSection() {
           </div>
 
           {/* Benefit Row */}
-          <div className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-y-2 gap-x-4 sm:gap-x-6 text-[11px] sm:text-xs">
+          <div className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-y-2 gap-x-4 sm:gap-x-6 text-[11px] sm:text-xs animate-hero-fade-up animation-delay-480">
             <div className="flex items-center gap-1.5">
               <Database className="w-3.5 h-3.5 text-[#6E60EE]" />
               <span className="text-[#A1A1AA]">Free 15 GB storage</span>
@@ -197,7 +197,7 @@ export function HeroSection() {
         {/* ========================================================================= */}
         {/* EXACT CLOUDSPACEGO DASHBOARD PRODUCT FRAME (MATCHING SCREENSHOT)           */}
         {/* ========================================================================= */}
-        <div className="relative mt-8 sm:mt-10 lg:mt-12 w-full z-20">
+        <div className="relative mt-8 sm:mt-10 lg:mt-12 w-full z-20 animate-hero-fade-up animation-delay-560">
           <div className="rounded-2xl border border-[#24242B] bg-[#0B0B0D] overflow-hidden shadow-2xl select-none">
             
             {/* Top Application Bar */}

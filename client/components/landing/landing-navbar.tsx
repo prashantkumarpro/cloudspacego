@@ -48,16 +48,16 @@ export function LandingNavbar() {
 
         {/* Desktop Navigation Links */}
         <nav className="hidden items-center gap-8 text-sm font-medium text-[#A1A1AA] md:flex">
-          <a href="#organize" className="transition-colors hover:text-[#F5F5F7]">
+          <a href="#organize" className="transition-colors duration-150 hover:text-[#F5F5F7]">
             Features
           </a>
-          <a href="#search" className="transition-colors hover:text-[#F5F5F7]">
+          <a href="#search" className="transition-colors duration-150 hover:text-[#F5F5F7]">
             How it works
           </a>
-          <a href="#sharing" className="transition-colors hover:text-[#F5F5F7]">
+          <a href="#sharing" className="transition-colors duration-150 hover:text-[#F5F5F7]">
             Security
           </a>
-          <a href="#storage" className="transition-colors hover:text-[#F5F5F7]">
+          <a href="#storage" className="transition-colors duration-150 hover:text-[#F5F5F7]">
             Pricing
           </a>
         </nav>
@@ -66,17 +66,17 @@ export function LandingNavbar() {
         <div className="hidden items-center gap-6 sm:flex">
           <Link
             href="/login"
-            className="text-sm font-medium text-[#A1A1AA] transition-colors hover:text-[#F5F5F7]"
+            className="text-sm font-medium text-[#A1A1AA] transition-colors duration-150 hover:text-[#F5F5F7]"
           >
             Log in
           </Link>
 
           <Link
             href="/register"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#7C6CFF] hover:text-[#9B8CFF] transition-colors group"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#7C6CFF] hover:text-[#9B8CFF] transition-all duration-150 group active:scale-[0.98]"
           >
             <span>Get started</span>
-            <ArrowRight className="w-4 h-4 text-[#7C6CFF] group-hover:text-[#9B8CFF] group-hover:translate-x-0.5 transition-all" />
+            <ArrowRight className="w-4 h-4 text-[#7C6CFF] group-hover:text-[#9B8CFF] group-hover:translate-x-0.5 transition-transform duration-150" />
           </Link>
         </div>
 
@@ -84,14 +84,14 @@ export function LandingNavbar() {
         <div className="flex items-center gap-3 sm:hidden">
           <Link
             href="/login"
-            className="text-xs font-medium text-[#A1A1AA] hover:text-[#F5F5F7]"
+            className="text-xs font-medium text-[#A1A1AA] hover:text-[#F5F5F7] transition-colors duration-150"
           >
             Log in
           </Link>
 
           <Link
             href="/register"
-            className="inline-flex items-center gap-1 text-xs font-semibold text-[#7C6CFF] hover:text-[#9B8CFF]"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-[#7C6CFF] hover:text-[#9B8CFF] transition-colors duration-150"
           >
             <span>Get started</span>
             <ArrowRight className="w-3 h-3" />
@@ -100,7 +100,7 @@ export function LandingNavbar() {
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             type="button"
-            className="inline-flex items-center justify-center rounded-lg p-2 text-[#A1A1AA] hover:bg-[#141419] hover:text-[#F5F5F7] focus:outline-none cursor-pointer ml-1"
+            className="inline-flex items-center justify-center rounded-lg p-2 text-[#A1A1AA] hover:bg-[#141419] hover:text-[#F5F5F7] focus:outline-none cursor-pointer ml-1 transition-colors duration-150 active:scale-95"
             aria-expanded={mobileMenuOpen}
             aria-label="Toggle navigation menu"
           >
