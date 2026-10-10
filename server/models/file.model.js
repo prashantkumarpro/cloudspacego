@@ -30,6 +30,10 @@ const fileSchema = new Schema(
     storageKey: {
       type: String,
       required: true,
+    },
+    isStarred: {
+      type: Boolean,
+      default: false
     }
   },
   {
@@ -38,11 +42,8 @@ const fileSchema = new Schema(
   }
 )
 
-// // Prevent duplicate file names in the same directory
-// fileSchema.index({ userId: 1, parentDirId: 1, name: 1 }, { unique: true })
-
-// // Fast lookup for files inside a directory
-// fileSchema.index({ userId: 1, parentDirId: 1 })
+// Index for user starred queries with pagination
+fileSchema.index({ userId: 1, isStarred: 1, createdAt: -1, _id: -1 })
 
 const File = model('File', fileSchema)
 export default File

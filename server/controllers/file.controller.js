@@ -408,6 +408,7 @@ export const getFiles = async (req, res, next) => {
           size: 1,
           parentDirId: 1,
           createdAt: 1,
+          isStarred: { $ifNull: ['$isStarred', false] },
           directory: {
             _id: '$directory._id',
             name: '$directory.name'
@@ -441,6 +442,212 @@ export const getFiles = async (req, res, next) => {
     })
   } catch (error) {
     next(error)
+  }
+}
+
+export const getStarredFiles = async (req, res, next) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit) : 20
+
+    if (limit < 1 || limit > 100) {
+      return res.status(400).json({
+        error: 'Limit must be between 1 and 100'
+      })
+    }
+
+    const cursor = req.query.cursor
+
+    const query = {
+      userId: req.user._id,
+      isStarred: true
+    }
+
+    if (cursor) {
+      let decodedCursor
+
+      try {
+        decodedCursor = decodeCursor(cursor)
+      } catch {
+        return res.status(400).json({
+          error: 'Invalid cursor'
+        })
+      }
+
+      const { createdAt, id } = decodedCursor
+
+      if (
+        !createdAt ||
+        !id ||
+        !mongoose.isValidObjectId(id) ||
+        Number.isNaN(new Date(createdAt).getTime())
+      ) {
+        return res.status(400).json({
+          error: 'Invalid cursor'
+        })
+      }
+
+      query.$or = [
+        {
+          createdAt: {
+            $lt: new Date(createdAt)
+          }
+        },
+        {
+          createdAt: new Date(createdAt),
+          _id: {
+            $lt: new mongoose.Types.ObjectId(id)
+          }
+        }
+      ]
+    }
+
+    const files = await File.aggregate([
+      {
+        $match: query
+      },
+      {
+        $sort: {
+          createdAt: -1,
+          _id: -1
+        }
+      },
+      {
+        $limit: limit + 1
+      },
+      {
+        $lookup: {
+          from: 'directories',
+          let: {
+            parentDirId: '$parentDirId',
+            userId: '$userId'
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {
+                      $eq: ['$_id', '$$parentDirId']
+                    },
+                    {
+                      $eq: ['$userId', '$$userId']
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              $project: {
+                _id: 1,
+                name: 1
+              }
+            }
+          ],
+          as: 'directory'
+        }
+      },
+      {
+        $unwind: {
+          path: '$directory',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          extension: 1,
+          size: 1,
+          parentDirId: 1,
+          createdAt: 1,
+          isStarred: { $ifNull: ['$isStarred', false] },
+          directory: {
+            _id: '$directory._id',
+            name: '$directory.name'
+          }
+        }
+      }
+    ])
+
+    const hasMore = files.length > limit
+
+    const data = files.slice(0, limit)
+
+    let nextCursor = null
+
+    if (hasMore) {
+      const lastFile = data[data.length - 1]
+
+      nextCursor = createCursor({
+        createdAt: lastFile.createdAt,
+        id: lastFile._id.toString()
+      })
+    }
+
+    return res.status(200).json({
+      data,
+      pagination: {
+        limit,
+        hasMore,
+        nextCursor
+      }
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const toggleStarFile = async (req, res, next) => {
+  const { id } = req.params
+
+  try {
+    const file = await File.findById(id)
+
+    if (!file) {
+      return res.status(404).json({
+        error: 'File not found'
+      })
+    }
+
+    // Verify ownership
+    if (file.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        error: 'Unauthorized: You do not have permission to modify this file'
+      })
+    }
+
+    // Explicit desired state if provided in request body, otherwise toggle
+    let targetState
+    if (typeof req.body?.isStarred === 'boolean') {
+      targetState = req.body.isStarred
+    } else if (req.body?.isStarred !== undefined && req.body?.isStarred !== null) {
+      targetState = Boolean(req.body.isStarred)
+    } else {
+      targetState = !Boolean(file.isStarred)
+    }
+
+    // Metadata-only update without touching Cloudflare R2
+    file.isStarred = targetState
+    await file.save()
+
+    return res.status(200).json({
+      success: true,
+      message: targetState ? 'File starred successfully' : 'File unstarred successfully',
+      file: {
+        id: file._id,
+        _id: file._id,
+        name: file.name,
+        extension: file.extension,
+        size: file.size,
+        parentDirId: file.parentDirId,
+        userId: file.userId,
+        createdAt: file.createdAt,
+        updatedAt: file.updatedAt,
+        isStarred: file.isStarred
+      }
+    })
+  } catch (err) {
+    next(err)
   }
 }
 

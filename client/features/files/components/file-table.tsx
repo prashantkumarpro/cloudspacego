@@ -155,6 +155,8 @@ export function FileTable({
               ? formatFileSize(fileSizeNum)
               : '—'
 
+          const isStarred = Boolean(file.starred ?? file.isStarred)
+
           return (
             <div
               key={fileId}
@@ -226,23 +228,23 @@ export function FileTable({
               >
                 {onToggleStar && (
                   <Tooltip
-                    content={file.starred ? 'Unstar' : 'Star'}
+                    content={isStarred ? 'Unstar' : 'Star'}
                     side='top'
                   >
                     <button
                       onClick={() => onToggleStar(fileId)}
                       className={cn(
                         'w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6E60EE]/50 active:scale-95',
-                        file.starred
+                        isStarred
                           ? 'opacity-100'
                           : 'opacity-0 group-hover:opacity-100 hover:bg-input-bg'
                       )}
-                      aria-label={file.starred ? 'Unstar file' : 'Star file'}
+                      aria-label={isStarred ? 'Unstar file' : 'Star file'}
                     >
                       <Star
                         className={cn(
                           'w-4 h-4',
-                          file.starred
+                          isStarred
                             ? 'fill-[#6E60EE] text-[#6E60EE]'
                             : 'text-text-muted'
                         )}

@@ -13,6 +13,7 @@ import { StorageUpgradeModal } from '@/features/storage/components/storage-upgra
 import DashboardOverview from '@/features/dashboard/components/dashboard-overview'
 import MyFilesView from '@/features/files/components/my-files-view'
 import SettingsView from '@/features/settings/components/settings-view'
+import StarredView from '@/features/files/components/starred-view'
 
 export default function DashboardPage () {
   const { currentSection, activeModal, setActiveModal } = useApp()
@@ -32,7 +33,7 @@ export default function DashboardPage () {
       {currentSection === 'Recent' && <FileList title='Recent Assets' />}
 
       {/* VIEW: Starred */}
-      {currentSection === 'Starred' && <FileList title='Starred Assets' />}
+      {currentSection === 'Starred' && <StarredView />}
 
       {/* VIEW: Trash */}
       {currentSection === 'Trash' && <TrashView />}

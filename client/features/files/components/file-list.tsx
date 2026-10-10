@@ -51,6 +51,7 @@ export type UnifiedFileItem = {
   parentFolderId?: string | null
   parentDirId?: string | null
   starred?: boolean
+  isStarred?: boolean
   deleted?: boolean
   createdAt?: string
   updatedAt?: string
@@ -72,6 +73,7 @@ export interface FileListProps {
   emptySubtitle?: string
   onFileClick?: (file: UnifiedFileItem) => void
   onFolderClick?: (folderId: string) => void
+  onToggleStar?: (fileId: string) => void
   isLoading?: boolean
   isLoadingMore?: boolean
   hasMore?: boolean
@@ -108,6 +110,7 @@ export function FileList({
   emptySubtitle,
   onFileClick,
   onFolderClick,
+  onToggleStar: propOnToggleStar,
   isLoading = false,
   isLoadingMore = false,
   hasMore = false,
@@ -219,6 +222,9 @@ export function FileList({
   const displayList = React.useMemo(() => {
     if (customFiles !== undefined) {
       let list = (customFiles as UnifiedFileItem[]) || []
+      if (currentSection === 'Starred') {
+        list = list.filter(f => (f.starred ?? f.isStarred) !== false)
+      }
       if (searchQuery) {
         list = list.filter(f =>
           f.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -250,7 +256,7 @@ export function FileList({
           f.parentDirId === activeFolderId
       )
     } else if (currentSection === 'Starred') {
-      result = result.filter(f => f.starred)
+      result = result.filter(f => Boolean(f.starred ?? f.isStarred))
     } else if (currentSection === 'Shared') {
       result = result.filter(
         f => f.owner !== 'Prashant' || (f.sharedWith && f.sharedWith.length > 0)
@@ -339,9 +345,36 @@ export function FileList({
     }
   }
 
+  const handleToggleStar = async (fileId: string) => {
+    const file = displayList.find(f => (f.id || f._id || '').toString() === fileId.toString())
+    const currentlyStarred = file ? Boolean(file.starred ?? file.isStarred) : undefined
+    const targetState = currentlyStarred !== undefined ? !currentlyStarred : undefined
+
+    try {
+      const newStarred = await toggleStar(fileId, targetState)
+      if (file) {
+        toast.success(
+          newStarred ? 'Starred' : 'Unstarred',
+          newStarred
+            ? `Added "${file.name}" to starred.`
+            : `Removed "${file.name}" from starred.`
+        )
+      }
+      if (propOnToggleStar) {
+        propOnToggleStar(fileId)
+      }
+    } catch (err) {
+      toast.error(
+        'Failed to update star',
+        file ? `Could not update star status for "${file.name}".` : 'Could not update star status.'
+      )
+    }
+  }
+
   const getDropdownItems = (file: UnifiedFileItem): ActionMenuItem[] => {
     const fileId = file.id || file._id || ''
     const isFolder = file.type === 'folder'
+    const isStarred = Boolean(file.starred ?? file.isStarred)
 
     return [
       {
@@ -378,8 +411,8 @@ export function FileList({
         icon: <FolderInput className='w-4 h-4 text-text-secondary' />
       },
       {
-        label: file.starred ? 'Unstar' : 'Star',
-        onClick: () => toggleStar(fileId),
+        label: isStarred ? 'Unstar' : 'Star',
+        onClick: () => handleToggleStar(fileId),
         icon: <Star className='w-4 h-4 text-text-secondary' />
       },
       {
@@ -491,7 +524,7 @@ export function FileList({
               onRename={file => setRenameTarget(file)}
               onMove={file => setMoveTarget(file)}
               onDetails={file => setDetailsTarget(file)}
-              onToggleStar={fileId => toggleStar(fileId)}
+              onToggleStar={fileId => handleToggleStar(fileId)}
               onDelete={file => handleDeleteItem(file)}
             />
           ) : (
@@ -500,7 +533,7 @@ export function FileList({
               files={displayList}
               onFileClick={handleOpenFile}
               onFolderClick={onFolderClick ? onFolderClick : setActiveFolderId}
-              onToggleStar={fileId => toggleStar(fileId)}
+              onToggleStar={fileId => handleToggleStar(fileId)}
               customActions={getDropdownItems}
               showHeader={showHeader}
               allFiles={globalFiles as UnifiedFileItem[]}

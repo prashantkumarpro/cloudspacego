@@ -6,7 +6,9 @@ import {
   downloadFile,
   getFileBlob,
   getFiles,
+  getStarredFiles,
   renameFile,
+  toggleStarFile,
   uploadFile,
 } from "../api";
 import type { FileItem, RenameFileData, UploadFileData } from "../types";
@@ -41,6 +43,7 @@ interface UseFilesReturn {
   isRenaming: boolean;
   isDeleting: boolean;
   isDownloading: boolean;
+  isStarring: boolean;
   error: string | null;
   upload: (
     data: UploadFileData,
@@ -56,6 +59,7 @@ interface UseFilesReturn {
     filename?: string
   ) => Promise<void>;
   getBlob: (id: string) => Promise<Blob>;
+  toggleStar: (id: string, isStarred?: boolean) => Promise<boolean>;
 }
 
 export function useFiles(): UseFilesReturn {
@@ -63,8 +67,10 @@ export function useFiles(): UseFilesReturn {
   const [isRenaming, setIsRenaming] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
+  const [isStarring, setIsStarring] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  const starringIdsRef = useRef<Set<string>>(new Set());
   const isUploading = uploadContext ? uploadContext.isUploading : false;
 
   const upload = useCallback(
@@ -161,23 +167,51 @@ export function useFiles(): UseFilesReturn {
     }
   }, []);
 
+  const toggleStar = useCallback(
+    async (id: string, isStarred?: boolean): Promise<boolean> => {
+      if (starringIdsRef.current.has(id)) {
+        return false;
+      }
+      try {
+        starringIdsRef.current.add(id);
+        setIsStarring(true);
+        setError(null);
+
+        const res = await toggleStarFile(id, isStarred);
+        notifyFilesChanged();
+        return res.file?.isStarred ?? true;
+      } catch (err) {
+        console.error("Failed to toggle star file:", err);
+        setError("Failed to update star status.");
+        throw err;
+      } finally {
+        starringIdsRef.current.delete(id);
+        setIsStarring(starringIdsRef.current.size > 0);
+      }
+    },
+    []
+  );
+
   return {
     isUploading,
     isRenaming,
     isDeleting,
     isDownloading,
+    isStarring,
     error,
     upload,
     rename,
     remove,
     download,
     getBlob,
+    toggleStar,
   };
 }
 
 export interface UseInfiniteFilesOptions {
   limit?: number;
   enabled?: boolean;
+  starred?: boolean;
 }
 
 export interface UseInfiniteFilesReturn {
@@ -188,12 +222,13 @@ export interface UseInfiniteFilesReturn {
   error: string | null;
   loadMore: () => Promise<void>;
   refresh: () => Promise<void>;
+  setFiles: React.Dispatch<React.SetStateAction<FileItem[]>>;
 }
 
 export function useInfiniteFiles(
   options: UseInfiniteFilesOptions = {}
 ): UseInfiniteFilesReturn {
-  const { limit = 20, enabled = true } = options;
+  const { limit = 20, enabled = true, starred = false } = options;
 
   const [files, setFiles] = useState<FileItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(enabled);
@@ -221,7 +256,8 @@ export function useInfiniteFiles(
       });
       setError(null);
 
-      const response = await getFiles({ limit });
+      const fetchFn = starred ? getStarredFiles : getFiles;
+      const response = await fetchFn({ limit });
 
       setFiles(response.data);
       nextCursorRef.current = response.pagination.nextCursor;
@@ -234,7 +270,7 @@ export function useInfiniteFiles(
       setIsLoading(false);
       isFetchingRef.current = false;
     }
-  }, [enabled, limit]);
+  }, [enabled, limit, starred]);
 
   const loadMore = useCallback(async () => {
     const cursor = nextCursorRef.current;
@@ -254,7 +290,8 @@ export function useInfiniteFiles(
       setIsLoadingMore(true);
       setError(null);
 
-      const response = await getFiles({
+      const fetchFn = starred ? getStarredFiles : getFiles;
+      const response = await fetchFn({
         cursor,
         limit,
       });
@@ -278,7 +315,7 @@ export function useInfiniteFiles(
       isFetchingRef.current = false;
       inFlightCursorRef.current = null;
     }
-  }, [enabled, limit]);
+  }, [enabled, limit, starred]);
 
   useEffect(() => {
     fetchInitial();
@@ -301,6 +338,7 @@ export function useInfiniteFiles(
     error,
     loadMore,
     refresh: fetchInitial,
+    setFiles,
   };
 }
 

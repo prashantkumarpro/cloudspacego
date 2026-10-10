@@ -73,6 +73,8 @@ export function FileCard({
 }: FileCardProps) {
   const metadataText = getFileMetadata(file)
 
+  const isStarred = Boolean(file.starred ?? file.isStarred)
+
   // Default actions for standard file vs trash file
   const defaultActions: ActionMenuItem[] = isTrash
     ? [
@@ -154,7 +156,7 @@ export function FileCard({
         ...(onToggleStar
           ? [
               {
-                label: file.starred ? 'Unstar' : 'Star',
+                label: isStarred ? 'Unstar' : 'Star',
                 onClick: onToggleStar,
                 icon: <Star className='w-4 h-4 text-text-secondary' />
               }
@@ -204,7 +206,7 @@ export function FileCard({
           className='flex items-center gap-1 shrink-0 -mr-1'
           onClick={e => e.stopPropagation()}
         >
-          {file.starred && !isTrash && (
+          {isStarred && !isTrash && (
             <Star className='w-4 h-4 text-[#6E60EE] fill-[#6E60EE] shrink-0' />
           )}
 

@@ -15,6 +15,13 @@ export interface FileItem {
     updatedAt?: string;
     size?: number;
     directory?: DirectoryReference;
+    isStarred?: boolean;
+    starred?: boolean;
+}
+
+export interface ToggleStarResponse extends FileApiResponse {
+    success?: boolean;
+    file?: FileItem;
 }
 
 

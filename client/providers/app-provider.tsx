@@ -1,12 +1,13 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { FileItem, ActivityItem, StorageStats, SidebarSection, FileType } from '../types';
 import { INITIAL_FILES, INITIAL_ACTIVITIES, INITIAL_STORAGE } from '../lib/constants/mock-data';
 import { ToastProvider } from './toast-provider';
 import { UploadProvider } from './upload-provider';
 import { getStorageQuota, type StorageQuotaResponse } from '@/features/storage/api';
-import { subscribeFilesChanged } from '@/features/files/hooks/use-files';
+import { subscribeFilesChanged, notifyFilesChanged } from '@/features/files/hooks/use-files';
+import { toggleStarFile } from '@/features/files/api';
 
 interface AppContextType {
   currentSection: SidebarSection;
@@ -22,7 +23,7 @@ interface AppContextType {
   // Actions
   uploadFile: (name: string, size: number, type: FileType, folderId?: string | null) => void;
   createFolder: (name: string, parentId?: string | null) => string;
-  toggleStar: (id: string) => void;
+  toggleStar: (id: string, targetState?: boolean) => Promise<boolean>;
   deleteFile: (id: string) => void;
   restoreFile: (id: string) => void;
   deletePermanently: (id: string) => void;
@@ -246,17 +247,54 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return folderId;
   }, [activeFolderId, addActivity]);
 
-  const toggleStar = useCallback((id: string) => {
-    setFiles(prev =>
-      prev.map(f => {
-        if (f.id === id) {
-          const newStarredState = !f.starred;
-          addActivity('star', f.name, newStarredState ? `You starred: ${f.name}` : `You unstarred: ${f.name}`);
-          return { ...f, starred: newStarredState, updatedAt: new Date().toISOString() };
-        }
-        return f;
-      })
-    );
+  const starringIdsRef = useRef<Set<string>>(new Set());
+
+  const toggleStar = useCallback(async (id: string, targetState?: boolean): Promise<boolean> => {
+    if (starringIdsRef.current.has(id)) {
+      return false;
+    }
+
+    const isMock = typeof id === 'string' && id.startsWith('file-');
+
+    if (isMock) {
+      let nextState = false;
+      setFiles(prev =>
+        prev.map(f => {
+          if (f.id === id) {
+            nextState = targetState !== undefined ? targetState : !f.starred;
+            addActivity('star', f.name, nextState ? `You starred: ${f.name}` : `You unstarred: ${f.name}`);
+            return { ...f, starred: nextState, isStarred: nextState, updatedAt: new Date().toISOString() };
+          }
+          return f;
+        })
+      );
+      return nextState;
+    }
+
+    try {
+      starringIdsRef.current.add(id);
+      const res = await toggleStarFile(id, targetState);
+      const newStarred = res.file?.isStarred ?? (targetState !== undefined ? targetState : true);
+
+      setFiles(prev =>
+        prev.map(f => {
+          const fid = f.id || ('_id' in f ? String((f as { _id?: string })._id) : '');
+          if (fid === id) {
+            addActivity('star', f.name, newStarred ? `You starred: ${f.name}` : `You unstarred: ${f.name}`);
+            return { ...f, starred: newStarred, isStarred: newStarred, updatedAt: new Date().toISOString() };
+          }
+          return f;
+        })
+      );
+
+      notifyFilesChanged();
+      return newStarred;
+    } catch (err) {
+      console.error('Failed to toggle star:', err);
+      throw err;
+    } finally {
+      starringIdsRef.current.delete(id);
+    }
   }, [addActivity]);
 
   const deleteFile = useCallback((id: string) => {

@@ -4,6 +4,7 @@ import type {
     GetFilesParams,
     GetFilesResponse,
     RenameFileData,
+    ToggleStarResponse,
     UploadFileData,
 } from "./types";
 
@@ -21,6 +22,7 @@ export const getFiles = async (
             createdAt?: string;
             updatedAt?: string;
             size?: number;
+            isStarred?: boolean;
             directory?: {
                 id?: string;
                 _id?: string;
@@ -45,6 +47,8 @@ export const getFiles = async (
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
         size: typeof item.size === 'number' ? item.size : (typeof item.size === 'string' && !isNaN(Number(item.size)) ? Number(item.size) : item.size),
+        isStarred: Boolean(item.isStarred),
+        starred: Boolean(item.isStarred),
         directory: item.directory
             ? {
                   id: (item.directory.id || item.directory._id || "").toString(),
@@ -57,6 +61,70 @@ export const getFiles = async (
         data: normalizedData,
         pagination: response.data.pagination,
     };
+};
+
+export const getStarredFiles = async (
+    params?: GetFilesParams
+): Promise<GetFilesResponse> => {
+    const response = await apiClient.get<{
+        data: Array<{
+            id?: string;
+            _id?: string;
+            name: string;
+            extension: string;
+            parentDirId?: string;
+            userId?: string;
+            createdAt?: string;
+            updatedAt?: string;
+            size?: number;
+            isStarred?: boolean;
+            directory?: {
+                id?: string;
+                _id?: string;
+                name: string;
+            };
+        }>;
+        pagination: {
+            limit: number;
+            hasMore: boolean;
+            nextCursor: string | null;
+        };
+    }>("/file/starred", {
+        params,
+    });
+
+    const normalizedData = (response.data.data || []).map((item) => ({
+        id: (item.id || item._id || "").toString(),
+        name: item.name,
+        extension: item.extension,
+        parentDirId: item.parentDirId,
+        userId: item.userId,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        size: typeof item.size === 'number' ? item.size : (typeof item.size === 'string' && !isNaN(Number(item.size)) ? Number(item.size) : item.size),
+        isStarred: Boolean(item.isStarred),
+        starred: Boolean(item.isStarred),
+        directory: item.directory
+            ? {
+                  id: (item.directory.id || item.directory._id || "").toString(),
+                  name: item.directory.name,
+              }
+            : undefined,
+    }));
+
+    return {
+        data: normalizedData,
+        pagination: response.data.pagination,
+    };
+};
+
+export const toggleStarFile = async (
+    id: string,
+    isStarred?: boolean
+): Promise<ToggleStarResponse> => {
+    const body = isStarred !== undefined ? { isStarred } : {};
+    const response = await apiClient.patch<ToggleStarResponse>(`/file/${id}/star`, body);
+    return response.data;
 };
 
 
