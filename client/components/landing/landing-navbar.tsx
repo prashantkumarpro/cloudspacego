@@ -6,18 +6,68 @@ import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
 import { LandingContainer } from '@/components/landing/landing-container'
 
+interface NavItem {
+  label: string
+  href: string
+}
+
+const NAV_ITEMS: NavItem[] = [
+  { label: 'FEATURES', href: '#organize' },
+  { label: 'HOW IT WORKS', href: '#search' },
+  { label: 'SECURITY', href: '#sharing' },
+  { label: 'PRICING', href: '#storage' },
+]
+
 export function LandingNavbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [activeSection, setActiveSection] = useState<string>('')
 
   useEffect(() => {
     const handleScroll = () => {
       const scrolled = window.scrollY > 10
       setIsScrolled((prev) => (prev !== scrolled ? scrolled : prev))
+      if (window.scrollY < 200) {
+        setActiveSection('')
+      }
     }
     handleScroll()
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  useEffect(() => {
+    const sections = ['organize', 'search', 'sharing', 'storage']
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(`#${entry.target.id}`)
+          }
+        })
+      },
+      {
+        rootMargin: '-20% 0px -60% 0px',
+        threshold: 0,
+      }
+    )
+
+    sections.forEach((id) => {
+      const el = document.getElementById(id)
+      if (el) observer.observe(el)
+    })
+
+    const handleHashChange = () => {
+      if (window.location.hash) {
+        setActiveSection(window.location.hash)
+      }
+    }
+    window.addEventListener('hashchange', handleHashChange)
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange)
+      observer.disconnect()
+    }
   }, [])
 
   useEffect(() => {
@@ -48,7 +98,7 @@ export function LandingNavbar() {
       }`}
     >
       <LandingContainer className="grid grid-cols-2 md:grid-cols-[1fr_auto_1fr] items-center h-16">
-        {/* Left: Brand Logo */}
+        {/* Left: Brand Logo (Typography unchanged) */}
         <div className="flex items-center justify-start">
           <Link
             href="/"
@@ -71,42 +121,34 @@ export function LandingNavbar() {
           </Link>
         </div>
 
-        {/* Center: Desktop Navigation Links */}
-        <nav className="hidden items-center justify-center gap-7 lg:gap-8 text-[13.5px] font-medium text-[#A1A1AA] md:flex">
-          <a
-            href="#organize"
-            className="transition-colors duration-150 hover:text-[#F5F5F7] focus-visible:outline-none focus-visible:text-[#F5F5F7]"
-          >
-            Features
-          </a>
-          <a
-            href="#search"
-            className="transition-colors duration-150 hover:text-[#F5F5F7] focus-visible:outline-none focus-visible:text-[#F5F5F7]"
-          >
-            How it works
-          </a>
-          <a
-            href="#sharing"
-            className="transition-colors duration-150 hover:text-[#F5F5F7] focus-visible:outline-none focus-visible:text-[#F5F5F7]"
-          >
-            Security
-          </a>
-          <a
-            href="#storage"
-            className="transition-colors duration-150 hover:text-[#F5F5F7] focus-visible:outline-none focus-visible:text-[#F5F5F7]"
-          >
-            Pricing
-          </a>
+        {/* Center: Desktop Navigation Links (Uppercase, Plus Jakarta Sans, restrained medium weight, compact size, subtle tracking) */}
+        <nav className="hidden items-center justify-center gap-7 lg:gap-8 font-sans md:flex">
+          {NAV_ITEMS.map((item) => {
+            const isActive = activeSection === item.href
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                className={`text-xs font-medium uppercase tracking-wider transition-colors duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#6E60EE] focus-visible:text-[#F5F5F7] rounded-sm py-1 px-0.5 ${
+                  isActive
+                    ? 'text-[#6E60EE]'
+                    : 'text-[#A1A1AA] hover:text-[#F5F5F7]'
+                }`}
+              >
+                {item.label}
+              </a>
+            )
+          })}
         </nav>
 
         {/* Right: Desktop GitHub Capsule + Mobile Hamburger Control */}
         <div className="flex items-center justify-end">
-          {/* Desktop: Capsule-style GitHub Button */}
+          {/* Desktop: Capsule-style GitHub Button (Normal Title Case "GitHub") */}
           <a
             href="https://github.com/prashantkumarpro/cloudspacego"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden md:inline-flex items-center gap-2 h-9 px-3.5 rounded-full border border-[#24242B] bg-[#141419] text-[13px] font-medium text-[#A1A1AA] transition-all duration-150 hover:border-[#383842] hover:bg-[#181820] hover:text-[#F5F5F7] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6E60EE]"
+            className="hidden md:inline-flex items-center gap-2 h-9 px-3.5 rounded-full border border-[#24242B] bg-[#141419] font-sans text-xs font-medium text-[#A1A1AA] transition-all duration-150 hover:border-[#383842] hover:bg-[#181820] hover:text-[#F5F5F7] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6E60EE]"
             aria-label="GitHub Repository"
           >
             <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
@@ -152,49 +194,38 @@ export function LandingNavbar() {
       >
         <div className="mobile-menu-dropdown-inner">
           <div className="border-b border-[#24242B] bg-[#0B0B0D] px-5 pt-2 pb-5 text-[#F5F5F7] shadow-2xl shadow-black/80">
-            {/* Main Navigation Links */}
-            <div className="flex flex-col space-y-0.5 pt-1 pb-2">
-              <a
-                href="#organize"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#A1A1AA] hover:bg-[#141419] hover:text-[#F5F5F7] transition-colors active:scale-[0.98]"
-              >
-                Features
-              </a>
-              <a
-                href="#search"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#A1A1AA] hover:bg-[#141419] hover:text-[#F5F5F7] transition-colors active:scale-[0.98]"
-              >
-                How it works
-              </a>
-              <a
-                href="#sharing"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#A1A1AA] hover:bg-[#141419] hover:text-[#F5F5F7] transition-colors active:scale-[0.98]"
-              >
-                Security
-              </a>
-              <a
-                href="#storage"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#A1A1AA] hover:bg-[#141419] hover:text-[#F5F5F7] transition-colors active:scale-[0.98]"
-              >
-                Pricing
-              </a>
+            {/* Main Navigation Links (Matching Typography System: Uppercase, Plus Jakarta Sans, Medium Weight, Compact Size, Subtle Tracking) */}
+            <div className="flex flex-col space-y-1 pt-1 pb-2 font-sans">
+              {NAV_ITEMS.map((item) => {
+                const isActive = activeSection === item.href
+                return (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center rounded-lg px-3.5 py-2.5 text-xs font-medium uppercase tracking-wider transition-colors active:scale-[0.98] ${
+                      isActive
+                        ? 'text-[#6E60EE] bg-[#1D1935]/50'
+                        : 'text-[#A1A1AA] hover:bg-[#141419] hover:text-[#F5F5F7]'
+                    }`}
+                  >
+                    {item.label}
+                  </a>
+                )
+              })}
             </div>
 
             {/* Subtle Divider */}
-            <div className="border-t border-[#24242B] my-2" />
+            <div className="border-t border-[#24242B] my-2.5" />
 
-            {/* Mobile Capsule-style GitHub Button */}
+            {/* Mobile Capsule-style GitHub Button (Normal Title Case "GitHub") */}
             <div className="pt-1 px-1">
               <a
                 href="https://github.com/prashantkumarpro/cloudspacego"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setMobileMenuOpen(false)}
-                className="inline-flex w-full h-10 items-center justify-center gap-2 rounded-full border border-[#24242B] bg-[#141419] px-4 text-xs sm:text-[13px] font-medium text-[#A1A1AA] transition-all duration-150 hover:border-[#383842] hover:bg-[#181820] hover:text-[#F5F5F7] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6E60EE]"
+                className="inline-flex w-full h-10 items-center justify-center gap-2 rounded-full border border-[#24242B] bg-[#141419] px-4 font-sans text-xs font-medium text-[#A1A1AA] transition-all duration-150 hover:border-[#383842] hover:bg-[#181820] hover:text-[#F5F5F7] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6E60EE]"
                 aria-label="GitHub Repository"
               >
                 <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">

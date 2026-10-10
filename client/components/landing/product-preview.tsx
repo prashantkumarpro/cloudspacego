@@ -487,7 +487,7 @@ export function ProductPreview() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-card-border bg-card-bg px-3 py-1.5 text-xs font-semibold text-foreground shadow-2xs hover:border-card-border/80 hover:bg-input-bg transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-card-border bg-card-bg px-3.5 py-1.5 text-xs font-semibold text-foreground shadow-2xs hover:border-card-border/80 hover:bg-input-bg transition-all cursor-pointer"
                 >
                   <FolderPlus className="h-3.5 w-3.5 text-[#6E60EE]" />
                   <span>New Folder</span>
@@ -495,7 +495,7 @@ export function ProductPreview() {
 
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-[#6E60EE] px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-[#6052E6] transition-all cursor-pointer active:scale-95"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[#6E60EE] px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-[#6052E6] transition-all cursor-pointer active:scale-95"
                 >
                   <Upload className="h-3.5 w-3.5" />
                   <span>Upload File</span>

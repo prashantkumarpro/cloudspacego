@@ -162,7 +162,7 @@ export function ShareSection() {
                   <button
                     type="button"
                     onClick={handleCopy}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#6E60EE] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#5F52DE] shadow-xs active:scale-[0.98] transition-all cursor-pointer shrink-0"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-[#6E60EE] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#5F52DE] shadow-xs active:scale-[0.98] transition-all cursor-pointer shrink-0"
                   >
                     {copied ? <Check className="w-3.5 h-3.5 text-white" /> : <Link2 className="w-3.5 h-3.5" />}
                     <span>{copied ? 'Copied!' : 'Copy link'}</span>
@@ -194,7 +194,7 @@ export function ShareSection() {
                     <button
                       type="submit"
                       disabled={!inviteEmail.trim()}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-[#24242B] bg-[#141419] px-3.5 py-2 text-xs font-semibold text-[#F5F5F7] hover:bg-[#1A1A22] hover:border-[#383842] disabled:opacity-40 transition-all cursor-pointer shrink-0"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-[#24242B] bg-[#141419] px-3.5 py-2 text-xs font-semibold text-[#F5F5F7] hover:bg-[#1A1A22] hover:border-[#383842] disabled:opacity-40 transition-all cursor-pointer shrink-0"
                     >
                       <UserPlus className="w-3.5 h-3.5 text-[#6E60EE]" />
                       <span>Invite</span>
@@ -367,7 +367,7 @@ export function ShareSection() {
                 </p>
                 <button
                   type="button"
-                  className="ml-auto inline-flex items-center justify-center rounded-xl bg-[#6E60EE] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#5F52DE] shadow-xs active:scale-[0.98] transition-all cursor-pointer"
+                  className="ml-auto inline-flex items-center justify-center rounded-full bg-[#6E60EE] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#5F52DE] shadow-xs active:scale-[0.98] transition-all cursor-pointer"
                 >
                   Done
                 </button>
