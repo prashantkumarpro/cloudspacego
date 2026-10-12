@@ -46,6 +46,7 @@ export interface FileShareItem {
     role: 'viewer' | 'editor';
     status: 'active' | 'revoked';
     sharedAt: string;
+    notificationStatus?: 'pending' | 'sent' | 'failed';
     recipient: ShareRecipientInfo;
 }
 
@@ -66,6 +67,7 @@ export interface ShareFileResponse {
         role: 'viewer' | 'editor';
         status: string;
         sharedAt: string;
+        notificationStatus?: 'pending' | 'sent' | 'failed';
         recipient: ShareRecipientInfo;
     };
 }

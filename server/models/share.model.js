@@ -33,6 +33,19 @@ const shareSchema = new Schema(
       type: Date,
       default: Date.now,
       required: true
+    },
+    notificationStatus: {
+      type: String,
+      enum: ['pending', 'sent', 'failed'],
+      default: 'pending'
+    },
+    notificationError: {
+      type: String,
+      default: null
+    },
+    notificationSentAt: {
+      type: Date,
+      default: null
     }
   },
   {

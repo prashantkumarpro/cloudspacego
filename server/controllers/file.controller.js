@@ -13,6 +13,10 @@ import {
 
 import { getFile as getStoredFile, deleteFile as deleteStoredFile } from '../services/storage.service.js'
 import { uploadFile } from '../services/storage.service.js'
+import {
+  dispatchShareEmailAndUpdateRecord,
+  retryShareNotification
+} from '../services/shareEmailService.js'
 
 export const createFile = async (req, res) => {
   let fileId = null
@@ -1003,6 +1007,7 @@ export const shareFile = async (req, res, next) => {
 
     let share
     let statusCode = 201
+    let shouldNotify = false
 
     if (existingShare) {
       if (existingShare.status === 'active') {
@@ -1013,16 +1018,22 @@ export const shareFile = async (req, res, next) => {
         }
         existingShare.role = role
         existingShare.sharedAt = new Date()
+        existingShare.notificationStatus = 'pending'
+        existingShare.notificationError = null
         await existingShare.save()
         share = existingShare
         statusCode = 200
+        shouldNotify = true
       } else {
         existingShare.status = 'active'
         existingShare.role = role
         existingShare.sharedAt = new Date()
+        existingShare.notificationStatus = 'pending'
+        existingShare.notificationError = null
         await existingShare.save()
         share = existingShare
         statusCode = 200
+        shouldNotify = true
       }
     } else {
       share = await Share.create({
@@ -1031,8 +1042,24 @@ export const shareFile = async (req, res, next) => {
         recipientId: recipient._id,
         role,
         status: 'active',
-        sharedAt: new Date()
+        sharedAt: new Date(),
+        notificationStatus: 'pending'
       })
+      shouldNotify = true
+    }
+
+    if (shouldNotify) {
+      try {
+        await dispatchShareEmailAndUpdateRecord({
+          share,
+          owner: req.user,
+          recipient,
+          file
+        })
+      } catch (emailErr) {
+        // Safe logging - never let email failure bubble up to fail the share operation
+        console.error('[shareFile] Error dispatching email notification:', emailErr?.message || emailErr)
+      }
     }
 
     return res.status(statusCode).json({
@@ -1044,6 +1071,7 @@ export const shareFile = async (req, res, next) => {
         role: share.role,
         status: share.status,
         sharedAt: share.sharedAt,
+        notificationStatus: share.notificationStatus,
         recipient: {
           id: recipient._id,
           name: recipient.name,
@@ -1089,6 +1117,7 @@ export const getFileShares = async (req, res, next) => {
         role: s.role,
         status: s.status,
         sharedAt: s.sharedAt,
+        notificationStatus: s.notificationStatus || 'pending',
         recipient: {
           id: s.recipientId._id,
           name: s.recipientId.name,
@@ -1098,6 +1127,63 @@ export const getFileShares = async (req, res, next) => {
 
     return res.status(200).json({
       shares: data
+    })
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const retryFileShareEmail = async (req, res, next) => {
+  const { id, recipientId } = req.params
+
+  try {
+    const file = await File.findById(id)
+    if (!file) {
+      return res.status(404).json({
+        error: 'File not found'
+      })
+    }
+
+    if (file.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        error: 'Unauthorized: You do not own this file'
+      })
+    }
+
+    const share = await Share.findOne({
+      fileId: id,
+      recipientId,
+      ownerId: req.user._id,
+      status: 'active'
+    })
+
+    if (!share) {
+      return res.status(404).json({
+        error: 'Active share record not found'
+      })
+    }
+
+    const recipient = await User.findById(recipientId)
+    if (!recipient) {
+      return res.status(404).json({
+        error: 'Recipient user not found'
+      })
+    }
+
+    const emailResult = await dispatchShareEmailAndUpdateRecord({
+      share,
+      owner: req.user,
+      recipient,
+      file
+    })
+
+    return res.status(200).json({
+      success: emailResult.success,
+      message: emailResult.success
+        ? 'Notification email sent successfully'
+        : 'Failed to send notification email',
+      notificationStatus: share.notificationStatus,
+      error: emailResult.error || null
     })
   } catch (err) {
     next(err)

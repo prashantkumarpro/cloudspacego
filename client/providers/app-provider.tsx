@@ -62,7 +62,23 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [currentSection, setCurrentSectionState] = useState<SidebarSection>('Dashboard');
+  const [currentSection, setCurrentSectionState] = useState<SidebarSection>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const sectionParam = params.get('section') || params.get('tab');
+        if (sectionParam) {
+          const match = (['Dashboard', 'My Files', 'Shared', 'Recent', 'Starred', 'Trash', 'Settings'] as const).find(
+            s => s.toLowerCase() === sectionParam.toLowerCase()
+          );
+          if (match) return match;
+        }
+      } catch {
+        // Fallback to Dashboard
+      }
+    }
+    return 'Dashboard';
+  });
   const [activeFolderId, setActiveFolderId] = useState<string | null>(null);
   const [files, setFiles] = useState<FileItem[]>(INITIAL_FILES);
   const [activities, setActivities] = useState<ActivityItem[]>(INITIAL_ACTIVITIES);

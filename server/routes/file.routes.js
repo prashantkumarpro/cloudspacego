@@ -10,6 +10,7 @@ import {
   getSharedWithMeFiles,
   getStarredFiles,
   revokeFileShare,
+  retryFileShareEmail,
   shareFile,
   toggleStarFile,
   updateFile
@@ -32,6 +33,7 @@ router.get('/:id/shares', getFileShares)
 
 // Share & Revoke
 router.post('/:id/share', shareFile)
+router.post('/:id/share/:recipientId/retry-email', retryFileShareEmail)
 router.delete('/:id/share/:recipientId', revokeFileShare)
 
 // Update
