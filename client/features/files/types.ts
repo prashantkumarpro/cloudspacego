@@ -4,6 +4,19 @@ export interface DirectoryReference {
     name: string;
 }
 
+export interface ShareOwnerInfo {
+    id: string;
+    _id?: string;
+    name: string;
+    email: string;
+}
+
+export interface ShareRecipientInfo {
+    id: string;
+    name: string;
+    email: string;
+}
+
 export interface FileItem {
     id: string;
     _id?: string;
@@ -17,11 +30,44 @@ export interface FileItem {
     directory?: DirectoryReference;
     isStarred?: boolean;
     starred?: boolean;
+    role?: 'viewer' | 'editor';
+    sharedAt?: string;
+    shareId?: string;
+    owner?: ShareOwnerInfo | string;
 }
 
 export interface ToggleStarResponse extends FileApiResponse {
     success?: boolean;
     file?: FileItem;
+}
+
+export interface FileShareItem {
+    id: string;
+    role: 'viewer' | 'editor';
+    status: 'active' | 'revoked';
+    sharedAt: string;
+    recipient: ShareRecipientInfo;
+}
+
+export interface GetFileSharesResponse {
+    shares: FileShareItem[];
+}
+
+export interface ShareFilePayload {
+    recipientEmail: string;
+    role: 'viewer' | 'editor';
+}
+
+export interface ShareFileResponse {
+    success: boolean;
+    message: string;
+    share: {
+        id: string;
+        role: 'viewer' | 'editor';
+        status: string;
+        sharedAt: string;
+        recipient: ShareRecipientInfo;
+    };
 }
 
 

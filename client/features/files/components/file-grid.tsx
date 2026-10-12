@@ -54,12 +54,12 @@ export function FileGrid({
             isTrash={isTrash}
             onClick={onFileClick ? () => onFileClick(file) : undefined}
             onDownload={onDownload ? () => onDownload(file) : undefined}
-            onShare={onShare ? () => onShare(file) : undefined}
-            onRename={onRename ? () => onRename(file) : undefined}
-            onMove={onMove ? () => onMove(file) : undefined}
+            onShare={!file.role && onShare ? () => onShare(file) : undefined}
+            onRename={(!file.role || file.role === 'editor') && onRename ? () => onRename(file) : undefined}
+            onMove={!file.role && onMove ? () => onMove(file) : undefined}
             onDetails={onDetails ? () => onDetails(file) : undefined}
-            onToggleStar={onToggleStar ? () => onToggleStar(fileId) : undefined}
-            onDelete={onDelete ? () => onDelete(file) : undefined}
+            onToggleStar={!file.role && onToggleStar ? () => onToggleStar(fileId) : undefined}
+            onDelete={!file.role && onDelete ? () => onDelete(file) : undefined}
             onRestore={onRestore ? () => onRestore(file) : undefined}
             onDeletePermanently={onDeletePermanently ? () => onDeletePermanently(file) : undefined}
           />
@@ -68,3 +68,5 @@ export function FileGrid({
     </div>
   )
 }
+
+

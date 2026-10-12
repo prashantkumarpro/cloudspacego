@@ -4,7 +4,7 @@ import React from 'react'
 import { FilePreview } from './file-preview'
 import { ActionMenu, ActionMenuItem } from '../../../components/ui/action-menu'
 import { Tooltip } from '../../../components/ui/tooltip'
-import { formatBytes, formatFileSize, formatDate } from '../../../lib/utils/format'
+import { formatFileSize, formatDate } from '../../../lib/utils/format'
 import { FileType } from '../../../types'
 import { UnifiedFileItem } from './file-list'
 import { useAuth } from '@/features/auth/hooks/use-auth'
@@ -56,14 +56,20 @@ export function FileTable({
   showOwner = true,
   showDate = true,
   showSize = true,
-  dateLabel = 'Date modified',
-  allFiles = []
+  dateLabel = 'Date modified'
 }: FileTableProps) {
   const { user } = useAuth()
 
   const getOwnerName = (file: UnifiedFileItem) => {
     if (file.owner) {
-      const trimmed = file.owner.trim()
+      if (typeof file.owner === 'object' && file.owner !== null) {
+        const ownerObj = file.owner as { name?: string; email?: string }
+        if (user?.email && ownerObj.email && ownerObj.email.toLowerCase() === user.email.toLowerCase()) {
+          return 'Me'
+        }
+        return ownerObj.name || ownerObj.email || 'Owner'
+      }
+      const trimmed = typeof file.owner === 'string' ? file.owner.trim() : ''
       if (
         trimmed === 'Prashant' ||
         trimmed.toLowerCase() === 'you' ||
@@ -71,7 +77,7 @@ export function FileTable({
       ) {
         return 'Me'
       }
-      return trimmed
+      return trimmed || 'Me'
     }
     return 'Me'
   }
@@ -137,13 +143,16 @@ export function FileTable({
           const fileType = deriveFileType(file)
           const dropdownItems = customActions ? customActions(file) : []
           const isShared =
+            Boolean(file.role) ||
             (file.sharedWith && file.sharedWith.length > 0) ||
-            (file.owner && file.owner !== 'Prashant')
+            (file.owner && file.owner !== 'Prashant' && file.owner !== 'Me')
           const ownerName = getOwnerName(file)
           const displayDate =
-            file.updatedAt || file.createdAt || new Date().toISOString()
+            file.sharedAt || file.updatedAt || file.createdAt || new Date().toISOString()
           const isFolder = fileType === 'folder'
-          const rawSize = file.size ?? (file as any).raw?.size ?? (file as any).fileSize ?? (file as any).length
+          const rawRecord = file as unknown as Record<string, unknown>
+          const rawInner = rawRecord.raw as Record<string, unknown> | undefined
+          const rawSize = file.size ?? rawInner?.size ?? rawRecord.fileSize ?? rawRecord.length
           const fileSizeNum =
             typeof rawSize === 'number'
               ? rawSize
@@ -181,9 +190,14 @@ export function FileTable({
                       {file.name}
                     </span>
                     {isShared && (
-                      <Tooltip content='Shared file' side='top'>
-                        <span className='shrink-0 text-text-muted/80 group-hover:text-text-secondary'>
+                      <Tooltip content={file.role ? `Shared with you (${file.role})` : 'Shared file'} side='top'>
+                        <span className='shrink-0 text-text-muted/80 group-hover:text-text-secondary flex items-center gap-1'>
                           <Users className='w-3.5 h-3.5' />
+                          {file.role && (
+                            <span className='text-[10px] px-1 py-0.5 rounded bg-input-bg text-text-secondary capitalize font-medium leading-none'>
+                              {file.role}
+                            </span>
+                          )}
                         </span>
                       </Tooltip>
                     )}
@@ -226,7 +240,7 @@ export function FileTable({
                 className='flex items-center justify-end gap-1 w-20 shrink-0'
                 onClick={e => e.stopPropagation()}
               >
-                {onToggleStar && (
+                {onToggleStar && !file.role && (
                   <Tooltip
                     content={isStarred ? 'Unstar' : 'Star'}
                     side='top'

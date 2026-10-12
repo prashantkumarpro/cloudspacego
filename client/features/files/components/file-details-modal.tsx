@@ -4,18 +4,11 @@ import React from 'react'
 import { Dialog } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { FilePreview } from './file-preview'
-import { formatBytes, formatFileSize, formatDate } from '@/lib/utils/format'
+import { formatFileSize, formatDate } from '@/lib/utils/format'
 import { UnifiedFileItem } from './file-list'
 import { useApp } from '@/providers/app-provider'
 import {
   Folder,
-  FileText,
-  Info,
-  Calendar,
-  HardDrive,
-  User,
-  Users,
-  MapPin,
   Download
 } from 'lucide-react'
 
@@ -37,7 +30,9 @@ export function FileDetailsModal({
   if (!file) return null
 
   const isFolder = file.type === 'folder'
-  const rawSize = file.size ?? (file as any).raw?.size ?? (file as any).fileSize ?? (file as any).length
+  const rawRecord = file as unknown as Record<string, unknown>
+  const rawInner = rawRecord.raw as Record<string, unknown> | undefined
+  const rawSize = file.size ?? rawInner?.size ?? rawRecord.fileSize ?? rawRecord.length
   const fileSizeNum =
     typeof rawSize === 'number'
       ? rawSize
@@ -121,9 +116,19 @@ export function FileDetailsModal({
           <div className="flex items-center justify-between p-3">
             <span className="text-text-secondary font-medium">Owner</span>
             <span className="text-foreground font-semibold">
-              {file.owner || 'You (Prashant)'}
+              {typeof file.owner === 'object' && file.owner
+                ? `${file.owner.name || file.owner.email} (${file.owner.email})`
+                : (file.owner || 'You')}
             </span>
           </div>
+
+          {/* Date Shared if present */}
+          {file.sharedAt && (
+            <div className="flex items-center justify-between p-3">
+              <span className="text-text-secondary font-medium">Date shared</span>
+              <span className="text-foreground font-semibold">{formatDate(file.sharedAt)}</span>
+            </div>
+          )}
 
           {/* Modified Date */}
           <div className="flex items-center justify-between p-3">
@@ -140,8 +145,8 @@ export function FileDetailsModal({
           {/* Sharing Status */}
           <div className="flex items-center justify-between p-3">
             <span className="text-text-secondary font-medium">Sharing</span>
-            <span className="text-foreground font-semibold">
-              {isShared ? 'Shared' : 'Private to you'}
+            <span className="text-foreground font-semibold capitalize">
+              {file.role ? `Shared with you (${file.role})` : isShared ? 'Shared' : 'Private to you'}
             </span>
           </div>
         </div>

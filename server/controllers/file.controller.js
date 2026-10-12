@@ -4,6 +4,7 @@ import path from 'path'
 import { createCursor, decodeCursor } from '../utils/cursor.js'
 import Directory from '../models/directory.model.js'
 import File from '../models/file.model.js'
+import Share from '../models/share.model.js'
 import User from '../models/user.model.js'
 import {
   DEFAULT_STORAGE_LIMIT,
@@ -657,16 +658,28 @@ export const getFile = async (req, res) => {
   try {
     const id = req.params.id
 
-    const fileData = await File.findOne({
-      _id: id,
-      userId: req.user._id
-    }).lean()
+    const fileData = await File.findById(id).lean()
 
     // Check if file exists
     if (!fileData) {
       return res.status(404).json({
-        message: 'File not found'
+        error: 'File not found'
       })
+    }
+
+    // Permission check: owner or active share (viewer or editor)
+    if (fileData.userId.toString() !== req.user._id.toString()) {
+      const share = await Share.findOne({
+        fileId: id,
+        recipientId: req.user._id,
+        status: 'active'
+      }).lean()
+
+      if (!share) {
+        return res.status(403).json({
+          error: 'Unauthorized: You do not have access to this file'
+        })
+      }
     }
 
     // Get file from configured storage provider
@@ -714,18 +727,6 @@ export const updateFile = async (req, res, next) => {
   const { id } = req.params
   const { newFilename } = req.body
 
-  const fileData = await File.findOne({
-    _id: id,
-    userId: req.user._id
-  })
-
-  // Check if file exists
-  if (!fileData) {
-    return res.status(404).json({
-      error: 'File not found'
-    })
-  }
-
   if (!newFilename) {
     return res.status(400).json({
       error: 'newFilename is required'
@@ -733,6 +734,31 @@ export const updateFile = async (req, res, next) => {
   }
 
   try {
+    const fileData = await File.findById(id)
+
+    // Check if file exists
+    if (!fileData) {
+      return res.status(404).json({
+        error: 'File not found'
+      })
+    }
+
+    // Permission check: owner or active share with role 'editor'
+    if (fileData.userId.toString() !== req.user._id.toString()) {
+      const share = await Share.findOne({
+        fileId: id,
+        recipientId: req.user._id,
+        status: 'active',
+        role: 'editor'
+      }).lean()
+
+      if (!share) {
+        return res.status(403).json({
+          error: 'Unauthorized: You do not have edit permission for this file'
+        })
+      }
+    }
+
     fileData.name = newFilename
     await fileData.save()
     return res.status(200).json({ message: 'Renamed' })
@@ -745,23 +771,30 @@ export const updateFile = async (req, res, next) => {
 export const deleteFile = async (req, res, next) => {
   const { id } = req.params
 
-  const file = await File.findOne({
-    _id: id,
-    userId: req.user._id
-  }).select('storageKey size')
-
-  if (!file) {
-    return res.status(404).json({
-      error: 'File not found!'
-    })
-  }
-
   try {
+    const file = await File.findById(id).select('storageKey size userId')
+
+    if (!file) {
+      return res.status(404).json({
+        error: 'File not found!'
+      })
+    }
+
+    // Only the file owner can delete the file
+    if (file.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        error: 'Unauthorized: Only the file owner can delete this file'
+      })
+    }
+
     // Delete the actual file from storage
     await deleteStoredFile(file.storageKey)
 
     // Delete file metadata from MongoDB
     await file.deleteOne()
+
+    // Revoke any active shares for this file
+    await Share.updateMany({ fileId: id }, { status: 'revoked' })
 
     // Atomically decrement user's storageUsed (never negative)
     const fileSize = typeof file.size === 'number' && file.size > 0 ? file.size : 0
@@ -789,5 +822,326 @@ export const deleteFile = async (req, res, next) => {
       })
   } catch (error) {
     return next(error)
+  }
+}
+
+export const getSharedWithMeFiles = async (req, res, next) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit) : 20
+
+    if (limit < 1 || limit > 100) {
+      return res.status(400).json({
+        error: 'Limit must be between 1 and 100'
+      })
+    }
+
+    const cursor = req.query.cursor
+
+    const query = {
+      recipientId: req.user._id,
+      status: 'active'
+    }
+
+    if (cursor) {
+      let decodedCursor
+
+      try {
+        decodedCursor = decodeCursor(cursor)
+      } catch {
+        return res.status(400).json({
+          error: 'Invalid cursor'
+        })
+      }
+
+      const { createdAt, id } = decodedCursor
+
+      if (
+        !createdAt ||
+        !id ||
+        !mongoose.isValidObjectId(id) ||
+        Number.isNaN(new Date(createdAt).getTime())
+      ) {
+        return res.status(400).json({
+          error: 'Invalid cursor'
+        })
+      }
+
+      query.$or = [
+        {
+          sharedAt: {
+            $lt: new Date(createdAt)
+          }
+        },
+        {
+          sharedAt: new Date(createdAt),
+          _id: {
+            $lt: new mongoose.Types.ObjectId(id)
+          }
+        }
+      ]
+    }
+
+    const shares = await Share.find(query)
+      .sort({
+        sharedAt: -1,
+        _id: -1
+      })
+      .limit(limit + 1)
+      .populate({
+        path: 'fileId',
+        select: '_id name extension size parentDirId createdAt updatedAt isStarred'
+      })
+      .populate({
+        path: 'ownerId',
+        select: '_id name email'
+      })
+      .lean()
+
+    // Filter out shares whose files have been removed
+    const validShares = shares.filter(s => s.fileId != null)
+    const hasMore = validShares.length > limit
+    const pageShares = validShares.slice(0, limit)
+
+    let nextCursor = null
+    if (hasMore) {
+      const lastShare = pageShares[pageShares.length - 1]
+      nextCursor = createCursor({
+        createdAt: lastShare.sharedAt ? lastShare.sharedAt.toISOString() : new Date().toISOString(),
+        id: lastShare._id.toString()
+      })
+    }
+
+    const data = pageShares.map(s => {
+      const file = s.fileId
+      const owner = s.ownerId
+      return {
+        id: file._id.toString(),
+        _id: file._id.toString(),
+        name: file.name,
+        extension: file.extension,
+        size: file.size,
+        parentDirId: file.parentDirId,
+        createdAt: file.createdAt,
+        updatedAt: file.updatedAt,
+        isStarred: Boolean(file.isStarred),
+        role: s.role,
+        sharedAt: s.sharedAt,
+        shareId: s._id.toString(),
+        owner: owner
+          ? {
+              id: owner._id.toString(),
+              _id: owner._id.toString(),
+              name: owner.name,
+              email: owner.email
+            }
+          : undefined
+      }
+    })
+
+    return res.status(200).json({
+      data,
+      pagination: {
+        limit,
+        hasMore,
+        nextCursor
+      }
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const shareFile = async (req, res, next) => {
+  const { id } = req.params
+  const recipientEmail = req.body?.recipientEmail ? String(req.body.recipientEmail).trim().toLowerCase() : ''
+  const role = req.body?.role ? String(req.body.role).trim().toLowerCase() : 'viewer'
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!recipientEmail || !emailRegex.test(recipientEmail)) {
+    return res.status(400).json({
+      error: 'Valid recipientEmail is required'
+    })
+  }
+
+  if (role !== 'viewer' && role !== 'editor') {
+    return res.status(400).json({
+      error: 'Role must be either viewer or editor'
+    })
+  }
+
+  try {
+    const file = await File.findById(id)
+    if (!file) {
+      return res.status(404).json({
+        error: 'File not found'
+      })
+    }
+
+    if (file.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        error: 'Unauthorized: You do not own this file'
+      })
+    }
+
+    const recipient = await User.findOne({ email: recipientEmail })
+    if (!recipient) {
+      return res.status(404).json({
+        error: 'Recipient user not found'
+      })
+    }
+
+    if (recipient._id.toString() === req.user._id.toString()) {
+      return res.status(400).json({
+        error: 'You cannot share a file with yourself'
+      })
+    }
+
+    const existingShare = await Share.findOne({
+      fileId: file._id,
+      recipientId: recipient._id
+    })
+
+    let share
+    let statusCode = 201
+
+    if (existingShare) {
+      if (existingShare.status === 'active') {
+        if (existingShare.role === role) {
+          return res.status(409).json({
+            error: 'File is already shared with this user'
+          })
+        }
+        existingShare.role = role
+        existingShare.sharedAt = new Date()
+        await existingShare.save()
+        share = existingShare
+        statusCode = 200
+      } else {
+        existingShare.status = 'active'
+        existingShare.role = role
+        existingShare.sharedAt = new Date()
+        await existingShare.save()
+        share = existingShare
+        statusCode = 200
+      }
+    } else {
+      share = await Share.create({
+        fileId: file._id,
+        ownerId: req.user._id,
+        recipientId: recipient._id,
+        role,
+        status: 'active',
+        sharedAt: new Date()
+      })
+    }
+
+    return res.status(statusCode).json({
+      success: true,
+      message: 'File shared successfully',
+      share: {
+        id: share._id,
+        fileId: share.fileId,
+        role: share.role,
+        status: share.status,
+        sharedAt: share.sharedAt,
+        recipient: {
+          id: recipient._id,
+          name: recipient.name,
+          email: recipient.email
+        }
+      }
+    })
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const getFileShares = async (req, res, next) => {
+  const { id } = req.params
+
+  try {
+    const file = await File.findById(id)
+    if (!file) {
+      return res.status(404).json({
+        error: 'File not found'
+      })
+    }
+
+    if (file.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        error: 'Unauthorized: You do not own this file'
+      })
+    }
+
+    const shares = await Share.find({
+      fileId: id,
+      ownerId: req.user._id,
+      status: 'active'
+    })
+      .populate('recipientId', 'name email')
+      .sort({ sharedAt: -1 })
+      .lean()
+
+    const data = shares
+      .filter(s => s.recipientId != null)
+      .map(s => ({
+        id: s._id,
+        role: s.role,
+        status: s.status,
+        sharedAt: s.sharedAt,
+        recipient: {
+          id: s.recipientId._id,
+          name: s.recipientId.name,
+          email: s.recipientId.email
+        }
+      }))
+
+    return res.status(200).json({
+      shares: data
+    })
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const revokeFileShare = async (req, res, next) => {
+  const { id, recipientId } = req.params
+
+  try {
+    const file = await File.findById(id)
+    if (!file) {
+      return res.status(404).json({
+        error: 'File not found'
+      })
+    }
+
+    if (file.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        error: 'Unauthorized: Only the file owner can revoke sharing'
+      })
+    }
+
+    const share = await Share.findOne({
+      fileId: id,
+      recipientId,
+      ownerId: req.user._id,
+      status: 'active'
+    })
+
+    if (!share) {
+      return res.status(404).json({
+        error: 'Active share record not found'
+      })
+    }
+
+    share.status = 'revoked'
+    await share.save()
+
+    return res.status(200).json({
+      success: true,
+      message: 'Share access revoked successfully'
+    })
+  } catch (err) {
+    next(err)
   }
 }

@@ -9,6 +9,15 @@ import { getStorageQuota, type StorageQuotaResponse } from '@/features/storage/a
 import { subscribeFilesChanged, notifyFilesChanged } from '@/features/files/hooks/use-files';
 import { toggleStarFile } from '@/features/files/api';
 
+export interface SelectedShareFile {
+  id?: string;
+  _id?: string;
+  name: string;
+  size?: number;
+  owner?: string | { id?: string; name?: string; email?: string };
+  role?: 'viewer' | 'editor';
+}
+
 interface AppContextType {
   currentSection: SidebarSection;
   setCurrentSection: (section: SidebarSection) => void;
@@ -35,6 +44,8 @@ interface AppContextType {
   setActiveModal: (modal: 'upload-file' | 'upload-folder' | 'create-folder' | 'share' | 'get-link' | 'search' | 'storage-upgrade' | null) => void;
   selectedFileId: string | null;
   setSelectedFileId: (id: string | null) => void;
+  selectedFileItem: SelectedShareFile | null;
+  setSelectedFileItem: (file: SelectedShareFile | null) => void;
 
   // Theme & Sidebar States
   theme: 'light' | 'dark';
@@ -89,6 +100,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Modal disclosures
   const [activeModal, setActiveModal] = useState<'upload-file' | 'upload-folder' | 'create-folder' | 'share' | 'get-link' | 'search' | 'storage-upgrade' | null>(null);
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
+  const [selectedFileItem, setSelectedFileItem] = useState<SelectedShareFile | null>(null);
 
   // Sync theme to DOM root and localStorage
   useEffect(() => {
@@ -408,6 +420,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setActiveModal,
     selectedFileId,
     setSelectedFileId,
+    selectedFileItem,
+    setSelectedFileItem,
     theme,
     toggleTheme,
     isSidebarCollapsed,
@@ -437,6 +451,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setActiveModal,
     selectedFileId,
     setSelectedFileId,
+    selectedFileItem,
+    setSelectedFileItem,
     theme,
     toggleTheme,
     isSidebarCollapsed,

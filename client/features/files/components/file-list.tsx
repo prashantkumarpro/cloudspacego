@@ -55,8 +55,11 @@ export type UnifiedFileItem = {
   deleted?: boolean
   createdAt?: string
   updatedAt?: string
-  owner?: string
+  owner?: string | { id?: string; name?: string; email?: string }
   sharedWith?: string[]
+  role?: 'viewer' | 'editor'
+  sharedAt?: string
+  shareId?: string
 }
 
 export interface FileListProps {
@@ -125,6 +128,7 @@ export function FileList({
     toggleStar,
     searchQuery,
     setSelectedFileId,
+    setSelectedFileItem,
     setActiveModal,
     moveFile,
     deleteFile,
@@ -163,10 +167,12 @@ export function FileList({
   const isLoadingMoreRef = React.useRef(isLoadingMore)
   const isLoadingRef = React.useRef(isLoading)
 
-  onLoadMoreRef.current = onLoadMore
-  hasMoreRef.current = hasMore
-  isLoadingMoreRef.current = isLoadingMore
-  isLoadingRef.current = isLoading
+  React.useEffect(() => {
+    onLoadMoreRef.current = onLoadMore
+    hasMoreRef.current = hasMore
+    isLoadingMoreRef.current = isLoadingMore
+    isLoadingRef.current = isLoading
+  }, [onLoadMore, hasMore, isLoadingMore, isLoading])
 
   const checkAndLoadMore = React.useCallback(() => {
     if (
@@ -375,6 +381,9 @@ export function FileList({
     const fileId = file.id || file._id || ''
     const isFolder = file.type === 'folder'
     const isStarred = Boolean(file.starred ?? file.isStarred)
+    const isSharedFile = Boolean(file.role)
+    const canEdit = !isSharedFile || file.role === 'editor'
+    const canManage = !isSharedFile
 
     return [
       {
@@ -392,35 +401,36 @@ export function FileList({
         onClick: () => setDetailsTarget(file),
         icon: <Info className='w-4 h-4 text-text-secondary' />
       },
-      {
+      ...(canManage ? [{
         label: 'Share',
         onClick: () => {
           setSelectedFileId(fileId)
+          setSelectedFileItem?.(file)
           setActiveModal('share')
         },
         icon: <Share2 className='w-4 h-4 text-text-secondary' />
-      },
-      {
+      }] : []),
+      ...(canEdit ? [{
         label: 'Rename',
         onClick: () => setRenameTarget(file),
         icon: <Edit3 className='w-4 h-4 text-text-secondary' />
-      },
-      {
+      }] : []),
+      ...(canManage ? [{
         label: 'Move',
         onClick: () => setMoveTarget(file),
         icon: <FolderInput className='w-4 h-4 text-text-secondary' />
-      },
-      {
+      }] : []),
+      ...(canManage ? [{
         label: isStarred ? 'Unstar' : 'Star',
         onClick: () => handleToggleStar(fileId),
         icon: <Star className='w-4 h-4 text-text-secondary' />
-      },
-      {
+      }] : []),
+      ...(canManage ? [{
         label: 'Delete',
         onClick: () => handleDeleteItem(file),
         icon: <Trash2 className='w-4 h-4 text-rose-500' />,
         danger: true
-      }
+      }] : [])
     ]
   }
 
@@ -519,6 +529,7 @@ export function FileList({
               onShare={file => {
                 const fId = file.id || file._id || ''
                 setSelectedFileId(fId)
+                setSelectedFileItem?.(file)
                 setActiveModal('share')
               }}
               onRename={file => setRenameTarget(file)}

@@ -1,9 +1,12 @@
 import { apiClient } from "@/lib/api/client";
 import type {
     FileApiResponse,
+    GetFileSharesResponse,
     GetFilesParams,
     GetFilesResponse,
     RenameFileData,
+    ShareFilePayload,
+    ShareFileResponse,
     ToggleStarResponse,
     UploadFileData,
 } from "./types";
@@ -108,6 +111,69 @@ export const getStarredFiles = async (
             ? {
                   id: (item.directory.id || item.directory._id || "").toString(),
                   name: item.directory.name,
+              }
+            : undefined,
+    }));
+
+    return {
+        data: normalizedData,
+        pagination: response.data.pagination,
+    };
+};
+
+export const getSharedWithMeFiles = async (
+    params?: GetFilesParams
+): Promise<GetFilesResponse> => {
+    const response = await apiClient.get<{
+        data: Array<{
+            id?: string;
+            _id?: string;
+            name: string;
+            extension: string;
+            parentDirId?: string;
+            userId?: string;
+            createdAt?: string;
+            updatedAt?: string;
+            size?: number;
+            isStarred?: boolean;
+            role?: 'viewer' | 'editor';
+            sharedAt?: string;
+            shareId?: string;
+            owner?: {
+                id?: string;
+                _id?: string;
+                name: string;
+                email: string;
+            };
+        }>;
+        pagination: {
+            limit: number;
+            hasMore: boolean;
+            nextCursor: string | null;
+        };
+    }>("/file/shared-with-me", {
+        params,
+    });
+
+    const normalizedData = (response.data.data || []).map((item) => ({
+        id: (item.id || item._id || "").toString(),
+        name: item.name,
+        extension: item.extension,
+        parentDirId: item.parentDirId,
+        userId: item.userId,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        size: typeof item.size === 'number' ? item.size : (typeof item.size === 'string' && !isNaN(Number(item.size)) ? Number(item.size) : item.size),
+        isStarred: Boolean(item.isStarred),
+        starred: Boolean(item.isStarred),
+        role: item.role,
+        sharedAt: item.sharedAt,
+        shareId: item.shareId,
+        owner: item.owner
+            ? {
+                  id: (item.owner.id || item.owner._id || "").toString(),
+                  name: item.owner.name,
+                  email: item.owner.email,
               }
             : undefined,
     }));
@@ -224,5 +290,35 @@ export const renameFile = async (
 export const deleteFile = async (id: string): Promise<FileApiResponse> => {
     const response = await apiClient.delete<FileApiResponse>(`/file/${id}`);
 
+    return response.data;
+};
+
+export const shareFile = async (
+    fileId: string,
+    payload: ShareFilePayload
+): Promise<ShareFileResponse> => {
+    const response = await apiClient.post<ShareFileResponse>(
+        `/file/${fileId}/share`,
+        payload
+    );
+    return response.data;
+};
+
+export const getFileShares = async (
+    fileId: string
+): Promise<GetFileSharesResponse> => {
+    const response = await apiClient.get<GetFileSharesResponse>(
+        `/file/${fileId}/shares`
+    );
+    return response.data;
+};
+
+export const revokeFileShare = async (
+    fileId: string,
+    recipientId: string
+): Promise<FileApiResponse> => {
+    const response = await apiClient.delete<FileApiResponse>(
+        `/file/${fileId}/share/${recipientId}`
+    );
     return response.data;
 };

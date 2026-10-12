@@ -14,6 +14,7 @@ import DashboardOverview from '@/features/dashboard/components/dashboard-overvie
 import MyFilesView from '@/features/files/components/my-files-view'
 import SettingsView from '@/features/settings/components/settings-view'
 import StarredView from '@/features/files/components/starred-view'
+import SharedWithMeView from '@/features/files/components/shared-with-me-view'
 
 export default function DashboardPage () {
   const { currentSection, activeModal, setActiveModal } = useApp()
@@ -27,7 +28,7 @@ export default function DashboardPage () {
       {currentSection === 'My Files' && <MyFilesView />}
 
       {/* VIEW: Shared */}
-      {currentSection === 'Shared' && <FileList title='Shared Assets' />}
+      {currentSection === 'Shared' && <SharedWithMeView />}
 
       {/* VIEW: Recent */}
       {currentSection === 'Recent' && <FileList title='Recent Assets' />}

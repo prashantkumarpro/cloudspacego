@@ -6,6 +6,7 @@ import {
   downloadFile,
   getFileBlob,
   getFiles,
+  getSharedWithMeFiles,
   getStarredFiles,
   renameFile,
   toggleStarFile,
@@ -212,6 +213,7 @@ export interface UseInfiniteFilesOptions {
   limit?: number;
   enabled?: boolean;
   starred?: boolean;
+  sharedWithMe?: boolean;
 }
 
 export interface UseInfiniteFilesReturn {
@@ -228,7 +230,7 @@ export interface UseInfiniteFilesReturn {
 export function useInfiniteFiles(
   options: UseInfiniteFilesOptions = {}
 ): UseInfiniteFilesReturn {
-  const { limit = 20, enabled = true, starred = false } = options;
+  const { limit = 20, enabled = true, starred = false, sharedWithMe = false } = options;
 
   const [files, setFiles] = useState<FileItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(enabled);
@@ -256,7 +258,7 @@ export function useInfiniteFiles(
       });
       setError(null);
 
-      const fetchFn = starred ? getStarredFiles : getFiles;
+      const fetchFn = sharedWithMe ? getSharedWithMeFiles : starred ? getStarredFiles : getFiles;
       const response = await fetchFn({ limit });
 
       setFiles(response.data);
@@ -270,7 +272,7 @@ export function useInfiniteFiles(
       setIsLoading(false);
       isFetchingRef.current = false;
     }
-  }, [enabled, limit, starred]);
+  }, [enabled, limit, starred, sharedWithMe]);
 
   const loadMore = useCallback(async () => {
     const cursor = nextCursorRef.current;
@@ -290,7 +292,7 @@ export function useInfiniteFiles(
       setIsLoadingMore(true);
       setError(null);
 
-      const fetchFn = starred ? getStarredFiles : getFiles;
+      const fetchFn = sharedWithMe ? getSharedWithMeFiles : starred ? getStarredFiles : getFiles;
       const response = await fetchFn({
         cursor,
         limit,
@@ -315,7 +317,7 @@ export function useInfiniteFiles(
       isFetchingRef.current = false;
       inFlightCursorRef.current = null;
     }
-  }, [enabled, limit, starred]);
+  }, [enabled, limit, starred, sharedWithMe]);
 
   useEffect(() => {
     fetchInitial();
