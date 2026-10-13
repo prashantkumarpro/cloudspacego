@@ -312,7 +312,8 @@ export const getFiles = async (req, res, next) => {
     const cursor = req.query.cursor
 
     const query = {
-      userId: req.user._id
+      userId: req.user._id,
+      isTrash: { $ne: true }
     }
 
     if (cursor) {
@@ -466,7 +467,8 @@ export const getStarredFiles = async (req, res, next) => {
 
     const query = {
       userId: req.user._id,
-      isStarred: true
+      isStarred: true,
+      isTrash: { $ne: true }
     }
 
     if (cursor) {
@@ -622,7 +624,8 @@ export const getRecentFiles = async (req, res, next) => {
 
     const query = {
       userId: req.user._id,
-      lastAccessedAt: { $ne: null }
+      lastAccessedAt: { $ne: null },
+      isTrash: { $ne: true }
     }
 
     if (cursor) {
@@ -769,7 +772,7 @@ export const recordFileAccess = async (req, res, next) => {
   try {
     const file = await File.findById(id)
 
-    if (!file) {
+    if (!file || file.isTrash) {
       return res.status(404).json({
         error: 'File not found'
       })
@@ -807,7 +810,7 @@ export const toggleStarFile = async (req, res, next) => {
   try {
     const file = await File.findById(id)
 
-    if (!file) {
+    if (!file || file.isTrash) {
       return res.status(404).json({
         error: 'File not found'
       })
@@ -863,8 +866,8 @@ export const getFile = async (req, res) => {
 
     const fileData = await File.findById(id).lean()
 
-    // Check if file exists
-    if (!fileData) {
+    // Check if file exists and is not trashed
+    if (!fileData || fileData.isTrash) {
       return res.status(404).json({
         error: 'File not found'
       })
@@ -947,8 +950,8 @@ export const updateFile = async (req, res, next) => {
   try {
     const fileData = await File.findById(id)
 
-    // Check if file exists
-    if (!fileData) {
+    // Check if file exists and is not trashed
+    if (!fileData || fileData.isTrash) {
       return res.status(404).json({
         error: 'File not found'
       })
@@ -983,7 +986,7 @@ export const deleteFile = async (req, res, next) => {
   const { id } = req.params
 
   try {
-    const file = await File.findById(id).select('storageKey size userId')
+    const file = await File.findById(id)
 
     if (!file) {
       return res.status(404).json({
@@ -991,23 +994,269 @@ export const deleteFile = async (req, res, next) => {
       })
     }
 
-    // Only the file owner can delete the file
+    // Only the file owner can move the file to trash
     if (file.userId.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         error: 'Unauthorized: Only the file owner can delete this file'
       })
     }
 
-    // Delete the actual file from storage
+    if (file.isTrash) {
+      return res.status(200).json({
+        success: true,
+        message: 'File is already in trash'
+      })
+    }
+
+    // Soft delete: move to trash without modifying storage quota or deleting R2 object
+    file.isTrash = true
+    file.trashedAt = new Date()
+    await file.save()
+
+    return res.status(200).json({
+      success: true,
+      message: 'File moved to trash'
+    })
+  } catch (error) {
+    return next(error)
+  }
+}
+
+export const getTrashFiles = async (req, res, next) => {
+  try {
+    const requestedLimit = Number(req.query.limit)
+    const limit = Number.isNaN(requestedLimit) ? 20 : requestedLimit
+
+    if (limit < 1 || limit > 100) {
+      return res.status(400).json({
+        error: 'Limit must be between 1 and 100'
+      })
+    }
+
+    const cursor = req.query.cursor
+    const query = {
+      userId: req.user._id,
+      isTrash: true
+    }
+
+    if (cursor) {
+      let decodedCursor
+      try {
+        decodedCursor = decodeCursor(cursor)
+      } catch {
+        return res.status(400).json({
+          error: 'Invalid cursor'
+        })
+      }
+
+      const { trashedAt, createdAt, id } = decodedCursor
+      const cursorTimestamp = trashedAt || createdAt
+
+      if (
+        !cursorTimestamp ||
+        !id ||
+        !mongoose.isValidObjectId(id) ||
+        Number.isNaN(new Date(cursorTimestamp).getTime())
+      ) {
+        return res.status(400).json({
+          error: 'Invalid cursor'
+        })
+      }
+
+      query.$or = [
+        {
+          trashedAt: {
+            $lt: new Date(cursorTimestamp)
+          }
+        },
+        {
+          trashedAt: new Date(cursorTimestamp),
+          _id: {
+            $lt: new mongoose.Types.ObjectId(id)
+          }
+        }
+      ]
+    }
+
+    const files = await File.aggregate([
+      {
+        $match: query
+      },
+      {
+        $sort: {
+          trashedAt: -1,
+          _id: -1
+        }
+      },
+      {
+        $limit: limit + 1
+      },
+      {
+        $lookup: {
+          from: 'directories',
+          let: {
+            parentDirId: '$parentDirId',
+            userId: '$userId'
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$_id', '$$parentDirId'] },
+                    { $eq: ['$userId', '$$userId'] }
+                  ]
+                }
+              }
+            },
+            {
+              $project: {
+                _id: 1,
+                name: 1
+              }
+            }
+          ],
+          as: 'directory'
+        }
+      },
+      {
+        $unwind: {
+          path: '$directory',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          extension: 1,
+          size: 1,
+          parentDirId: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          lastAccessedAt: 1,
+          isTrash: { $ifNull: ['$isTrash', false] },
+          trashedAt: 1,
+          isStarred: { $ifNull: ['$isStarred', false] },
+          directory: {
+            _id: '$directory._id',
+            name: '$directory.name'
+          }
+        }
+      }
+    ])
+
+    const hasMore = files.length > limit
+    const data = files.slice(0, limit)
+
+    let nextCursor = null
+    if (hasMore) {
+      const lastFile = data[data.length - 1]
+      nextCursor = createCursor({
+        trashedAt: lastFile.trashedAt ? lastFile.trashedAt.toISOString() : new Date().toISOString(),
+        id: lastFile._id.toString()
+      })
+    }
+
+    return res.status(200).json({
+      data,
+      pagination: {
+        limit,
+        hasMore,
+        nextCursor
+      }
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const restoreFile = async (req, res, next) => {
+  const { id } = req.params
+
+  try {
+    const file = await File.findById(id)
+
+    if (!file) {
+      return res.status(404).json({
+        error: 'File not found'
+      })
+    }
+
+    if (file.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        error: 'Unauthorized: Only the file owner can restore this file'
+      })
+    }
+
+    if (!file.isTrash) {
+      return res.status(400).json({
+        error: 'File is not in trash'
+      })
+    }
+
+    // Check if original parent folder exists and belongs to current user
+    let targetDirId = file.parentDirId
+    const parentDir = await Directory.findOne({
+      _id: targetDirId,
+      userId: req.user._id
+    })
+
+    if (!parentDir) {
+      // Fallback to user root directory if parent folder was deleted
+      targetDirId = req.user.rootDirId
+    }
+
+    file.isTrash = false
+    file.trashedAt = null
+    file.parentDirId = targetDirId
+    await file.save()
+
+    return res.status(200).json({
+      success: true,
+      message: 'File restored successfully',
+      file: {
+        id: file._id,
+        _id: file._id,
+        name: file.name,
+        parentDirId: file.parentDirId,
+        isTrash: file.isTrash
+      }
+    })
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const deleteFilePermanent = async (req, res, next) => {
+  const { id } = req.params
+
+  try {
+    const file = await File.findById(id)
+
+    if (!file) {
+      return res.status(404).json({
+        error: 'File not found'
+      })
+    }
+
+    if (file.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        error: 'Unauthorized: Only the file owner can permanently delete this file'
+      })
+    }
+
+    // 1. Delete actual file from storage provider
+    // If storage deletion fails, do NOT delete metadata and do NOT decrement quota
     await deleteStoredFile(file.storageKey)
 
-    // Delete file metadata from MongoDB
-    await file.deleteOne()
+    // 2. Delete metadata from MongoDB
+    await File.deleteOne({ _id: id, userId: req.user._id })
 
-    // Revoke any active shares for this file
-    await Share.updateMany({ fileId: id }, { status: 'revoked' })
+    // 3. Remove all shares for this file
+    await Share.deleteMany({ fileId: id })
 
-    // Atomically decrement user's storageUsed (never negative)
+    // 4. Safely decrement user's storage quota exactly once
     const fileSize = typeof file.size === 'number' && file.size > 0 ? file.size : 0
     if (fileSize > 0) {
       await User.updateOne(
@@ -1025,14 +1274,92 @@ export const deleteFile = async (req, res, next) => {
       )
     }
 
-    return res
-      .status(200)
-      .json({
+    return res.status(200).json({
+      success: true,
+      message: 'File permanently deleted'
+    })
+  } catch (err) {
+    next(err)
+  }
+}
+
+export const emptyTrash = async (req, res, next) => {
+  try {
+    const trashedFiles = await File.find({
+      userId: req.user._id,
+      isTrash: true
+    }).lean()
+
+    if (trashedFiles.length === 0) {
+      return res.status(200).json({
         success: true,
-        message: 'File deleted successfully'
+        message: 'Trash is already empty',
+        deletedCount: 0,
+        failedCount: 0,
+        failedItems: []
       })
-  } catch (error) {
-    return next(error)
+    }
+
+    const successfullyDeletedIds = []
+    const failedItems = []
+    let totalDeletedBytes = 0
+
+    for (const file of trashedFiles) {
+      try {
+        await deleteStoredFile(file.storageKey)
+        successfullyDeletedIds.push(file._id)
+        if (typeof file.size === 'number' && file.size > 0) {
+          totalDeletedBytes += file.size
+        }
+      } catch (err) {
+        console.error(`Failed to delete storage file for ${file._id}:`, err)
+        failedItems.push({
+          id: file._id.toString(),
+          name: file.name,
+          error: err.message || 'Storage deletion failed'
+        })
+      }
+    }
+
+    // Only remove metadata and decrement quota for objects successfully deleted from storage
+    if (successfullyDeletedIds.length > 0) {
+      await File.deleteMany({
+        _id: { $in: successfullyDeletedIds },
+        userId: req.user._id
+      })
+
+      await Share.deleteMany({
+        fileId: { $in: successfullyDeletedIds }
+      })
+
+      if (totalDeletedBytes > 0) {
+        await User.updateOne(
+          { _id: req.user._id },
+          [
+            {
+              $set: {
+                storageUsed: {
+                  $max: [0, { $subtract: [{ $ifNull: ['$storageUsed', 0] }, totalDeletedBytes] }],
+                },
+              },
+            },
+          ],
+          { updatePipeline: true }
+        )
+      }
+    }
+
+    return res.status(200).json({
+      success: failedItems.length === 0,
+      message: failedItems.length === 0
+        ? `Successfully emptied trash (${successfullyDeletedIds.length} items permanently deleted)`
+        : `Deleted ${successfullyDeletedIds.length} items, but ${failedItems.length} items failed to delete`,
+      deletedCount: successfullyDeletedIds.length,
+      failedCount: failedItems.length,
+      failedItems
+    })
+  } catch (err) {
+    next(err)
   }
 }
 
@@ -1100,7 +1427,7 @@ export const getSharedWithMeFiles = async (req, res, next) => {
       .limit(limit + 1)
       .populate({
         path: 'fileId',
-        select: '_id name extension size parentDirId createdAt updatedAt isStarred'
+        select: '_id name extension size parentDirId createdAt updatedAt isStarred isTrash'
       })
       .populate({
         path: 'ownerId',
@@ -1108,8 +1435,8 @@ export const getSharedWithMeFiles = async (req, res, next) => {
       })
       .lean()
 
-    // Filter out shares whose files have been removed
-    const validShares = shares.filter(s => s.fileId != null)
+    // Filter out shares whose files have been removed or moved to trash
+    const validShares = shares.filter(s => s.fileId != null && !s.fileId.isTrash)
     const hasMore = validShares.length > limit
     const pageShares = validShares.slice(0, limit)
 
@@ -1182,7 +1509,7 @@ export const shareFile = async (req, res, next) => {
 
   try {
     const file = await File.findById(id)
-    if (!file) {
+    if (!file || file.isTrash) {
       return res.status(404).json({
         error: 'File not found'
       })
@@ -1296,7 +1623,7 @@ export const getFileShares = async (req, res, next) => {
 
   try {
     const file = await File.findById(id)
-    if (!file) {
+    if (!file || file.isTrash) {
       return res.status(404).json({
         error: 'File not found'
       })
@@ -1345,7 +1672,7 @@ export const retryFileShareEmail = async (req, res, next) => {
 
   try {
     const file = await File.findById(id)
-    if (!file) {
+    if (!file || file.isTrash) {
       return res.status(404).json({
         error: 'File not found'
       })
@@ -1402,7 +1729,7 @@ export const revokeFileShare = async (req, res, next) => {
 
   try {
     const file = await File.findById(id)
-    if (!file) {
+    if (!file || file.isTrash) {
       return res.status(404).json({
         error: 'File not found'
       })

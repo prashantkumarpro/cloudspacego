@@ -141,7 +141,7 @@ export function FileList({
   } = useApp()
 
   const toast = useToast()
-  const { download, rename, remove } = useFiles()
+  const { download, rename, remove, restore } = useFiles()
   const [previewFile, setPreviewFile] = useState<UnifiedFileItem | null>(null)
   const [renameTarget, setRenameTarget] = useState<UnifiedFileItem | null>(null)
   const [moveTarget, setMoveTarget] = useState<UnifiedFileItem | null>(null)
@@ -338,9 +338,17 @@ export function FileList({
         `"${file.name}" was moved to Trash.`,
         {
           label: 'Undo',
-          onClick: () => {
+          onClick: async () => {
             if (typeof fileId === 'string' && fileId.startsWith('file-')) {
               restoreFile(fileId)
+            } else {
+              try {
+                await restore(fileId)
+                toast.success('Restored', `"${file.name}" was restored from Trash.`)
+              } catch (err) {
+                console.error('Failed to restore file:', err)
+                toast.error('Failed to restore', `Could not restore "${file.name}".`)
+              }
             }
           }
         }

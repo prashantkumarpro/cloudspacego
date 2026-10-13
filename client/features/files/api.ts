@@ -1,5 +1,6 @@
 import { apiClient } from "@/lib/api/client";
 import type {
+    EmptyTrashResponse,
     FileApiResponse,
     GetFileSharesResponse,
     GetFilesParams,
@@ -389,5 +390,81 @@ export const revokeFileShare = async (
     const response = await apiClient.delete<FileApiResponse>(
         `/file/${fileId}/share/${recipientId}`
     );
+    return response.data;
+};
+
+export const getTrashFiles = async (
+    params?: GetFilesParams
+): Promise<GetFilesResponse> => {
+    const response = await apiClient.get<{
+        data: Array<{
+            id?: string;
+            _id?: string;
+            name: string;
+            extension: string;
+            parentDirId?: string;
+            userId?: string;
+            createdAt?: string;
+            updatedAt?: string;
+            lastAccessedAt?: string;
+            size?: number;
+            isStarred?: boolean;
+            isTrash?: boolean;
+            trashedAt?: string;
+            directory?: {
+                id?: string;
+                _id?: string;
+                name: string;
+            };
+        }>;
+        pagination: {
+            limit: number;
+            hasMore: boolean;
+            nextCursor: string | null;
+        };
+    }>("/file/trash", {
+        params,
+    });
+
+    const normalizedData = (response.data.data || []).map((item) => ({
+        id: (item.id || item._id || "").toString(),
+        name: item.name,
+        extension: item.extension,
+        parentDirId: item.parentDirId,
+        userId: item.userId,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        lastAccessedAt: item.lastAccessedAt,
+        size: typeof item.size === 'number' ? item.size : (typeof item.size === 'string' && !isNaN(Number(item.size)) ? Number(item.size) : item.size),
+        isStarred: Boolean(item.isStarred),
+        starred: Boolean(item.isStarred),
+        isTrash: Boolean(item.isTrash),
+        trashedAt: item.trashedAt,
+        directory: item.directory
+            ? {
+                  id: (item.directory.id || item.directory._id || "").toString(),
+                  name: item.directory.name,
+              }
+            : undefined,
+    }));
+
+    return {
+        data: normalizedData,
+        pagination: response.data.pagination,
+    };
+};
+
+export const restoreFile = async (id: string): Promise<FileApiResponse> => {
+    const response = await apiClient.patch<FileApiResponse>(`/file/${id}/restore`);
+    return response.data;
+};
+
+export const deleteFilePermanently = async (id: string): Promise<FileApiResponse> => {
+    const response = await apiClient.delete<FileApiResponse>(`/file/${id}/permanent`);
+    return response.data;
+};
+
+export const emptyTrash = async (): Promise<EmptyTrashResponse> => {
+    const response = await apiClient.delete<EmptyTrashResponse>("/file/trash/empty");
     return response.data;
 };

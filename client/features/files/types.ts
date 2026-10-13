@@ -31,10 +31,23 @@ export interface FileItem {
     directory?: DirectoryReference;
     isStarred?: boolean;
     starred?: boolean;
+    isTrash?: boolean;
+    trashedAt?: string;
     role?: 'viewer' | 'editor';
     sharedAt?: string;
     shareId?: string;
     owner?: ShareOwnerInfo | string;
+}
+
+export interface EmptyTrashResponse extends FileApiResponse {
+    success: boolean;
+    deletedCount: number;
+    failedCount: number;
+    failedItems?: Array<{
+        id: string;
+        name: string;
+        error?: string;
+    }>;
 }
 
 export interface RecordFileAccessResponse extends FileApiResponse {

@@ -3,14 +3,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   deleteFile,
+  deleteFilePermanently,
   downloadFile,
+  emptyTrash as apiEmptyTrash,
   getFileBlob,
   getFiles,
   getRecentFiles,
   getSharedWithMeFiles,
   getStarredFiles,
+  getTrashFiles,
   recordFileAccess,
   renameFile,
+  restoreFile as apiRestoreFile,
   toggleStarFile,
   uploadFile,
 } from "../api";
@@ -64,6 +68,9 @@ interface UseFilesReturn {
   getBlob: (id: string) => Promise<Blob>;
   toggleStar: (id: string, isStarred?: boolean) => Promise<boolean>;
   recordAccess: (id: string) => Promise<void>;
+  restore: (id: string) => Promise<void>;
+  deletePermanently: (id: string) => Promise<void>;
+  emptyTrash: () => Promise<void>;
 }
 
 export function useFiles(): UseFilesReturn {
@@ -216,6 +223,39 @@ export function useFiles(): UseFilesReturn {
         console.warn("Failed to record file access:", err);
       }
     }, []),
+    restore: useCallback(async (id: string): Promise<void> => {
+      try {
+        setError(null);
+        await apiRestoreFile(id);
+        notifyFilesChanged();
+      } catch (err) {
+        console.error("Failed to restore file:", err);
+        setError("Failed to restore file.");
+        throw err;
+      }
+    }, []),
+    deletePermanently: useCallback(async (id: string): Promise<void> => {
+      try {
+        setError(null);
+        await deleteFilePermanently(id);
+        notifyFilesChanged();
+      } catch (err) {
+        console.error("Failed to permanently delete file:", err);
+        setError("Failed to permanently delete file.");
+        throw err;
+      }
+    }, []),
+    emptyTrash: useCallback(async (): Promise<void> => {
+      try {
+        setError(null);
+        await apiEmptyTrash();
+        notifyFilesChanged();
+      } catch (err) {
+        console.error("Failed to empty trash:", err);
+        setError("Failed to empty trash.");
+        throw err;
+      }
+    }, []),
   };
 }
 
@@ -225,6 +265,7 @@ export interface UseInfiniteFilesOptions {
   starred?: boolean;
   sharedWithMe?: boolean;
   recent?: boolean;
+  trash?: boolean;
 }
 
 export interface UseInfiniteFilesReturn {
@@ -241,7 +282,14 @@ export interface UseInfiniteFilesReturn {
 export function useInfiniteFiles(
   options: UseInfiniteFilesOptions = {}
 ): UseInfiniteFilesReturn {
-  const { limit = 20, enabled = true, starred = false, sharedWithMe = false, recent = false } = options;
+  const {
+    limit = 20,
+    enabled = true,
+    starred = false,
+    sharedWithMe = false,
+    recent = false,
+    trash = false
+  } = options;
 
   const [files, setFiles] = useState<FileItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(enabled);
@@ -260,16 +308,17 @@ export function useInfiniteFiles(
     try {
       isFetchingRef.current = true;
       inFlightCursorRef.current = null;
-      // Only show full loading skeleton if we don't have any items loaded yet
-      setFiles((prev) => {
-        if (prev.length === 0) {
-          setIsLoading(true);
-        }
-        return prev;
-      });
       setError(null);
 
-      const fetchFn = recent ? getRecentFiles : sharedWithMe ? getSharedWithMeFiles : starred ? getStarredFiles : getFiles;
+      const fetchFn = trash
+        ? getTrashFiles
+        : recent
+        ? getRecentFiles
+        : sharedWithMe
+        ? getSharedWithMeFiles
+        : starred
+        ? getStarredFiles
+        : getFiles;
       const response = await fetchFn({ limit });
 
       setFiles(response.data);
@@ -283,7 +332,7 @@ export function useInfiniteFiles(
       setIsLoading(false);
       isFetchingRef.current = false;
     }
-  }, [enabled, limit, starred, sharedWithMe, recent]);
+  }, [enabled, limit, starred, sharedWithMe, recent, trash]);
 
   const loadMore = useCallback(async () => {
     const cursor = nextCursorRef.current;
@@ -303,7 +352,15 @@ export function useInfiniteFiles(
       setIsLoadingMore(true);
       setError(null);
 
-      const fetchFn = recent ? getRecentFiles : sharedWithMe ? getSharedWithMeFiles : starred ? getStarredFiles : getFiles;
+      const fetchFn = trash
+        ? getTrashFiles
+        : recent
+        ? getRecentFiles
+        : sharedWithMe
+        ? getSharedWithMeFiles
+        : starred
+        ? getStarredFiles
+        : getFiles;
       const response = await fetchFn({
         cursor,
         limit,
@@ -328,9 +385,10 @@ export function useInfiniteFiles(
       isFetchingRef.current = false;
       inFlightCursorRef.current = null;
     }
-  }, [enabled, limit, starred, sharedWithMe, recent]);
+  }, [enabled, limit, starred, sharedWithMe, recent, trash]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchInitial();
   }, [fetchInitial]);
 

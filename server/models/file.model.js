@@ -38,6 +38,15 @@ const fileSchema = new Schema(
     lastAccessedAt: {
       type: Date,
       default: null
+    },
+    isTrash: {
+      type: Boolean,
+      default: false,
+      index: true
+    },
+    trashedAt: {
+      type: Date,
+      default: null
     }
   },
   {
@@ -51,6 +60,12 @@ fileSchema.index({ userId: 1, isStarred: 1, createdAt: -1, _id: -1 })
 
 // Index for user recent queries with pagination
 fileSchema.index({ userId: 1, lastAccessedAt: -1, _id: -1 })
+
+// Index for user trash queries with pagination
+fileSchema.index({ userId: 1, isTrash: 1, trashedAt: -1, _id: -1 })
+
+// Index for standard user file queries excluding trash
+fileSchema.index({ userId: 1, isTrash: 1, createdAt: -1, _id: -1 })
 
 const File = model('File', fileSchema)
 export default File
