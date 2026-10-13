@@ -138,7 +138,7 @@ export const createFile = async (req, res) => {
       )
 
       if (!postReservedUser) {
-        await deleteStoredFile(storageKey).catch(() => {})
+        await deleteStoredFile(storageKey).catch(() => { })
         isUploadedToStorage = false
 
         const currentUser = await User.findById(req.user._id).select(
@@ -195,7 +195,7 @@ export const createFile = async (req, res) => {
 
         if (!extraReserved) {
           // Extra bytes exceeded quota -> rollback entire reservation and clean up
-          await deleteStoredFile(storageKey).catch(() => {})
+          await deleteStoredFile(storageKey).catch(() => { })
           isUploadedToStorage = false
 
           await User.updateOne(
@@ -413,6 +413,8 @@ export const getFiles = async (req, res, next) => {
           size: 1,
           parentDirId: 1,
           createdAt: 1,
+          updatedAt: 1,
+          lastAccessedAt: 1,
           isStarred: { $ifNull: ['$isStarred', false] },
           directory: {
             _id: '$directory._id',
@@ -565,6 +567,8 @@ export const getStarredFiles = async (req, res, next) => {
           size: 1,
           parentDirId: 1,
           createdAt: 1,
+          updatedAt: 1,
+          lastAccessedAt: 1,
           isStarred: { $ifNull: ['$isStarred', false] },
           directory: {
             _id: '$directory._id',
@@ -599,6 +603,201 @@ export const getStarredFiles = async (req, res, next) => {
     })
   } catch (error) {
     next(error)
+  }
+}
+
+export const getRecentFiles = async (req, res, next) => {
+  try {
+    const requestedLimit = Number(req.query.limit)
+
+    const limit = Number.isNaN(requestedLimit) ? 20 : requestedLimit
+
+    if (limit < 1 || limit > 100) {
+      return res.status(400).json({
+        error: 'Limit must be between 1 and 100'
+      })
+    }
+
+    const cursor = req.query.cursor
+
+    const query = {
+      userId: req.user._id,
+      lastAccessedAt: { $ne: null }
+    }
+
+    if (cursor) {
+      let decodedCursor
+
+      try {
+        decodedCursor = decodeCursor(cursor)
+      } catch {
+        return res.status(400).json({
+          error: 'Invalid cursor'
+        })
+      }
+
+      const { lastAccessedAt, createdAt, id } = decodedCursor
+      const cursorTimestamp = lastAccessedAt || createdAt
+
+      if (
+        !cursorTimestamp ||
+        !id ||
+        !mongoose.isValidObjectId(id) ||
+        Number.isNaN(new Date(cursorTimestamp).getTime())
+      ) {
+        return res.status(400).json({
+          error: 'Invalid cursor'
+        })
+      }
+
+      query.$or = [
+        {
+          lastAccessedAt: {
+            $lt: new Date(cursorTimestamp)
+          }
+        },
+        {
+          lastAccessedAt: new Date(cursorTimestamp),
+          _id: {
+            $lt: new mongoose.Types.ObjectId(id)
+          }
+        }
+      ]
+    }
+
+    const files = await File.aggregate([
+      {
+        $match: query
+      },
+      {
+        $sort: {
+          lastAccessedAt: -1,
+          _id: -1
+        }
+      },
+      {
+        $limit: limit + 1
+      },
+      {
+        $lookup: {
+          from: 'directories',
+          let: {
+            parentDirId: '$parentDirId',
+            userId: '$userId'
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {
+                      $eq: ['$_id', '$$parentDirId']
+                    },
+                    {
+                      $eq: ['$userId', '$$userId']
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              $project: {
+                _id: 1,
+                name: 1
+              }
+            }
+          ],
+          as: 'directory'
+        }
+      },
+      {
+        $unwind: {
+          path: '$directory',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          extension: 1,
+          size: 1,
+          parentDirId: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          lastAccessedAt: 1,
+          isStarred: { $ifNull: ['$isStarred', false] },
+          directory: {
+            _id: '$directory._id',
+            name: '$directory.name'
+          }
+        }
+      }
+    ])
+
+    const hasMore = files.length > limit
+
+    const data = files.slice(0, limit)
+
+    let nextCursor = null
+
+    if (hasMore) {
+      const lastFile = data[data.length - 1]
+
+      nextCursor = createCursor({
+        lastAccessedAt: lastFile.lastAccessedAt ? lastFile.lastAccessedAt.toISOString() : new Date().toISOString(),
+        id: lastFile._id.toString()
+      })
+    }
+
+    return res.status(200).json({
+      data,
+      pagination: {
+        limit,
+        hasMore,
+        nextCursor
+      }
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const recordFileAccess = async (req, res, next) => {
+  const { id } = req.params
+
+  try {
+    const file = await File.findById(id)
+
+    if (!file) {
+      return res.status(404).json({
+        error: 'File not found'
+      })
+    }
+
+    // Verify ownership: only the owner can record personal access to their file
+    if (file.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        error: 'Unauthorized: You do not have permission to record access for this file'
+      })
+    }
+
+    const now = new Date()
+    file.lastAccessedAt = now
+    await file.save()
+
+    return res.status(200).json({
+      success: true,
+      message: 'File access recorded successfully',
+      file: {
+        id: file._id,
+        _id: file._id,
+        name: file.name,
+        lastAccessedAt: file.lastAccessedAt
+      }
+    })
+  } catch (err) {
+    next(err)
   }
 }
 
@@ -709,6 +908,14 @@ export const getFile = async (req, res) => {
         'Content-Disposition',
         `attachment; filename="${encodeURIComponent(fileData.name)}"`
       )
+
+      // Only update owner's personal lastAccessedAt if downloaded by the file owner
+      if (fileData.userId.toString() === req.user._id.toString()) {
+        await File.updateOne(
+          { _id: id, userId: req.user._id },
+          { $set: { lastAccessedAt: new Date() } }
+        ).catch(err => console.error('Failed to update lastAccessedAt on download:', err))
+      }
     }
 
     // Stream file to browser
@@ -933,11 +1140,11 @@ export const getSharedWithMeFiles = async (req, res, next) => {
         shareId: s._id.toString(),
         owner: owner
           ? {
-              id: owner._id.toString(),
-              _id: owner._id.toString(),
-              name: owner.name,
-              email: owner.email
-            }
+            id: owner._id.toString(),
+            _id: owner._id.toString(),
+            name: owner.name,
+            email: owner.email
+          }
           : undefined
       }
     })

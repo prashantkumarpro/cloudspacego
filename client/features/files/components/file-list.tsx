@@ -55,6 +55,7 @@ export type UnifiedFileItem = {
   deleted?: boolean
   createdAt?: string
   updatedAt?: string
+  lastAccessedAt?: string
   owner?: string | { id?: string; name?: string; email?: string }
   sharedWith?: string[]
   role?: 'viewer' | 'editor'
@@ -74,6 +75,7 @@ export interface FileListProps {
   defaultViewMode?: 'grid' | 'list'
   emptyMessage?: string
   emptySubtitle?: string
+  dateLabel?: string
   onFileClick?: (file: UnifiedFileItem) => void
   onFolderClick?: (folderId: string) => void
   onToggleStar?: (fileId: string) => void
@@ -111,6 +113,7 @@ export function FileList({
   defaultViewMode,
   emptyMessage,
   emptySubtitle,
+  dateLabel,
   onFileClick,
   onFolderClick,
   onToggleStar: propOnToggleStar,
@@ -249,7 +252,13 @@ export function FileList({
     }
 
 
-    if (currentSection === 'Dashboard' || currentSection === 'Recent') {
+    if (currentSection === 'Recent') {
+      result = result.sort(
+        (a, b) =>
+          new Date(b.lastAccessedAt || b.updatedAt || 0).getTime() -
+          new Date(a.lastAccessedAt || a.updatedAt || 0).getTime()
+      )
+    } else if (currentSection === 'Dashboard') {
       result = result.sort(
         (a, b) =>
           new Date(b.updatedAt || 0).getTime() -
@@ -547,6 +556,7 @@ export function FileList({
               onToggleStar={fileId => handleToggleStar(fileId)}
               customActions={getDropdownItems}
               showHeader={showHeader}
+              dateLabel={dateLabel}
               allFiles={globalFiles as UnifiedFileItem[]}
             />
           )}

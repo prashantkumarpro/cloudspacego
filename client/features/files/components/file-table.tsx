@@ -148,7 +148,9 @@ export function FileTable({
             (file.owner && file.owner !== 'Prashant' && file.owner !== 'Me')
           const ownerName = getOwnerName(file)
           const displayDate =
-            file.sharedAt || file.updatedAt || file.createdAt || new Date().toISOString()
+            (dateLabel?.toLowerCase().includes('open') && file.lastAccessedAt)
+              ? file.lastAccessedAt
+              : file.lastAccessedAt || file.sharedAt || file.updatedAt || file.createdAt || new Date().toISOString()
           const isFolder = fileType === 'folder'
           const rawRecord = file as unknown as Record<string, unknown>
           const rawInner = rawRecord.raw as Record<string, unknown> | undefined

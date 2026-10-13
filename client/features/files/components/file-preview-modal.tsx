@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import { useFiles } from '@/features/files/hooks/use-files'
+import { recordFileAccess } from '@/features/files/api'
 import { formatBytes } from '@/lib/utils/format'
 import { getFileTypeInfo, FileCategory, ensureTypedBlob, revokeBlobUrl } from '../utils/file-preview'
 import { cn } from '@/lib/utils/cn'
@@ -92,6 +93,7 @@ function PreviewSlide({
   const [isImageLoaded, setIsImageLoaded] = useState<boolean>(false)
   const blobUrlRef = useRef<string | null>(null)
   const isMountedRef = useRef<boolean>(true)
+  const hasRecordedAccessRef = useRef<boolean>(false)
 
   const fileId = file.id || file._id
   const typeInfo = useMemo(() => {
@@ -124,7 +126,24 @@ function PreviewSlide({
     setTextContent(null)
     setError(null)
     setIsImageLoaded(false)
+    hasRecordedAccessRef.current = false
   }, [fileId])
+
+  // Record access when active file content loads successfully (never for prefetches or failed loads)
+  useEffect(() => {
+    if (
+      isActive &&
+      (blobUrl || textContent) &&
+      !error &&
+      !isLoading &&
+      !hasRecordedAccessRef.current &&
+      fileId &&
+      isValidObjectId(fileId)
+    ) {
+      hasRecordedAccessRef.current = true
+      recordFileAccess(fileId).catch(() => {})
+    }
+  }, [isActive, blobUrl, textContent, error, isLoading, fileId])
 
   // Load content when active or adjacent
   useEffect(() => {

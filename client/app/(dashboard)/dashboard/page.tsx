@@ -2,7 +2,6 @@
 
 import React from 'react'
 import { useApp } from '@/providers/app-provider'
-import { FileList } from '@/features/files/components/file-list'
 import { TrashView } from '@/features/trash/components/trash-view'
 import { UploadModal } from '@/features/files/components/upload-modal'
 import { CreateFolderModal } from '@/features/directory/components/create-folder-modal'
@@ -15,6 +14,7 @@ import MyFilesView from '@/features/files/components/my-files-view'
 import SettingsView from '@/features/settings/components/settings-view'
 import StarredView from '@/features/files/components/starred-view'
 import SharedWithMeView from '@/features/files/components/shared-with-me-view'
+import RecentView from '@/features/files/components/recent-view'
 
 export default function DashboardPage () {
   const { currentSection, activeModal, setActiveModal } = useApp()
@@ -31,7 +31,7 @@ export default function DashboardPage () {
       {currentSection === 'Shared' && <SharedWithMeView />}
 
       {/* VIEW: Recent */}
-      {currentSection === 'Recent' && <FileList title='Recent Assets' />}
+      {currentSection === 'Recent' && <RecentView />}
 
       {/* VIEW: Starred */}
       {currentSection === 'Starred' && <StarredView />}

@@ -26,6 +26,7 @@ export interface FileItem {
     userId?: string;
     createdAt?: string;
     updatedAt?: string;
+    lastAccessedAt?: string;
     size?: number;
     directory?: DirectoryReference;
     isStarred?: boolean;
@@ -34,6 +35,16 @@ export interface FileItem {
     sharedAt?: string;
     shareId?: string;
     owner?: ShareOwnerInfo | string;
+}
+
+export interface RecordFileAccessResponse extends FileApiResponse {
+    success?: boolean;
+    file?: {
+        id?: string;
+        _id?: string;
+        name?: string;
+        lastAccessedAt?: string;
+    };
 }
 
 export interface ToggleStarResponse extends FileApiResponse {

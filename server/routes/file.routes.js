@@ -7,8 +7,10 @@ import {
   getFile,
   getFiles,
   getFileShares,
+  getRecentFiles,
   getSharedWithMeFiles,
   getStarredFiles,
+  recordFileAccess,
   revokeFileShare,
   retryFileShareEmail,
   shareFile,
@@ -27,6 +29,7 @@ router.post('/{:parentDirId}', createFile)
 // Read
 router.get('/shared-with-me', getSharedWithMeFiles)
 router.get('/starred', getStarredFiles)
+router.get('/recent', getRecentFiles)
 router.get('/', getFiles)
 router.get('/:id', getFile)
 router.get('/:id/shares', getFileShares)
@@ -37,6 +40,7 @@ router.post('/:id/share/:recipientId/retry-email', retryFileShareEmail)
 router.delete('/:id/share/:recipientId', revokeFileShare)
 
 // Update
+router.patch('/:id/access', recordFileAccess)
 router.patch('/:id/star', toggleStarFile)
 router.patch('/:id', updateFile)
 

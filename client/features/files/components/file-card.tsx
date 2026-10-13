@@ -3,7 +3,7 @@
 import React from 'react'
 import { FileThumbnail } from './file-thumbnail'
 import { ActionMenu, ActionMenuItem } from '@/components/ui/action-menu'
-import { formatBytes, formatFileSize, formatDate } from '@/lib/utils/format'
+import { formatFileSize, formatDate } from '@/lib/utils/format'
 import { Eye, Download, Share2, Edit3, Star, Trash2, RotateCcw, Trash, FolderInput, Info } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import type { UnifiedFileItem } from './file-list'
@@ -32,7 +32,9 @@ function getFileMetadata(file: UnifiedFileItem): string {
     .toUpperCase()
 
   const isFolder = file.type === 'folder'
-  const rawSize = file.size ?? (file as any).raw?.size ?? (file as any).fileSize ?? (file as any).length
+  const rawRecord = file as unknown as Record<string, unknown>
+  const rawInner = rawRecord.raw as Record<string, unknown> | undefined
+  const rawSize = file.size ?? rawInner?.size ?? rawRecord.fileSize ?? rawRecord.length
   const fileSizeNum =
     typeof rawSize === 'number'
       ? rawSize
@@ -42,7 +44,8 @@ function getFileMetadata(file: UnifiedFileItem): string {
 
   const hasSize = !isFolder && typeof fileSizeNum === 'number' && fileSizeNum >= 0
   const sizeFormatted = hasSize ? formatFileSize(fileSizeNum!) : null
-  const dateFormatted = file.updatedAt || file.createdAt ? formatDate(file.updatedAt || file.createdAt!) : null
+  const rawDate = file.lastAccessedAt || file.updatedAt || file.createdAt
+  const dateFormatted = rawDate ? formatDate(rawDate) : null
 
   if (sizeFormatted) {
     return `${ext} • ${sizeFormatted}`

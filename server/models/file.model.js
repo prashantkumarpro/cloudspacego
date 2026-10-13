@@ -34,6 +34,10 @@ const fileSchema = new Schema(
     isStarred: {
       type: Boolean,
       default: false
+    },
+    lastAccessedAt: {
+      type: Date,
+      default: null
     }
   },
   {
@@ -44,6 +48,9 @@ const fileSchema = new Schema(
 
 // Index for user starred queries with pagination
 fileSchema.index({ userId: 1, isStarred: 1, createdAt: -1, _id: -1 })
+
+// Index for user recent queries with pagination
+fileSchema.index({ userId: 1, lastAccessedAt: -1, _id: -1 })
 
 const File = model('File', fileSchema)
 export default File

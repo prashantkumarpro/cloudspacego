@@ -4,6 +4,7 @@ import type {
     GetFileSharesResponse,
     GetFilesParams,
     GetFilesResponse,
+    RecordFileAccessResponse,
     RenameFileData,
     ShareFilePayload,
     ShareFileResponse,
@@ -24,6 +25,7 @@ export const getFiles = async (
             userId?: string;
             createdAt?: string;
             updatedAt?: string;
+            lastAccessedAt?: string;
             size?: number;
             isStarred?: boolean;
             directory?: {
@@ -49,6 +51,7 @@ export const getFiles = async (
         userId: item.userId,
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
+        lastAccessedAt: item.lastAccessedAt,
         size: typeof item.size === 'number' ? item.size : (typeof item.size === 'string' && !isNaN(Number(item.size)) ? Number(item.size) : item.size),
         isStarred: Boolean(item.isStarred),
         starred: Boolean(item.isStarred),
@@ -79,6 +82,7 @@ export const getStarredFiles = async (
             userId?: string;
             createdAt?: string;
             updatedAt?: string;
+            lastAccessedAt?: string;
             size?: number;
             isStarred?: boolean;
             directory?: {
@@ -104,6 +108,64 @@ export const getStarredFiles = async (
         userId: item.userId,
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
+        lastAccessedAt: item.lastAccessedAt,
+        size: typeof item.size === 'number' ? item.size : (typeof item.size === 'string' && !isNaN(Number(item.size)) ? Number(item.size) : item.size),
+        isStarred: Boolean(item.isStarred),
+        starred: Boolean(item.isStarred),
+        directory: item.directory
+            ? {
+                  id: (item.directory.id || item.directory._id || "").toString(),
+                  name: item.directory.name,
+              }
+            : undefined,
+    }));
+
+    return {
+        data: normalizedData,
+        pagination: response.data.pagination,
+    };
+};
+
+export const getRecentFiles = async (
+    params?: GetFilesParams
+): Promise<GetFilesResponse> => {
+    const response = await apiClient.get<{
+        data: Array<{
+            id?: string;
+            _id?: string;
+            name: string;
+            extension: string;
+            parentDirId?: string;
+            userId?: string;
+            createdAt?: string;
+            updatedAt?: string;
+            lastAccessedAt?: string;
+            size?: number;
+            isStarred?: boolean;
+            directory?: {
+                id?: string;
+                _id?: string;
+                name: string;
+            };
+        }>;
+        pagination: {
+            limit: number;
+            hasMore: boolean;
+            nextCursor: string | null;
+        };
+    }>("/file/recent", {
+        params,
+    });
+
+    const normalizedData = (response.data.data || []).map((item) => ({
+        id: (item.id || item._id || "").toString(),
+        name: item.name,
+        extension: item.extension,
+        parentDirId: item.parentDirId,
+        userId: item.userId,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        lastAccessedAt: item.lastAccessedAt,
         size: typeof item.size === 'number' ? item.size : (typeof item.size === 'string' && !isNaN(Number(item.size)) ? Number(item.size) : item.size),
         isStarred: Boolean(item.isStarred),
         starred: Boolean(item.isStarred),
@@ -190,6 +252,13 @@ export const toggleStarFile = async (
 ): Promise<ToggleStarResponse> => {
     const body = isStarred !== undefined ? { isStarred } : {};
     const response = await apiClient.patch<ToggleStarResponse>(`/file/${id}/star`, body);
+    return response.data;
+};
+
+export const recordFileAccess = async (
+    id: string
+): Promise<RecordFileAccessResponse> => {
+    const response = await apiClient.patch<RecordFileAccessResponse>(`/file/${id}/access`);
     return response.data;
 };
 
