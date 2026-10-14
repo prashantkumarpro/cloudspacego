@@ -68,7 +68,7 @@ interface UseFilesReturn {
   getBlob: (id: string) => Promise<Blob>;
   toggleStar: (id: string, isStarred?: boolean) => Promise<boolean>;
   recordAccess: (id: string) => Promise<void>;
-  restore: (id: string) => Promise<any>;
+  restore: (id: string, options?: { skipNotify?: boolean }) => Promise<any>;
   deletePermanently: (id: string) => Promise<void>;
   emptyTrash: () => Promise<void>;
 }
@@ -225,11 +225,13 @@ export function useFiles(): UseFilesReturn {
         console.warn("Failed to record file access:", err);
       }
     }, []),
-    restore: useCallback(async (id: string): Promise<any> => {
+    restore: useCallback(async (id: string, options?: { skipNotify?: boolean }): Promise<any> => {
       try {
         setError(null);
         const res = await apiRestoreFile(id);
-        notifyFilesChanged({ type: 'restore', fileId: id, file: res?.file });
+        if (!options?.skipNotify) {
+          notifyFilesChanged({ type: 'restore', fileId: id, file: res?.file });
+        }
         return res;
       } catch (err) {
         console.error("Failed to restore file:", err);
@@ -422,10 +424,22 @@ export function useInfiniteFiles(
 
       // 2. Rollback delete event: Re-insert file at original position
       if (event.type === 'rollback-delete' && event.file) {
-        if (trash) return;
+        if (trash) {
+          const fileIdStr = (event.file.id || event.file._id || event.fileId || '').toString();
+          setFiles((prev) =>
+            prev.filter((f) => (f.id || f._id || '').toString() !== fileIdStr)
+          );
+          return;
+        }
         const fileIdStr = (event.file.id || event.file._id || '').toString();
         setFiles((prev) => {
           if (prev.some((f) => (f.id || f._id || '').toString() === fileIdStr)) {
+            return prev;
+          }
+          if (starred && !event.file.isStarred && !event.file.starred) {
+            return prev;
+          }
+          if (recent && !event.file.lastAccessedAt) {
             return prev;
           }
           const index =
@@ -457,6 +471,9 @@ export function useInfiniteFiles(
               return prev;
             }
             if (starred && !event.file.isStarred && !event.file.starred) {
+              return prev;
+            }
+            if (recent && !event.file.lastAccessedAt) {
               return prev;
             }
             const index =
@@ -498,7 +515,7 @@ export function useInfiniteFiles(
     return () => {
       fileListeners.delete(handleFileEvent);
     };
-  }, [enabled, fetchInitial, trash, starred]);
+  }, [enabled, fetchInitial, trash, starred, recent]);
 
   return {
     files,

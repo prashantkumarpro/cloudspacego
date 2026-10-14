@@ -113,7 +113,7 @@ export default function DashboardOverview() {
           }
           return hasChange ? next : prev
         })
-      } else if (event.type === 'rollback-delete' && event.file) {
+      } else if ((event.type === 'rollback-delete' || event.type === 'restore') && event.file) {
         const file = event.file
         const fileId = (file.id || file._id || '').toString()
         const parentId = file.parentDirId || file.parentFolderId
