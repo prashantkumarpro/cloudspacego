@@ -18,31 +18,31 @@ import {
   toggleStarFile,
   uploadFile,
 } from "../api";
-import type { FileItem, RenameFileData, UploadFileData } from "../types";
+import type { FileItem, RenameFileData, UploadFileData, FileMutationEvent, FileEventListener } from "../types";
 import { notifyDirectoryChanged } from "@/features/directory/hooks/use-directory";
 import { useUpload } from "@/providers/upload-provider";
 
 
 // Global listener set to synchronize active file hook consumers if needed
-const fileListeners = new Set<() => void>();
+const fileListeners = new Set<FileEventListener>();
 
-export const subscribeFilesChanged = (listener: () => void) => {
+export const subscribeFilesChanged = (listener: FileEventListener) => {
   fileListeners.add(listener);
   return () => {
     fileListeners.delete(listener);
   };
 };
 
-export const notifyFilesChanged = () => {
+export const notifyFilesChanged = (event?: FileMutationEvent) => {
   fileListeners.forEach((listener) => {
     try {
-      listener();
+      listener(event);
     } catch (error) {
       console.error("Error in file listener:", error);
     }
   });
   // Also notify directory listeners since files live within directories
-  notifyDirectoryChanged();
+  notifyDirectoryChanged(event);
 };
 
 interface UseFilesReturn {
@@ -60,7 +60,7 @@ interface UseFilesReturn {
     id: string,
     data: RenameFileData
   ) => Promise<void>;
-  remove: (id: string) => Promise<void>;
+  remove: (id: string, options?: { skipNotify?: boolean }) => Promise<void>;
   download: (
     id: string,
     filename?: string
@@ -68,7 +68,7 @@ interface UseFilesReturn {
   getBlob: (id: string) => Promise<Blob>;
   toggleStar: (id: string, isStarred?: boolean) => Promise<boolean>;
   recordAccess: (id: string) => Promise<void>;
-  restore: (id: string) => Promise<void>;
+  restore: (id: string) => Promise<any>;
   deletePermanently: (id: string) => Promise<void>;
   emptyTrash: () => Promise<void>;
 }
@@ -130,14 +130,16 @@ export function useFiles(): UseFilesReturn {
   );
 
   const remove = useCallback(
-    async (id: string): Promise<void> => {
+    async (id: string, options?: { skipNotify?: boolean }): Promise<void> => {
       try {
         setIsDeleting(true);
         setError(null);
 
         await deleteFile(id);
 
-        notifyFilesChanged();
+        if (!options?.skipNotify) {
+          notifyFilesChanged({ type: 'delete', fileId: id });
+        }
       } catch (err) {
         console.error("Failed to delete file:", err);
         setError("Failed to delete file.");
@@ -223,11 +225,12 @@ export function useFiles(): UseFilesReturn {
         console.warn("Failed to record file access:", err);
       }
     }, []),
-    restore: useCallback(async (id: string): Promise<void> => {
+    restore: useCallback(async (id: string): Promise<any> => {
       try {
         setError(null);
-        await apiRestoreFile(id);
-        notifyFilesChanged();
+        const res = await apiRestoreFile(id);
+        notifyFilesChanged({ type: 'restore', fileId: id, file: res?.file });
+        return res;
       } catch (err) {
         console.error("Failed to restore file:", err);
         setError("Failed to restore file.");
@@ -238,7 +241,7 @@ export function useFiles(): UseFilesReturn {
       try {
         setError(null);
         await deleteFilePermanently(id);
-        notifyFilesChanged();
+        notifyFilesChanged({ type: 'permanent-delete', fileId: id });
       } catch (err) {
         console.error("Failed to permanently delete file:", err);
         setError("Failed to permanently delete file.");
@@ -249,7 +252,7 @@ export function useFiles(): UseFilesReturn {
       try {
         setError(null);
         await apiEmptyTrash();
-        notifyFilesChanged();
+        notifyFilesChanged({ type: 'empty-trash' });
       } catch (err) {
         console.error("Failed to empty trash:", err);
         setError("Failed to empty trash.");
@@ -395,11 +398,107 @@ export function useInfiniteFiles(
   useEffect(() => {
     if (!enabled) return;
 
-    fileListeners.add(fetchInitial);
-    return () => {
-      fileListeners.delete(fetchInitial);
+    const handleFileEvent: FileEventListener = (event) => {
+      if (!event || !event.type || event.type === 'refresh') {
+        fetchInitial();
+        return;
+      }
+
+      // 1. Delete event: Optimistically evict file from all non-trash views
+      if (event.type === 'delete' && event.fileId) {
+        if (trash) {
+          // Do not blindly add the file to Trash before server-confirmed trashedAt and pagination position are known.
+          return;
+        }
+        setFiles((prev) => {
+          const fileIdStr = event.fileId!.toString();
+          if (!prev.some((f) => (f.id || f._id || '').toString() === fileIdStr)) {
+            return prev;
+          }
+          return prev.filter((f) => (f.id || f._id || '').toString() !== fileIdStr);
+        });
+        return;
+      }
+
+      // 2. Rollback delete event: Re-insert file at original position
+      if (event.type === 'rollback-delete' && event.file) {
+        if (trash) return;
+        const fileIdStr = (event.file.id || event.file._id || '').toString();
+        setFiles((prev) => {
+          if (prev.some((f) => (f.id || f._id || '').toString() === fileIdStr)) {
+            return prev;
+          }
+          const index =
+            typeof event.originalIndex === 'number' &&
+            event.originalIndex >= 0 &&
+            event.originalIndex <= prev.length
+              ? event.originalIndex
+              : 0;
+          const next = [...prev];
+          next.splice(index, 0, event.file);
+          return next;
+        });
+        return;
+      }
+
+      // 3. Restore event: Remove from Trash; put back into source views if appropriate
+      if (event.type === 'restore' && event.fileId) {
+        if (trash) {
+          setFiles((prev) =>
+            prev.filter((f) => (f.id || f._id || '').toString() !== event.fileId!.toString())
+          );
+          return;
+        }
+
+        if (event.file) {
+          const fileIdStr = (event.file.id || event.file._id || '').toString();
+          setFiles((prev) => {
+            if (prev.some((f) => (f.id || f._id || '').toString() === fileIdStr)) {
+              return prev;
+            }
+            if (starred && !event.file.isStarred && !event.file.starred) {
+              return prev;
+            }
+            const index =
+              typeof event.originalIndex === 'number' &&
+              event.originalIndex >= 0 &&
+              event.originalIndex <= prev.length
+                ? event.originalIndex
+                : 0;
+            const next = [...prev];
+            next.splice(index, 0, event.file);
+            return next;
+          });
+          return;
+        }
+      }
+
+      // 4. Permanent delete & Empty trash events: update Trash view immediately
+      if (event.type === 'permanent-delete' && event.fileId) {
+        if (trash) {
+          setFiles((prev) =>
+            prev.filter((f) => (f.id || f._id || '').toString() !== event.fileId!.toString())
+          );
+          return;
+        }
+      }
+
+      if (event.type === 'empty-trash') {
+        if (trash) {
+          setFiles([]);
+          return;
+        }
+      }
+
+      // Fallback for upload, rename, etc.
+      fetchInitial();
     };
-  }, [enabled, fetchInitial]);
+
+    fileListeners.add(handleFileEvent);
+    return () => {
+      fileListeners.delete(handleFileEvent);
+    };
+  }, [enabled, fetchInitial, trash, starred]);
 
   return {
     files,

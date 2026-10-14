@@ -139,4 +139,27 @@ export interface RenameFileData {
 export interface FileApiResponse {
     message?: string;
     error?: string;
-}
+    file?: FileItem | any;
+}
+
+export type FileMutationType =
+    | 'delete'
+    | 'rollback-delete'
+    | 'restore'
+    | 'permanent-delete'
+    | 'empty-trash'
+    | 'upload'
+    | 'rename'
+    | 'star'
+    | 'refresh';
+
+export interface FileMutationEvent {
+    type: FileMutationType;
+    fileId?: string;
+    file?: FileItem | any;
+    originalIndex?: number;
+    parentDirId?: string | null;
+    [key: string]: any;
+}
+
+export type FileEventListener = (event?: FileMutationEvent) => void;

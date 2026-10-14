@@ -12,14 +12,23 @@ import type {
   Directory,
   RenameDirectoryData,
 } from "../types";
+import type { FileMutationEvent } from "@/features/files/types";
 
 // Global listener set to synchronize all active useDirectory hook instances on mutation
-const directoryListeners = new Set<() => void>();
+export type DirectoryEventListener = (event?: FileMutationEvent) => void;
+const directoryListeners = new Set<DirectoryEventListener>();
 
-export const notifyDirectoryChanged = () => {
+export const subscribeDirectoryChanged = (listener: DirectoryEventListener) => {
+  directoryListeners.add(listener);
+  return () => {
+    directoryListeners.delete(listener);
+  };
+};
+
+export const notifyDirectoryChanged = (event?: FileMutationEvent) => {
   directoryListeners.forEach((listener) => {
     try {
-      listener();
+      listener(event);
     } catch (error) {
       console.error("Error in directory listener:", error);
     }
@@ -142,11 +151,95 @@ export function useDirectory(id?: string): UseDirectoryReturn {
   }, [fetchDirectory]);
 
   useEffect(() => {
-    directoryListeners.add(fetchDirectory);
-    return () => {
-      directoryListeners.delete(fetchDirectory);
+    const handleDirectoryEvent: DirectoryEventListener = (event) => {
+      if (!event || !event.type || event.type === 'refresh') {
+        fetchDirectory();
+        return;
+      }
+
+      if (event.type === 'delete' && event.fileId) {
+        setDirectory((prev) => {
+          if (!prev || !prev.files) return prev;
+          const match = prev.files.some(
+            (f) => (f.id || f._id || '').toString() === event.fileId!.toString()
+          );
+          if (!match) return prev;
+          return {
+            ...prev,
+            files: prev.files.filter(
+              (f) => (f.id || f._id || '').toString() !== event.fileId!.toString()
+            ),
+          };
+        });
+        return;
+      }
+
+      if (event.type === 'rollback-delete' && event.file) {
+        const file = event.file;
+        const fileId = (file.id || file._id || '').toString();
+        setDirectory((prev) => {
+          if (!prev || !prev.files) return prev;
+          const currentDirId = id || undefined;
+          const fileParentId = file.parentDirId || file.parentFolderId;
+          if (currentDirId && fileParentId && fileParentId.toString() !== currentDirId.toString()) {
+            return prev;
+          }
+          if (prev.files.some((f) => (f.id || f._id || '').toString() === fileId)) {
+            return prev;
+          }
+          const index =
+            typeof event.originalIndex === 'number' &&
+            event.originalIndex >= 0 &&
+            event.originalIndex <= prev.files.length
+              ? event.originalIndex
+              : 0;
+          const newFiles = [...prev.files];
+          newFiles.splice(index, 0, file);
+          return {
+            ...prev,
+            files: newFiles,
+          };
+        });
+        return;
+      }
+
+      if (event.type === 'restore' && event.file) {
+        const file = event.file;
+        const fileId = (file.id || file._id || '').toString();
+        setDirectory((prev) => {
+          if (!prev || !prev.files) return prev;
+          const currentDirId = id || undefined;
+          const fileParentId = file.parentDirId || file.parentFolderId;
+          if (currentDirId && fileParentId && fileParentId.toString() !== currentDirId.toString()) {
+            return prev;
+          }
+          if (prev.files.some((f) => (f.id || f._id || '').toString() === fileId)) {
+            return prev;
+          }
+          const index =
+            typeof event.originalIndex === 'number' &&
+            event.originalIndex >= 0 &&
+            event.originalIndex <= prev.files.length
+              ? event.originalIndex
+              : 0;
+          const newFiles = [...prev.files];
+          newFiles.splice(index, 0, file);
+          return {
+            ...prev,
+            files: newFiles,
+          };
+        });
+        return;
+      }
+
+      fetchDirectory();
     };
-  }, [fetchDirectory]);
+
+    directoryListeners.add(handleDirectoryEvent);
+    return () => {
+      directoryListeners.delete(handleDirectoryEvent);
+    };
+  }, [fetchDirectory, id]);
 
   return {
     directory,

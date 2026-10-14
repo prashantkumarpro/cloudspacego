@@ -14,6 +14,7 @@ import { useDirectory } from '@/features/directory/hooks/use-directory'
 import { getDirectory } from '@/features/directory/api'
 import type { DirectoryItem, FileItem } from '@/features/directory/types'
 import { ActionMenuItem } from '@/components/ui/action-menu'
+import { subscribeFilesChanged } from '@/features/files/hooks/use-files'
 
 function deriveFileType(filename: string, ext?: string): string {
   const extension = (ext || filename.split('.').pop() || '')
@@ -88,6 +89,57 @@ export default function DashboardOverview() {
       isMounted = false
     }
   }, [folders])
+
+  // Synchronize folder contents with targeted file deletion / rollback events
+  React.useEffect(() => {
+    const unsubscribe = subscribeFilesChanged((event) => {
+      if (!event || !event.type) return
+
+      if (event.type === 'delete' && event.fileId) {
+        setFolderContents((prev) => {
+          let hasChange = false
+          const next = { ...prev }
+          for (const [folderId, content] of Object.entries(next)) {
+            if (content.files.some((f) => (f.id || f._id || '').toString() === event.fileId)) {
+              hasChange = true
+              next[folderId] = {
+                ...content,
+                filesCount: Math.max(0, content.filesCount - 1),
+                files: content.files.filter(
+                  (f) => (f.id || f._id || '').toString() !== event.fileId
+                ),
+              }
+            }
+          }
+          return hasChange ? next : prev
+        })
+      } else if (event.type === 'rollback-delete' && event.file) {
+        const file = event.file
+        const fileId = (file.id || file._id || '').toString()
+        const parentId = file.parentDirId || file.parentFolderId
+        if (parentId) {
+          setFolderContents((prev) => {
+            const content = prev[parentId]
+            if (!content || content.files.some((f) => (f.id || f._id || '').toString() === fileId)) {
+              return prev
+            }
+            return {
+              ...prev,
+              [parentId]: {
+                ...content,
+                filesCount: content.filesCount + 1,
+                files: [file, ...content.files],
+              },
+            }
+          })
+        }
+      }
+    })
+
+    return () => {
+      unsubscribe()
+    }
+  }, [])
 
   const getFolderItemsCountText = (folderId: string) => {
     const count = folderContents[folderId]?.filesCount ?? 0

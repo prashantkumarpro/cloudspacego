@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react'
 import { useApp } from '../../../providers/app-provider'
-import { useFiles } from '../hooks/use-files'
+import { useFiles, notifyFilesChanged } from '../hooks/use-files'
 import { useToast } from '@/providers/toast-provider'
 import { FilePreview } from './file-preview'
 import { FilePreviewModal } from './file-preview-modal'
@@ -146,6 +146,8 @@ export function FileList({
   const [renameTarget, setRenameTarget] = useState<UnifiedFileItem | null>(null)
   const [moveTarget, setMoveTarget] = useState<UnifiedFileItem | null>(null)
   const [detailsTarget, setDetailsTarget] = useState<UnifiedFileItem | null>(null)
+  const deletingIdsRef = React.useRef<Set<string>>(new Set())
+  const restoringIdsRef = React.useRef<Set<string>>(new Set())
 
   // Local view mode override if defaultViewMode is passed, otherwise global
   const [localViewMode, setLocalViewMode] = useState<'grid' | 'list' | null>(
@@ -325,38 +327,157 @@ export function FileList({
   const handleDeleteItem = async (file: UnifiedFileItem) => {
     const fileId = file.id || file._id
     if (!fileId) return
+    const fileIdStr = fileId.toString()
 
-    try {
-      if (typeof fileId === 'string' && fileId.startsWith('file-')) {
-        deleteFile(fileId)
-      } else {
-        await remove(fileId)
-      }
+    // 1. Prevent duplicate clicks for the same file
+    if (deletingIdsRef.current.has(fileIdStr)) return
+    deletingIdsRef.current.add(fileIdStr)
 
+    // 2. Capture snapshot and original position before state changes
+    const fileSnapshot: UnifiedFileItem = { ...file }
+    const originalIndex = displayList.findIndex(
+      f => (f.id || f._id || '').toString() === fileIdStr
+    )
+    const effectiveParentDirId =
+      file.parentFolderId || file.parentDirId || activeFolderId || null
+
+    // For mock/demo files starting with 'file-'
+    if (fileIdStr.startsWith('file-')) {
+      deleteFile(fileIdStr)
       toast.success(
         'Moved to Trash',
         `"${file.name}" was moved to Trash.`,
         {
           label: 'Undo',
-          onClick: async () => {
-            if (typeof fileId === 'string' && fileId.startsWith('file-')) {
-              restoreFile(fileId)
-            } else {
-              try {
-                await restore(fileId)
-                toast.success('Restored', `"${file.name}" was restored from Trash.`)
-              } catch (err) {
-                console.error('Failed to restore file:', err)
-                toast.error('Failed to restore', `Could not restore "${file.name}".`)
-              }
-            }
+          onClick: () => {
+            restoreFile(fileIdStr)
+            toast.success('Restored', `"${file.name}" was restored from Trash.`)
           }
         }
       )
-    } catch (err) {
-      console.error('Failed to delete item:', err)
-      toast.error('Failed to delete', `Could not move "${file.name}" to Trash.`)
+      deletingIdsRef.current.delete(fileIdStr)
+      return
     }
+
+    // 3. Immediately remove optimistically from all active views
+    notifyFilesChanged({
+      type: 'delete',
+      fileId: fileIdStr,
+      file: fileSnapshot,
+      originalIndex: originalIndex >= 0 ? originalIndex : undefined,
+      parentDirId: effectiveParentDirId
+    })
+
+    let isUndone = false
+    let deleteFailed = false
+
+    // 4. Start the backend DELETE request (with skipNotify so it doesn't fire redundant notifications)
+    const deletePromise = remove(fileIdStr, { skipNotify: true }).catch(err => {
+      deleteFailed = true
+      throw err
+    })
+
+    // 5. Show immediate success toast with Undo
+    const toastId = toast.success(
+      'Moved to Trash',
+      `"${file.name}" was moved to Trash.`,
+      {
+        label: 'Undo',
+        onClick: async () => {
+          if (isUndone) return
+          if (restoringIdsRef.current.has(fileIdStr)) return
+          isUndone = true
+          restoringIdsRef.current.add(fileIdStr)
+
+          try {
+            // Await the in-flight delete to prevent race conditions
+            await deletePromise.catch(() => {})
+
+            if (deleteFailed) {
+              // Delete already failed on server; file was never trashed
+              toast.info('Restored', `"${file.name}" was restored.`)
+              return
+            }
+
+            // Execute server restore
+            const res = await restore(fileIdStr)
+            const restoredParentId =
+              res?.file?.parentDirId || file.parentFolderId || file.parentDirId || null
+            const originalParentId = file.parentFolderId || file.parentDirId || null
+
+            // Notify all views of confirmed restore
+            notifyFilesChanged({
+              type: 'restore',
+              fileId: fileIdStr,
+              file: {
+                ...fileSnapshot,
+                parentDirId: restoredParentId,
+                parentFolderId: restoredParentId,
+                isTrash: false,
+                trashedAt: null
+              },
+              originalIndex: originalIndex >= 0 ? originalIndex : undefined,
+              parentDirId: restoredParentId
+            })
+
+            // Check if backend restored to root because original folder was deleted
+            if (
+              restoredParentId &&
+              originalParentId &&
+              restoredParentId.toString() !== originalParentId.toString()
+            ) {
+              toast.info(
+                'Restored to Root',
+                `"${file.name}" was restored to My Files because its original folder was deleted.`
+              )
+            } else {
+              toast.success('Restored', `"${file.name}" was restored from Trash.`)
+            }
+          } catch (err) {
+            console.error('Failed to restore file:', err)
+            toast.error('Failed to restore', `Could not restore "${file.name}".`)
+            // Reconcile: since restore failed on server, ensure it remains evicted from visible list
+            notifyFilesChanged({
+              type: 'delete',
+              fileId: fileIdStr
+            })
+          } finally {
+            restoringIdsRef.current.delete(fileIdStr)
+          }
+        }
+      }
+    )
+
+    // 6. Handle DELETE promise settlement
+    deletePromise
+      .then(() => {
+        deletingIdsRef.current.delete(fileIdStr)
+      })
+      .catch(err => {
+        deletingIdsRef.current.delete(fileIdStr)
+        if (isUndone) {
+          // If already undone by user, rollback was already handled
+          return
+        }
+
+        // Dismiss the success toast
+        toast.dismiss(toastId)
+
+        // Roll back the optimistic delete to restore the file
+        notifyFilesChanged({
+          type: 'rollback-delete',
+          fileId: fileIdStr,
+          file: fileSnapshot,
+          originalIndex: originalIndex >= 0 ? originalIndex : undefined,
+          parentDirId: effectiveParentDirId
+        })
+
+        // Show clear error toast
+        toast.error(
+          'Failed to delete',
+          `Could not move "${file.name}" to Trash. It has been restored.`
+        )
+      })
   }
 
   const handlePerformMove = async (targetFolderId: string | null) => {
