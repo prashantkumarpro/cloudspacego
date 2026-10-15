@@ -4,7 +4,7 @@ import React, { useMemo, useState } from 'react'
 import { useApp } from '@/providers/app-provider'
 import { useToast } from '@/providers/toast-provider'
 import { FolderCard } from './folder-card'
-import { useDirectory } from '../hooks/use-directory'
+import { useDirectory, subscribeDirectoryChanged } from '../hooks/use-directory'
 import { getDirectory } from '../api'
 import { RenameModal } from '@/features/files/components/rename-modal'
 import { MoveModal } from '@/features/files/components/move-modal'
@@ -57,6 +57,9 @@ export function FolderGrid ({
     if (folders.length > 0) {
       Promise.all(
         folders.map(async f => {
+          if (f.id?.startsWith('temp-') || f.isOptimistic) {
+            return { id: f.id, count: 0 }
+          }
           try {
             const subDir = await getDirectory(f.id)
             return { id: f.id, count: subDir.files ? subDir.files.length : 0 }
@@ -70,15 +73,44 @@ export function FolderGrid ({
         results.forEach(r => {
           map[r.id] = r.count
         })
-        setFolderCounts(map)
+        setFolderCounts(prev => ({ ...prev, ...map }))
       })
     } else {
-      setFolderCounts({})
+      setFolderCounts(prev => (Object.keys(prev).length === 0 ? prev : {}))
     }
     return () => {
       isMounted = false
     }
   }, [folders])
+
+  // Synchronize counts on optimistic folder creation / settlement
+  React.useEffect(() => {
+    const unsubscribe = subscribeDirectoryChanged((event) => {
+      if (!event || !event.type) return
+      if (event.type === 'create-folder-optimistic' && event.folder?.id) {
+        const folderId = event.folder.id
+        setFolderCounts(prev => ({ ...prev, [folderId]: 0 }))
+      } else if (event.type === 'create-folder-success' && event.tempId && event.folder?.id) {
+        const tempId = event.tempId
+        const folderId = event.folder.id
+        setFolderCounts(prev => {
+          const next = { ...prev }
+          delete next[tempId]
+          next[folderId] = 0
+          return next
+        })
+      } else if (event.type === 'create-folder-error' && event.tempId) {
+        const tempId = event.tempId
+        setFolderCounts(prev => {
+          if (!(tempId in prev)) return prev
+          const next = { ...prev }
+          delete next[tempId]
+          return next
+        })
+      }
+    })
+    return () => unsubscribe()
+  }, [])
 
   const isLoading = propIsLoading ?? hookResult.isLoading
 
@@ -159,6 +191,7 @@ export function FolderGrid ({
               name={folder.name}
               itemsCountText={itemsCountText}
               starred={false}
+              isOptimistic={folder.isOptimistic || folder.id.startsWith('temp-')}
               onClick={() => setActiveFolderId(folder.id)}
               onDetails={() => setDetailsTarget(folder)}
               onRename={() => setRenameTarget(folder)}

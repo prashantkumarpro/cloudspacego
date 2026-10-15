@@ -10,7 +10,7 @@ import { SectionAction } from '@/components/ui/section-action'
 import { useAuth } from '@/features/auth/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Folder, ChevronRight, Eye, Edit3, Share2, Trash2, FolderPlus } from 'lucide-react'
-import { useDirectory } from '@/features/directory/hooks/use-directory'
+import { useDirectory, subscribeDirectoryChanged } from '@/features/directory/hooks/use-directory'
 import { getDirectory } from '@/features/directory/api'
 import type { DirectoryItem, FileItem } from '@/features/directory/types'
 import { ActionMenuItem } from '@/components/ui/action-menu'
@@ -63,6 +63,9 @@ export default function DashboardOverview() {
     if (folders.length > 0) {
       Promise.all(
         folders.map(async folder => {
+          if (folder.id?.startsWith('temp-') || folder.isOptimistic) {
+            return { id: folder.id, filesCount: 0, files: [] }
+          }
           try {
             const subDir = await getDirectory(folder.id)
             return {
@@ -80,7 +83,7 @@ export default function DashboardOverview() {
         results.forEach(r => {
           map[r.id] = { filesCount: r.filesCount, files: r.files }
         })
-        setFolderContents(map)
+        setFolderContents(prev => ({ ...prev, ...map }))
       })
     } else {
       setFolderContents({})
@@ -89,6 +92,42 @@ export default function DashboardOverview() {
       isMounted = false
     }
   }, [folders])
+
+  // Synchronize folder contents with targeted directory creation / settlement events
+  React.useEffect(() => {
+    const unsubscribe = subscribeDirectoryChanged((event) => {
+      if (!event || !event.type) return
+
+      if (event.type === 'create-folder-optimistic' && event.folder?.id) {
+        const folderId = event.folder.id
+        setFolderContents((prev) => ({
+          ...prev,
+          [folderId]: { filesCount: 0, files: [] },
+        }))
+      } else if (event.type === 'create-folder-success' && event.tempId && event.folder?.id) {
+        const tempId = event.tempId
+        const folderId = event.folder.id
+        setFolderContents((prev) => {
+          const next = { ...prev }
+          delete next[tempId]
+          next[folderId] = { filesCount: 0, files: [] }
+          return next
+        })
+      } else if (event.type === 'create-folder-error' && event.tempId) {
+        const tempId = event.tempId
+        setFolderContents((prev) => {
+          if (!(tempId in prev)) return prev
+          const next = { ...prev }
+          delete next[tempId]
+          return next
+        })
+      }
+    })
+
+    return () => {
+      unsubscribe()
+    }
+  }, [])
 
   // Synchronize folder contents with targeted file deletion / rollback events
   React.useEffect(() => {
@@ -380,7 +419,9 @@ export default function DashboardOverview() {
                   name={folder.name}
                   itemsCountText={getFolderItemsCountText(folder.id)}
                   starred={false}
+                  isOptimistic={folder.isOptimistic || folder.id.startsWith('temp-')}
                   onClick={() => {
+                    if (folder.isOptimistic || folder.id.startsWith('temp-')) return
                     setCurrentSection('My Files')
                     setActiveFolderId(folder.id)
                   }}

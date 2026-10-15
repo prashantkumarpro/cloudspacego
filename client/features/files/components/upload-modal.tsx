@@ -2,16 +2,18 @@
 
 import React, { useState, useRef } from 'react'
 import { useApp } from '../../../providers/app-provider'
+import { useToast } from '../../../providers/toast-provider'
 import { useFiles } from '../hooks/use-files'
 import { useDirectory } from '../../directory/hooks/use-directory'
 import { Dialog } from '../../../components/ui/dialog'
 import { Input } from '../../../components/ui/input'
 import { Button } from '../../../components/ui/button'
-import { Upload, FolderPlus } from 'lucide-react'
+import { Upload } from 'lucide-react'
 import { formatBytes } from '../../../lib/utils/format'
 
 export function UploadModal() {
   const { activeModal, setActiveModal, activeFolderId, storageStats } = useApp()
+  const toast = useToast()
   const { upload, isUploading } = useFiles()
   const { create: createDir, isCreating: isCreatingDir } = useDirectory(activeFolderId ?? undefined)
 
@@ -69,18 +71,22 @@ export function UploadModal() {
 
   const handleUploadFolder = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!folderName.trim()) {
+    const trimmed = folderName.trim()
+    if (!trimmed) {
       setError('Folder name is required')
       return
     }
 
-    try {
-      await createDir({ dirname: folderName.trim() }, activeFolderId ?? undefined)
-      handleClose()
-    } catch (err) {
-      console.error('Failed to create folder:', err)
-      setError('Failed to create folder. Please try again.')
-    }
+    handleClose()
+
+    createDir({ dirname: trimmed }, activeFolderId ?? undefined)
+      .then(() => {
+        toast.success('Folder created', `Folder "${trimmed}" was created.`)
+      })
+      .catch((err) => {
+        console.error('Failed to create folder:', err)
+        toast.error('Failed to create folder', `Could not create folder "${trimmed}". Please try again.`)
+      })
   }
 
   if (isFileOpen) {

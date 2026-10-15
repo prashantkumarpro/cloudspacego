@@ -19,13 +19,20 @@ export const createDirectory = async (req, res, next) => {
         .status(404)
         .json({ message: 'Parent Directory Does not exist!' })
 
-    await Directory.insertOne({
+    const newDir = await Directory.insertOne({
       name: dirname,
       parentDirId,
       userId: user._id
     })
 
-    return res.status(200).json({ message: 'Directory Created!' })
+    const dirObj = newDir && typeof newDir.toObject === 'function' ? newDir.toObject() : newDir
+    return res.status(200).json({
+      message: 'Directory Created!',
+      directory: {
+        ...dirObj,
+        id: (dirObj?._id || dirObj?.id || '').toString()
+      }
+    })
   } catch (err) {
     console.dir(err)
     next(err)
