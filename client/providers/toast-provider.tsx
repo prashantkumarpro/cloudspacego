@@ -11,7 +11,7 @@ interface ToastOptions {
   duration?: number
 }
 
-interface ToastContextType {
+export interface ToastContextType {
   toasts: ToastItem[]
   show: (options: ToastOptions) => string
   success: (title: string, description?: string, action?: ToastAction) => string
@@ -21,7 +21,7 @@ interface ToastContextType {
   dismiss: (id: string) => void
 }
 
-const ToastContext = createContext<ToastContextType | undefined>(undefined)
+export const ToastContext = createContext<ToastContextType | undefined>(undefined)
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([])

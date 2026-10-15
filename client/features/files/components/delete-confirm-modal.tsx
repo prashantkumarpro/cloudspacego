@@ -39,6 +39,18 @@ export function DeleteConfirmModal({
   }
 
   const handleConfirm = async () => {
+    if (!isPermanent) {
+      // Soft deletion (moving to trash): close dialog immediately (<16ms) and run delete in background
+      handleClose()
+      try {
+        await onConfirm()
+      } catch (err) {
+        console.error('Failed to delete:', err)
+      }
+      return
+    }
+
+    // Permanent deletion: wait for server confirmation before closing
     try {
       setIsDeleting(true)
       setError('')

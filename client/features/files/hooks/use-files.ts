@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { ToastContext } from "@/providers/toast-provider";
 import {
   deleteFile,
   deleteFilePermanently,
@@ -45,6 +46,28 @@ export const notifyFilesChanged = (event?: FileMutationEvent) => {
   notifyDirectoryChanged(event);
 };
 
+export interface RemoveFileOptions {
+  skipNotify?: boolean;
+  skipToast?: boolean;
+  file?: FileItem | Record<string, unknown>;
+  originalIndex?: number;
+  parentDirId?: string | null;
+}
+
+// Global sets to track in-flight file deletions and restores across all hook instances
+const inFlightFileDeletions = new Set<string>();
+const inFlightFileRestorations = new Set<string>();
+
+export const isFileDeleting = (id?: string | null): boolean => {
+  if (!id) return false;
+  return inFlightFileDeletions.has(id.toString());
+};
+
+export const isFileRestoring = (id?: string | null): boolean => {
+  if (!id) return false;
+  return inFlightFileRestorations.has(id.toString());
+};
+
 interface UseFilesReturn {
   isUploading: boolean;
   isRenaming: boolean;
@@ -60,7 +83,7 @@ interface UseFilesReturn {
     id: string,
     data: RenameFileData
   ) => Promise<void>;
-  remove: (id: string, options?: { skipNotify?: boolean }) => Promise<void>;
+  remove: (id: string, options?: RemoveFileOptions) => Promise<void>;
   download: (
     id: string,
     filename?: string
@@ -68,13 +91,14 @@ interface UseFilesReturn {
   getBlob: (id: string) => Promise<Blob>;
   toggleStar: (id: string, isStarred?: boolean) => Promise<boolean>;
   recordAccess: (id: string) => Promise<void>;
-  restore: (id: string, options?: { skipNotify?: boolean }) => Promise<any>;
+  restore: (id: string, options?: { skipNotify?: boolean }) => Promise<unknown>;
   deletePermanently: (id: string) => Promise<void>;
   emptyTrash: () => Promise<void>;
 }
 
 export function useFiles(): UseFilesReturn {
   const uploadContext = useUpload();
+  const toast = useContext(ToastContext);
   const [isRenaming, setIsRenaming] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
@@ -130,25 +154,210 @@ export function useFiles(): UseFilesReturn {
   );
 
   const remove = useCallback(
-    async (id: string, options?: { skipNotify?: boolean }): Promise<void> => {
-      try {
-        setIsDeleting(true);
-        setError(null);
+    async (id: string, options?: RemoveFileOptions): Promise<void> => {
+      if (!id) return;
+      const fileIdStr = id.toString();
 
-        await deleteFile(id);
-
-        if (!options?.skipNotify) {
-          notifyFilesChanged({ type: 'delete', fileId: id });
-        }
-      } catch (err) {
-        console.error("Failed to delete file:", err);
-        setError("Failed to delete file.");
-        throw err;
-      } finally {
-        setIsDeleting(false);
+      // 1. Prevent duplicate clicks for the same file while deleting or restoring
+      if (inFlightFileDeletions.has(fileIdStr) || inFlightFileRestorations.has(fileIdStr)) {
+        return;
       }
+      setIsDeleting(true);
+      inFlightFileDeletions.add(fileIdStr);
+
+      const fileSnapshot = options?.file;
+      const snap = fileSnapshot as (FileItem & { parentFolderId?: string | null }) | undefined;
+      const rawIndex = options?.originalIndex;
+      const validOriginalIndex = typeof rawIndex === "number" && rawIndex >= 0 ? rawIndex : undefined;
+      const effectiveParentDirId =
+        options?.parentDirId ?? snap?.parentDirId ?? snap?.parentFolderId ?? null;
+
+      // 2. Immediately remove optimistically from all active views (<16ms)
+      if (!options?.skipNotify) {
+        notifyFilesChanged({
+          type: 'delete',
+          fileId: fileIdStr,
+          file: fileSnapshot,
+          originalIndex: validOriginalIndex,
+          parentDirId: effectiveParentDirId,
+        });
+      }
+
+      // Track operation lifecycle state
+      let status: 'deleting' | 'undone' | 'restoring' = 'deleting';
+      let deleteError: unknown = null;
+      let toastId: string | undefined;
+
+      // 3. Start backend DELETE request in background
+      const deletePromise = deleteFile(fileIdStr)
+        .catch((err) => {
+          deleteError = err;
+          throw err;
+        });
+
+      // 4. Define immediate Undo handler
+      const handleUndo = async () => {
+        // Prevent duplicate clicks on Undo
+        if (status !== 'deleting') return;
+        status = 'undone';
+        inFlightFileRestorations.add(fileIdStr);
+
+        // Dismiss the original delete toast
+        if (toastId && toast) {
+          toast.dismiss(toastId);
+        }
+
+        // CRITICAL UX FIX: Immediately restore the item in the UI without waiting for server (<16ms)
+        notifyFilesChanged({
+          type: 'rollback-delete',
+          fileId: fileIdStr,
+          file: fileSnapshot,
+          originalIndex: validOriginalIndex,
+          parentDirId: effectiveParentDirId,
+        });
+
+        // Immediately show restored confirmation toast
+        if (toast) {
+          const fileName = fileSnapshot?.name || 'File';
+          toast.success('Restored', `"${fileName}" was restored from Trash.`);
+        }
+
+        try {
+          // Await in-flight delete to settle
+          await deletePromise.catch(() => {});
+
+          if (deleteError) {
+            // The DELETE request failed on the server.
+            // The backend database never trashed the file (isTrash: false).
+            // The client was just restored (isTrash: false).
+            // Both are already in agreement! Do not send unnecessary restore request.
+            return;
+          }
+
+          // DELETE succeeded on backend, so backend marked it isTrash: true.
+          // Now invoke restore API to bring backend back to isTrash: false.
+          status = 'restoring';
+          const res = await apiRestoreFile(fileIdStr);
+
+          const restoredParentId =
+            res?.file?.parentDirId || snap?.parentFolderId || snap?.parentDirId || null;
+          const originalParentId = snap?.parentFolderId || snap?.parentDirId || null;
+
+          // Check if backend restored to root because original folder was deleted
+          if (
+            restoredParentId &&
+            originalParentId &&
+            restoredParentId.toString() !== originalParentId.toString()
+          ) {
+            notifyFilesChanged({
+              type: 'restore',
+              fileId: fileIdStr,
+              file: {
+                ...fileSnapshot,
+                parentDirId: restoredParentId,
+                parentFolderId: restoredParentId,
+                isTrash: false,
+                trashedAt: null,
+              },
+              originalIndex: validOriginalIndex,
+              parentDirId: restoredParentId,
+            });
+            if (toast) {
+              const fileName = fileSnapshot?.name || 'File';
+              toast.info(
+                'Restored to Root',
+                `"${fileName}" was restored to My Files because its original folder was deleted.`
+              );
+            }
+          } else {
+            // Confirm restore state across views (e.g. ensures removal from Trash if open)
+            notifyFilesChanged({
+              type: 'restore',
+              fileId: fileIdStr,
+              file: {
+                ...fileSnapshot,
+                isTrash: false,
+                trashedAt: null,
+              },
+              originalIndex: validOriginalIndex,
+              parentDirId: restoredParentId,
+            });
+          }
+        } catch (err) {
+          console.error('Failed to restore file on backend:', err);
+          if (toast) {
+            const fileName = fileSnapshot?.name || 'File';
+            toast.error('Failed to restore', `Could not restore "${fileName}".`);
+          }
+          // Safe rollback: since server restore failed, re-evict item from visible UI
+          notifyFilesChanged({
+            type: 'delete',
+            fileId: fileIdStr,
+          });
+        } finally {
+          inFlightFileDeletions.delete(fileIdStr);
+          inFlightFileRestorations.delete(fileIdStr);
+          setIsDeleting(inFlightFileDeletions.size > 0);
+        }
+      };
+
+      // 5. Show immediate success toast with Undo
+      if (!options?.skipToast && toast) {
+        const fileName = fileSnapshot?.name || 'File';
+        toastId = toast.success(
+          'Moved to Trash',
+          `"${fileName}" was moved to Trash.`,
+          {
+            label: 'Undo',
+            onClick: handleUndo,
+          }
+        );
+      }
+
+      // 6. Handle DELETE promise settlement if Undo was NOT clicked
+      deletePromise
+        .then(() => {
+          if (status === 'deleting') {
+            inFlightFileDeletions.delete(fileIdStr);
+            setIsDeleting(inFlightFileDeletions.size > 0);
+          }
+        })
+        .catch(() => {
+          // If Undo was already clicked by user, suppress delete error handling
+          if (status !== 'deleting') {
+            return;
+          }
+
+          inFlightFileDeletions.delete(fileIdStr);
+          setIsDeleting(inFlightFileDeletions.size > 0);
+
+          // Dismiss the success toast
+          if (toastId && toast) {
+            toast.dismiss(toastId);
+          }
+
+          // Roll back the optimistic delete to restore the file
+          notifyFilesChanged({
+            type: 'rollback-delete',
+            fileId: fileIdStr,
+            file: fileSnapshot,
+            originalIndex: validOriginalIndex,
+            parentDirId: effectiveParentDirId,
+          });
+
+          // Show clear error toast
+          if (toast) {
+            const fileName = fileSnapshot?.name || 'File';
+            toast.error(
+              'Failed to delete',
+              `Could not move "${fileName}" to Trash. It has been restored.`
+            );
+          }
+        });
+
+      return;
     },
-    []
+    [toast]
   );
 
   const download = useCallback(
@@ -225,7 +434,7 @@ export function useFiles(): UseFilesReturn {
         console.warn("Failed to record file access:", err);
       }
     }, []),
-    restore: useCallback(async (id: string, options?: { skipNotify?: boolean }): Promise<any> => {
+    restore: useCallback(async (id: string, options?: { skipNotify?: boolean }): Promise<unknown> => {
       try {
         setError(null);
         const res = await apiRestoreFile(id);
@@ -442,6 +651,9 @@ export function useInfiniteFiles(
           if (recent && !event.file.lastAccessedAt) {
             return prev;
           }
+          if (sharedWithMe && !event.file.role && (!event.file.sharedWith || event.file.sharedWith.length === 0)) {
+            return prev;
+          }
           const index =
             typeof event.originalIndex === 'number' &&
             event.originalIndex >= 0 &&
@@ -474,6 +686,9 @@ export function useInfiniteFiles(
               return prev;
             }
             if (recent && !event.file.lastAccessedAt) {
+              return prev;
+            }
+            if (sharedWithMe && !event.file.role && (!event.file.sharedWith || event.file.sharedWith.length === 0)) {
               return prev;
             }
             const index =
@@ -515,7 +730,7 @@ export function useInfiniteFiles(
     return () => {
       fileListeners.delete(handleFileEvent);
     };
-  }, [enabled, fetchInitial, trash, starred, recent]);
+  }, [enabled, fetchInitial, trash, starred, recent, sharedWithMe]);
 
   return {
     files,
