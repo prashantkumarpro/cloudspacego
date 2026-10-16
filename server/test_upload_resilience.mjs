@@ -330,6 +330,94 @@ async function runTests() {
     finalUser.storageUsed === initialQuota + totalAdded,
     `Final storage quota exactly matches initial + sum of concurrent uploads (${finalUser.storageUsed} === ${initialQuota + totalAdded})`
   )
+  // --- Test 8: Batch Abort All During Active Streams & Simultaneous Storage Cleanup ---
+  console.log('\n--- Test 8: Batch Abort All During Active Streams & Quota Rollback ---')
+  const quotaBeforeBatchAbort = (await User.findById(uAId)).storageUsed
+  const dbFilesBeforeBatch = await File.countDocuments({ userId: uAId })
+  const storageFilesBeforeBatch = fs.existsSync('./storage/files') ? fs.readdirSync('./storage/files') : []
+
+  const abortStreamSizes = [10000, 15000, 20000]
+  await Promise.all(
+    abortStreamSizes.map((size, idx) => {
+      return new Promise((resolve) => {
+        const req = http.request(
+          {
+            host: '127.0.0.1',
+            port: PORT,
+            method: 'POST',
+            path: `/file/${uARoot}`,
+            headers: {
+              Cookie: cookieA,
+              filename: `batch_abort_${idx}.bin`,
+              'Content-Type': 'application/octet-stream',
+              'Content-Length': size
+            }
+          },
+          () => {}
+        )
+        req.on('error', () => {})
+        req.write(Buffer.alloc(1024, `b${idx}`))
+        setTimeout(() => {
+          req.destroy()
+          setTimeout(resolve, 300)
+        }, 20)
+      })
+    })
+  )
+
+  const dbFilesAfterBatch = await File.countDocuments({ userId: uAId })
+  assert(dbFilesAfterBatch === dbFilesBeforeBatch, 'Zero file records were created in MongoDB for batch aborted uploads')
+
+  const userAfterBatchAbort = await User.findById(uAId)
+  assert(
+    userAfterBatchAbort.storageUsed === quotaBeforeBatchAbort,
+    `Storage quota rolled back to ${quotaBeforeBatchAbort} after batch abort (got ${userAfterBatchAbort.storageUsed})`
+  )
+
+  const storageAfterBatch = fs.existsSync('./storage/files') ? fs.readdirSync('./storage/files') : []
+  const batchOrphans = storageAfterBatch.filter(f => !storageFilesBeforeBatch.includes(f))
+  assert(batchOrphans.length === 0, `No orphaned files left in storage after batch abort (orphans: ${JSON.stringify(batchOrphans)})`)
+
+  // --- Test 9: Server-side Reconciliation for Uploads Completed on Server After Client Cancellation ---
+  console.log('\n--- Test 9: Client Cancellation Server Reconciliation & Quota Rollback ---')
+  const quotaBeforeReconcile = userAfterBatchAbort.storageUsed
+  const reconcileBuf = Buffer.alloc(512, 'z')
+  const uploadRes = await makeRequest(
+    {
+      method: 'POST',
+      path: `/file/${uARoot}`,
+      headers: {
+        Cookie: cookieA,
+        filename: 'reconcile_target.bin',
+        'Content-Type': 'application/octet-stream',
+        'Content-Length': reconcileBuf.length
+      }
+    },
+    reconcileBuf
+  )
+
+  assert(uploadRes.status === 201, `Server completed upload before cancellation (status ${uploadRes.status})`)
+  const completedFileId = uploadRes.body?.file?.id
+  assert(Boolean(completedFileId), 'Received completed file id from server')
+
+  // Client reconciliation handler calls permanent delete to clean up server state
+  const deleteRes = await makeRequest({
+    method: 'DELETE',
+    path: `/file/${completedFileId}/permanent`,
+    headers: {
+      Cookie: cookieA
+    }
+  })
+
+  assert(deleteRes.status === 200, `Reconciliation permanent delete returned 200 (got ${deleteRes.status})`)
+  const dbFileAfterReconcile = await File.findById(completedFileId)
+  assert(dbFileAfterReconcile === null, 'File record cleanly removed from database during reconciliation')
+
+  const userAfterReconcile = await User.findById(uAId)
+  assert(
+    userAfterReconcile.storageUsed === quotaBeforeReconcile,
+    `Storage quota safely restored to ${quotaBeforeReconcile} after reconciliation (got ${userAfterReconcile.storageUsed})`
+  )
 
   console.log(`\n=== Test Results: ${passed} passed, ${failed} failed ===\n`)
 

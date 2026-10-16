@@ -11,7 +11,7 @@ import React, {
 } from 'react'
 import axios from 'axios'
 import type { UploadTask, UploadFileData, FileApiResponse } from '@/features/files/types'
-import { uploadFile } from '@/features/files/api'
+import { uploadFile, deleteFilePermanently } from '@/features/files/api'
 import { notifyFilesChanged } from '@/features/files/hooks/use-files'
 import { UploadManager } from '@/features/files/components/upload-manager'
 
@@ -31,6 +31,7 @@ interface UploadContextType {
     parentDirId?: string
   ) => Promise<void>
   cancelTask: (id: string) => void
+  cancelAll: () => void
   retryTask: (id: string) => void
   dismissTask: (id: string) => void
   clearCompleted: () => void
@@ -52,6 +53,8 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
   const resolversRef = useRef<
     Map<string, { resolve: (res: FileApiResponse) => void; reject: (err: unknown) => void }>
   >(new Map())
+
+  const isCancellingAllRef = useRef(false)
 
   const isUploading = useMemo(() => {
     return tasks.some(t => t.status === 'uploading' || t.status === 'queued')
@@ -108,6 +111,15 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
       if (current && current.status === 'cancelled') {
         resolversRef.current.get(taskId)?.reject(new Error('Upload cancelled by user'))
         resolversRef.current.delete(taskId)
+
+        // Backend reconciliation (Requirement 8):
+        // If the upload completed on the server despite client cancellation,
+        // permanently delete the file to roll back quota and clean up storage.
+        if (response?.file?.id) {
+          deleteFilePermanently(response.file.id).catch(reconcileErr => {
+            console.warn('Failed to delete cancelled file on server during reconciliation:', reconcileErr)
+          })
+        }
         return
       }
 
@@ -170,6 +182,8 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
 
   // Process queue effect: inspect queued tasks and start up to MAX_CONCURRENT_UPLOADS
   useEffect(() => {
+    if (isCancellingAllRef.current) return
+
     const currentTasks = tasksRef.current
     const activeCount = currentTasks.filter(t => t.status === 'uploading').length
     if (activeCount >= MAX_CONCURRENT_UPLOADS) return
@@ -192,11 +206,20 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
 
   const cancelTask = useCallback((id: string) => {
     const task = tasksRef.current.find(t => t.id === id)
-    if (!task) return
+    if (!task || task.status === 'completed' || task.status === 'cancelled') return
 
     if (task.status === 'uploading') {
-      task.abortController?.abort()
+      try {
+        task.abortController?.abort()
+      } catch (err) {
+        console.warn('Error aborting upload task:', err)
+      }
     }
+
+    // Synchronously update tasksRef so in-flight async callbacks immediately see status 'cancelled'
+    tasksRef.current = tasksRef.current.map(t =>
+      t.id === id ? { ...t, status: 'cancelled' } : t
+    )
 
     setTasks(prev =>
       prev.map(t => (t.id === id ? { ...t, status: 'cancelled' } : t))
@@ -204,6 +227,49 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
 
     resolversRef.current.get(id)?.reject(new Error('Upload cancelled by user'))
     resolversRef.current.delete(id)
+  }, [])
+
+  const cancelAll = useCallback(() => {
+    if (isCancellingAllRef.current) return
+
+    const currentTasks = tasksRef.current
+    const cancellableTasks = currentTasks.filter(
+      t => t.status === 'uploading' || t.status === 'queued'
+    )
+    if (cancellableTasks.length === 0) return
+
+    isCancellingAllRef.current = true
+
+    try {
+      const cancellableIds = new Set(cancellableTasks.map(t => t.id))
+
+      // 1. Abort active upload controllers and reject pending resolvers
+      cancellableTasks.forEach(task => {
+        if (task.status === 'uploading') {
+          try {
+            task.abortController?.abort()
+          } catch (abortErr) {
+            console.warn('Error aborting active upload task:', task.id, abortErr)
+          }
+        }
+        resolversRef.current.get(task.id)?.reject(new Error('Upload cancelled by user'))
+        resolversRef.current.delete(task.id)
+      })
+
+      // 2. Synchronously update tasksRef so in-flight callbacks immediately see status 'cancelled'
+      tasksRef.current = tasksRef.current.map(t =>
+        cancellableIds.has(t.id) ? { ...t, status: 'cancelled' } : t
+      )
+
+      // 3. Promptly update UI state (completed uploads remain completely untouched)
+      setTasks(prev =>
+        prev.map(t =>
+          cancellableIds.has(t.id) ? { ...t, status: 'cancelled' } : t
+        )
+      )
+    } finally {
+      isCancellingAllRef.current = false
+    }
   }, [])
 
   const retryTask = useCallback((id: string) => {
@@ -309,6 +375,13 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
     []
   )
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as unknown as { __uploadBatch?: typeof uploadBatch }).__uploadBatch = uploadBatch;
+      (window as unknown as { __cancelAll?: typeof cancelAll }).__cancelAll = cancelAll;
+    }
+  }, [uploadBatch, cancelAll])
+
   const value = useMemo(
     () => ({
       tasks,
@@ -321,6 +394,7 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
       upload,
       uploadBatch,
       cancelTask,
+      cancelAll,
       retryTask,
       dismissTask,
       clearCompleted
@@ -334,6 +408,7 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
       upload,
       uploadBatch,
       cancelTask,
+      cancelAll,
       retryTask,
       dismissTask,
       clearCompleted

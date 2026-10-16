@@ -1,13 +1,14 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useCallback } from 'react'
 import { useUpload } from '@/providers/upload-provider'
 import { UploadItem } from './upload-item'
 import {
   Check,
   Minus,
   X,
-  ChevronUp
+  ChevronUp,
+  AlertTriangle
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
@@ -16,17 +17,17 @@ export function UploadManager() {
     tasks,
     isOpen,
     isMinimized,
+    setIsMinimized,
     toggleMinimized,
     cancelTask,
+    cancelAll,
     retryTask,
     dismissTask,
     clearCompleted,
     setIsOpen
   } = useUpload()
 
-  if (!isOpen || tasks.length === 0) {
-    return null
-  }
+  const [showConfirm, setShowConfirm] = useState(false)
 
   const activeUploads = tasks.filter(t => t.status === 'uploading')
   const queuedUploads = tasks.filter(t => t.status === 'queued')
@@ -34,7 +35,30 @@ export function UploadManager() {
   const stoppedUploads = tasks.filter(t => t.status === 'cancelled' || t.status === 'error')
 
   const totalTasks = tasks.length
+  const cancellableCount = activeUploads.length + queuedUploads.length
+  const hasCancellableTasks = cancellableCount > 0
   const isAllComplete = activeUploads.length === 0 && queuedUploads.length === 0 && completedUploads.length > 0
+  const isConfirmVisible = showConfirm && hasCancellableTasks
+
+  const handleCancelAll = useCallback(() => {
+    if (!hasCancellableTasks) return
+
+    // Requirement 11: Decide whether confirmation is needed based on the number of active/queued uploads.
+    // When >= 3 tasks are active/queued, require confirmation to prevent accidental mass aborts.
+    // When fewer than 3, execute promptly without blocking the user.
+    if (cancellableCount >= 3 && !showConfirm) {
+      setIsMinimized(false)
+      setShowConfirm(true)
+      return
+    }
+
+    setShowConfirm(false)
+    cancelAll()
+  }, [hasCancellableTasks, cancellableCount, showConfirm, setIsMinimized, cancelAll])
+
+  if (!isOpen || tasks.length === 0) {
+    return null
+  }
 
   return (
     <div
@@ -69,9 +93,22 @@ export function UploadManager() {
 
         {/* Header Controls */}
         <div
-          className="flex items-center gap-0.5 shrink-0 ml-2"
+          className="flex items-center gap-1 shrink-0 ml-2"
           onClick={e => e.stopPropagation()}
         >
+          {hasCancellableTasks && (
+            <button
+              type="button"
+              id="upload-manager-cancel-all-btn"
+              onClick={handleCancelAll}
+              className="text-[11px] font-medium text-rose-500 hover:text-rose-600 dark:text-rose-400 dark:hover:text-rose-300 px-2 py-0.5 rounded hover:bg-rose-500/10 transition-colors cursor-pointer"
+              title="Cancel all active and queued uploads"
+              aria-label="Cancel all uploads"
+            >
+              Cancel all
+            </button>
+          )}
+
           <button
             type="button"
             onClick={toggleMinimized}
@@ -98,6 +135,48 @@ export function UploadManager() {
         </div>
       </div>
 
+      {/* Confirmation prompt (Requirement 11) */}
+      {isConfirmVisible && !isMinimized && (
+        <div
+          className="px-4 py-2.5 bg-rose-500/10 border-b border-rose-500/20 text-xs flex flex-col gap-2 animate-in fade-in select-none"
+          role="alertdialog"
+          aria-labelledby="cancel-all-confirm-title"
+          aria-describedby="cancel-all-confirm-desc"
+        >
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+            <div className="flex flex-col min-w-0 flex-1">
+              <span id="cancel-all-confirm-title" className="font-semibold text-foreground leading-tight">
+                Cancel all {cancellableCount} {cancellableCount === 1 ? 'upload' : 'uploads'}?
+              </span>
+              <span id="cancel-all-confirm-desc" className="text-text-secondary mt-0.5 text-[11px] leading-relaxed">
+                Completed uploads will remain untouched.
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-2 pt-1 border-t border-rose-500/15">
+            <button
+              type="button"
+              onClick={() => setShowConfirm(false)}
+              className="px-2.5 py-1 text-xs font-medium rounded-md text-text-secondary hover:text-foreground hover:bg-input-bg transition-colors cursor-pointer"
+            >
+              Keep uploading
+            </button>
+            <button
+              type="button"
+              id="confirm-cancel-all-btn"
+              onClick={() => {
+                setShowConfirm(false)
+                cancelAll()
+              }}
+              className="px-2.5 py-1 text-xs font-semibold rounded-md bg-rose-500 hover:bg-rose-600 text-white transition-colors cursor-pointer shadow-xs"
+            >
+              Cancel all
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Body List */}
       {!isMinimized && (
         <>
@@ -113,16 +192,32 @@ export function UploadManager() {
             ))}
           </div>
 
-          {/* Footer - Clear completed / stopped */}
-          {(completedUploads.length > 0 || stoppedUploads.length > 0) && (
-            <div className="flex items-center justify-end px-4 py-2 border-t border-card-border/40 bg-card-bg">
-              <button
-                type="button"
-                onClick={clearCompleted}
-                className="text-xs text-text-muted hover:text-[#6E60EE] transition-colors cursor-pointer font-normal"
-              >
-                Clear completed
-              </button>
+          {/* Footer - Cancel all & Clear completed */}
+          {(hasCancellableTasks || completedUploads.length > 0 || stoppedUploads.length > 0) && (
+            <div className="flex items-center justify-between px-4 py-2 border-t border-card-border/40 bg-card-bg text-xs">
+              <div>
+                {hasCancellableTasks && (
+                  <button
+                    type="button"
+                    id="upload-manager-footer-cancel-all-btn"
+                    onClick={handleCancelAll}
+                    className="text-text-muted hover:text-rose-500 transition-colors cursor-pointer font-normal"
+                  >
+                    Cancel all
+                  </button>
+                )}
+              </div>
+              <div>
+                {(completedUploads.length > 0 || stoppedUploads.length > 0) && (
+                  <button
+                    type="button"
+                    onClick={clearCompleted}
+                    className="text-text-muted hover:text-[#6E60EE] transition-colors cursor-pointer font-normal"
+                  >
+                    Clear completed
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </>
