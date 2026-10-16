@@ -634,25 +634,58 @@ export function useDirectory(id?: string): UseDirectoryReturn {
       if (event.type === "upload" && event.file) {
         const file = event.file;
         const fileId = (file.id || file._id || "").toString();
-        const currentDirId = id || undefined;
-        const fileParentId = file.parentDirId || file.parentFolderId;
+        const currentDirId = (id || "").toString();
+        const isCurrentRoot = !id || id === "root";
 
-        // Check if destination matches this directory view
-        const isMatch = (!currentDirId && (!fileParentId || fileParentId === "root")) ||
-          (currentDirId && fileParentId && fileParentId.toString() === currentDirId.toString());
+        const eventParent = event.parentDirId ? event.parentDirId.toString() : undefined;
+        const fileParent = (file.parentDirId || file.parentFolderId || "").toString();
 
-        if (isMatch) {
-          setDirectory((prev) => {
-            if (!prev) return prev;
-            if (prev.files && prev.files.some((f) => (f.id || f._id || "").toString() === fileId)) {
-              return prev;
+        setDirectory((prev) => {
+          if (!prev) return prev;
+          const prevId = (prev.id || prev._id || "").toString();
+
+          let isMatch = false;
+          if (isCurrentRoot) {
+            // Upload matches root if:
+            // 1. Explicitly designated for root (!eventParent or 'root')
+            // 2. Or file parent matches this root directory's MongoDB ID
+            const isExplicitRoot = !eventParent || eventParent === "root";
+            const isFileParentRoot = !fileParent || fileParent === "root" || (prevId && fileParent === prevId);
+            const isTargetIdRoot = Boolean(eventParent && prevId && eventParent === prevId);
+
+            // Must NOT match root if eventParent is explicitly set to a different subfolder ID
+            if (eventParent && eventParent !== "root" && prevId && eventParent !== prevId) {
+              isMatch = false;
+            } else if (isExplicitRoot || isFileParentRoot || isTargetIdRoot) {
+              isMatch = true;
             }
-            return {
-              ...prev,
-              files: [file, ...(prev.files || [])],
-            };
-          });
-        }
+          } else {
+            // Nested folder matches if currentDirId or prevId equals eventParent or fileParent
+            const matchesCurrentId = Boolean(
+              (eventParent && eventParent === currentDirId) ||
+              (fileParent && fileParent === currentDirId)
+            );
+            const matchesPrevId = Boolean(
+              prevId && (
+                (eventParent && eventParent === prevId) ||
+                (fileParent && fileParent === prevId)
+              )
+            );
+            isMatch = matchesCurrentId || matchesPrevId;
+          }
+
+          if (!isMatch) return prev;
+
+          // Prevent duplicates if already present
+          if (prev.files && prev.files.some((f) => (f.id || f._id || "").toString() === fileId)) {
+            return prev;
+          }
+
+          return {
+            ...prev,
+            files: [file, ...(prev.files || [])],
+          };
+        });
         return;
       }
 

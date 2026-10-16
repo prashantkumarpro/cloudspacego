@@ -189,19 +189,20 @@ export default function DashboardOverview() {
       } else if ((event.type === 'upload' || event.type === 'rollback-delete' || event.type === 'restore') && event.file) {
         const file = event.file
         const fileId = (file.id || file._id || '').toString()
-        const parentId = file.parentDirId || file.parentFolderId
-        if (parentId) {
+        const parentId = (event.parentDirId || file.parentDirId || file.parentFolderId || '').toString()
+        const dirId = (directory?.id || directory?._id || '').toString()
+        const isRoot = !parentId || parentId === 'root' || (dirId && parentId === dirId)
+        if (parentId && !isRoot) {
           setFolderContents((prev) => {
             const content = prev[parentId]
-            if (!content || content.files.some((f) => (f.id || f._id || '').toString() === fileId)) {
+            if (content && content.files.some((f) => (f.id || f._id || '').toString() === fileId)) {
               return prev
             }
             return {
               ...prev,
               [parentId]: {
-                ...content,
-                filesCount: content.filesCount + 1,
-                files: [file, ...content.files],
+                filesCount: (content?.filesCount ?? 0) + 1,
+                files: [file, ...(content?.files || [])],
               },
             }
           })

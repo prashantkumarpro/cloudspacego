@@ -618,12 +618,18 @@ export function useInfiniteFiles(
       // 0. Upload event: Prepend new file into view directly without loading skeleton
       if (event.type === 'upload' && event.file) {
         if (trash || sharedWithMe) return;
+        if (recent && !event.file.lastAccessedAt) return;
+        if (starred && !event.file.isStarred && !event.file.starred) return;
+
+        // If this is default Files view (not trash/shared/recent/starred), only show root uploads
+        const isRootUpload = !event.parentDirId || event.parentDirId === 'root';
+        if (!recent && !starred && !isRootUpload) {
+          return;
+        }
+
         const fileIdStr = (event.file.id || event.file._id || '').toString();
         setFiles((prev) => {
           if (prev.some((f) => (f.id || f._id || '').toString() === fileIdStr)) {
-            return prev;
-          }
-          if (starred && !event.file.isStarred && !event.file.starred) {
             return prev;
           }
           return [event.file, ...prev];

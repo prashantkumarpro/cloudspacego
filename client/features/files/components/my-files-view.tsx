@@ -82,7 +82,8 @@ export default function MyFilesView () {
     }
 
     const dirMap = new Map(dirFiles.map(f => [f.id || f._id, f]))
-    return infFiles.map(f => {
+    const infFileIds = new Set(infFiles.map(f => (f.id || f._id || '').toString()))
+    const mappedInf = infFiles.map(f => {
       const match = dirMap.get(f.id || f._id)
       const sizeVal = typeof f.size === 'number' && f.size > 0 ? f.size : (match?.size ?? f.size)
       return {
@@ -90,6 +91,9 @@ export default function MyFilesView () {
         size: sizeVal
       }
     })
+
+    const missingDirFiles = dirFiles.filter(f => !infFileIds.has((f.id || f._id || '').toString()))
+    return [...missingDirFiles, ...mappedInf]
   }, [activeFolderId, directory?.files, infiniteFiles])
   const isListLoading = activeFolderId
     ? isDirLoading

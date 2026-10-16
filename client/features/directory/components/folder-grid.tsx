@@ -126,6 +126,18 @@ export function FolderGrid ({
           delete next[folderId]
           return next
         })
+      } else if (event.type === 'upload' && event.file) {
+        const parentId = (event.parentDirId || event.file.parentDirId || '').toString()
+        setFolderCounts(prev => {
+          if (!parentId || !(parentId in prev)) return prev
+          return { ...prev, [parentId]: (prev[parentId] || 0) + 1 }
+        })
+      } else if (event.type === 'delete' && (event.parentDirId || (event.file && (event.file as { parentDirId?: string }).parentDirId))) {
+        const parentId = (event.parentDirId || (event.file as { parentDirId?: string })?.parentDirId || '').toString()
+        setFolderCounts(prev => {
+          if (!parentId || !(parentId in prev)) return prev
+          return { ...prev, [parentId]: Math.max(0, (prev[parentId] || 0) - 1) }
+        })
       }
     })
     return () => unsubscribe()

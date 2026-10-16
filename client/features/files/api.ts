@@ -308,6 +308,37 @@ export const uploadFile = async (
         },
     });
 
+    if (response.data && response.data.file) {
+        const f = response.data.file;
+        const fileId = (f.id || f._id || "").toString();
+        const parentDirIdStr = f.parentDirId
+            ? f.parentDirId.toString()
+            : hasValidParent
+            ? parentDirId!.trim()
+            : undefined;
+
+        response.data.file = {
+            ...f,
+            id: fileId,
+            _id: fileId,
+            parentDirId: parentDirIdStr,
+            size:
+                typeof f.size === "number"
+                    ? f.size
+                    : typeof f.size === "string" && !isNaN(Number(f.size))
+                    ? Number(f.size)
+                    : 0,
+            isStarred: Boolean(f.isStarred),
+            starred: Boolean(f.isStarred),
+            directory: f.directory
+                ? {
+                      id: (f.directory.id || f.directory._id || "").toString(),
+                      name: f.directory.name,
+                  }
+                : undefined,
+        };
+    }
+
     return response.data;
 };
 

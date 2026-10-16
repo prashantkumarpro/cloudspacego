@@ -265,6 +265,12 @@ export const createFile = async (req, res) => {
         ...fileDoc,
         id: fileId.toString(),
         _id: fileId.toString(),
+        parentDirId: parentsDirData._id.toString(),
+        directory: {
+          id: parentsDirData._id.toString(),
+          _id: parentsDirData._id.toString(),
+          name: parentsDirData.name,
+        },
       },
     })
   } catch (error) {
