@@ -113,7 +113,7 @@ export interface GetFilesParams {
     limit?: number;
 }
 
-export type UploadStatus = 'uploading' | 'completed' | 'error';
+export type UploadStatus = 'queued' | 'uploading' | 'completed' | 'error' | 'cancelled';
 
 export interface UploadTask {
     id: string;
@@ -124,12 +124,15 @@ export interface UploadTask {
     error?: string;
     parentDirId?: string;
     createdAt: number;
+    file?: File | Blob;
+    abortController?: AbortController;
 }
 
 export interface UploadFileData {
     file: File | Blob;
     filename?: string;
     onProgress?: (progress: number) => void;
+    signal?: AbortSignal;
 }
 
 export interface RenameFileData {

@@ -12,6 +12,7 @@ import {
   File as FileIcon,
   Check,
   AlertCircle,
+  RotateCcw,
   X
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
@@ -19,6 +20,8 @@ import { cn } from '@/lib/utils/cn'
 export interface UploadItemProps {
   task: UploadTask
   onDismiss?: (id: string) => void
+  onCancel?: (id: string) => void
+  onRetry?: (id: string) => void
 }
 
 function getFileIcon(filename: string) {
@@ -37,10 +40,12 @@ function getFileIcon(filename: string) {
   return <FileIcon className="w-4 h-4 text-text-muted shrink-0" />
 }
 
-export function UploadItem({ task, onDismiss }: UploadItemProps) {
+export function UploadItem({ task, onDismiss, onCancel, onRetry }: UploadItemProps) {
+  const isQueued = task.status === 'queued'
+  const isUploading = task.status === 'uploading'
   const isCompleted = task.status === 'completed'
   const isError = task.status === 'error'
-  const isUploading = task.status === 'uploading'
+  const isCancelled = task.status === 'cancelled'
 
   return (
     <div className="group relative flex flex-col py-2 px-4 hover:bg-input-bg/40 transition-colors select-none">
@@ -54,46 +59,93 @@ export function UploadItem({ task, onDismiss }: UploadItemProps) {
             <span
               className={cn(
                 "text-xs font-medium truncate leading-tight",
-                isCompleted ? "text-text-secondary" : "text-foreground"
+                isCompleted ? "text-text-secondary" : isCancelled ? "text-text-muted line-through" : "text-foreground"
               )}
               title={task.name}
             >
               {task.name}
             </span>
-            <span className="text-[11px] text-text-muted mt-0.5 leading-none">
-              {task.size > 0 ? formatFileSize(task.size) : '0 B'}
-            </span>
+            <div className="flex items-center gap-1.5 mt-0.5 leading-none">
+              <span className="text-[11px] text-text-muted">
+                {task.size > 0 ? formatFileSize(task.size) : '0 B'}
+              </span>
+              {isQueued && (
+                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-input-bg text-text-muted">
+                  Queued
+                </span>
+              )}
+              {isCancelled && (
+                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-input-bg text-text-muted">
+                  Cancelled
+                </span>
+              )}
+              {isError && (
+                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-500 truncate max-w-[140px]" title={task.error || 'Failed'}>
+                  {task.error || 'Failed'}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Right: Progress % / Completed Check / Error */}
-        <div className="flex items-center gap-2 shrink-0">
+        {/* Right: Actions and Status Indicators */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Real progress percent */}
           {isUploading && (
-            <span className="text-xs font-medium text-[#6E60EE] tabular-nums">
+            <span className="text-xs font-medium text-[#6E60EE] tabular-nums mr-1">
               {task.progress}%
             </span>
           )}
 
+          {/* Cancel button for Queued or In-Flight uploads */}
+          {(isUploading || isQueued) && onCancel && (
+            <button
+              type="button"
+              onClick={() => onCancel(task.id)}
+              className="w-5 h-5 rounded flex items-center justify-center text-text-muted hover:text-foreground hover:bg-input-bg transition-colors cursor-pointer"
+              title="Cancel upload"
+              aria-label="Cancel upload"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          {/* Success Checkmark */}
           {isCompleted && (
             <div className="w-4 h-4 rounded-full flex items-center justify-center text-emerald-500">
               <Check className="w-3.5 h-3.5 stroke-[2.5]" />
             </div>
           )}
 
+          {/* Retry button for Error or Cancelled items */}
+          {(isError || isCancelled) && onRetry && (
+            <button
+              type="button"
+              onClick={() => onRetry(task.id)}
+              className="w-5 h-5 rounded flex items-center justify-center text-text-muted hover:text-[#6E60EE] hover:bg-input-bg transition-colors cursor-pointer"
+              title="Retry upload"
+              aria-label="Retry upload"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          {/* Error icon */}
           {isError && (
             <div
-              className="flex items-center gap-1 text-rose-500"
+              className="w-4 h-4 rounded-full flex items-center justify-center text-rose-500"
               title={task.error || 'Upload failed'}
             >
               <AlertCircle className="w-3.5 h-3.5" />
             </div>
           )}
 
-          {onDismiss && (
+          {/* Dismiss button for completed or stopped items */}
+          {(isCompleted || isError || isCancelled) && onDismiss && (
             <button
               type="button"
               onClick={() => onDismiss(task.id)}
-              className="w-4 h-4 rounded flex items-center justify-center text-text-muted hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+              className="w-5 h-5 rounded flex items-center justify-center text-text-muted hover:text-foreground hover:bg-input-bg opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer ml-0.5"
               title="Dismiss"
               aria-label="Dismiss item"
             >
@@ -103,7 +155,7 @@ export function UploadItem({ task, onDismiss }: UploadItemProps) {
         </div>
       </div>
 
-      {/* Thin subtle progress bar for actively uploading items only */}
+      {/* Thin subtle progress bar for actively uploading items */}
       {isUploading && (
         <div className="w-full h-1 bg-card-border/60 rounded-full overflow-hidden mt-1.5">
           <div

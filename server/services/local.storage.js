@@ -16,7 +16,12 @@ export const uploadToLocal = async ({
 
     const writeStream = fs.createWriteStream(filePath)
 
-    await pipeline(body, writeStream)
+    try {
+        await pipeline(body, writeStream)
+    } catch (err) {
+        await fs.promises.rm(filePath, { force: true }).catch(() => {})
+        throw err
+    }
 }
 
 export const getFromLocal = async (key) => {

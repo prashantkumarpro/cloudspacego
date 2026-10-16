@@ -17,6 +17,8 @@ export function UploadManager() {
     isOpen,
     isMinimized,
     toggleMinimized,
+    cancelTask,
+    retryTask,
     dismissTask,
     clearCompleted,
     setIsOpen
@@ -27,10 +29,12 @@ export function UploadManager() {
   }
 
   const activeUploads = tasks.filter(t => t.status === 'uploading')
+  const queuedUploads = tasks.filter(t => t.status === 'queued')
   const completedUploads = tasks.filter(t => t.status === 'completed')
+  const stoppedUploads = tasks.filter(t => t.status === 'cancelled' || t.status === 'error')
 
   const totalTasks = tasks.length
-  const isAllComplete = activeUploads.length === 0 && completedUploads.length > 0
+  const isAllComplete = activeUploads.length === 0 && queuedUploads.length === 0 && completedUploads.length > 0
 
   return (
     <div
@@ -54,7 +58,9 @@ export function UploadManager() {
           )}
           <span className="text-[13px] font-medium text-foreground truncate">
             {activeUploads.length > 0
-              ? `Uploading ${activeUploads.length} ${activeUploads.length === 1 ? 'file' : 'files'}`
+              ? `Uploading ${activeUploads.length} of ${totalTasks} ${totalTasks === 1 ? 'file' : 'files'}`
+              : queuedUploads.length > 0
+              ? `Queued (${queuedUploads.length})`
               : isAllComplete
               ? `${completedUploads.length} ${completedUploads.length === 1 ? 'upload' : 'uploads'} complete`
               : `${totalTasks} ${totalTasks === 1 ? 'upload' : 'uploads'}`}
@@ -100,13 +106,15 @@ export function UploadManager() {
               <UploadItem
                 key={task.id}
                 task={task}
+                onCancel={cancelTask}
+                onRetry={retryTask}
                 onDismiss={dismissTask}
               />
             ))}
           </div>
 
-          {/* Footer - Subtle secondary action */}
-          {completedUploads.length > 0 && (
+          {/* Footer - Clear completed / stopped */}
+          {(completedUploads.length > 0 || stoppedUploads.length > 0) && (
             <div className="flex items-center justify-end px-4 py-2 border-t border-card-border/40 bg-card-bg">
               <button
                 type="button"

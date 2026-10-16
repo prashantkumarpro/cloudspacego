@@ -118,8 +118,8 @@ export function useFiles(): UseFilesReturn {
         if (uploadContext) {
           await uploadContext.upload(data, parentDirId);
         } else {
-          await uploadFile(data, parentDirId);
-          notifyFilesChanged();
+          const res = await uploadFile(data, parentDirId);
+          notifyFilesChanged({ type: 'upload', file: res.file, parentDirId });
         }
       } catch (err) {
         console.error("Failed to upload file:", err);
@@ -612,6 +612,22 @@ export function useInfiniteFiles(
     const handleFileEvent: FileEventListener = (event) => {
       if (!event || !event.type || event.type === 'refresh') {
         fetchInitial();
+        return;
+      }
+
+      // 0. Upload event: Prepend new file into view directly without loading skeleton
+      if (event.type === 'upload' && event.file) {
+        if (trash || sharedWithMe) return;
+        const fileIdStr = (event.file.id || event.file._id || '').toString();
+        setFiles((prev) => {
+          if (prev.some((f) => (f.id || f._id || '').toString() === fileIdStr)) {
+            return prev;
+          }
+          if (starred && !event.file.isStarred && !event.file.starred) {
+            return prev;
+          }
+          return [event.file, ...prev];
+        });
         return;
       }
 

@@ -267,7 +267,8 @@ export const recordFileAccess = async (
 export const uploadFile = async (
     data: UploadFileData,
     parentDirId?: string,
-    onProgress?: (progress: number) => void
+    onProgress?: (progress: number) => void,
+    signal?: AbortSignal
 ): Promise<FileApiResponse> => {
     const hasValidParent =
         Boolean(parentDirId) &&
@@ -289,6 +290,7 @@ export const uploadFile = async (
     }
 
     const progressCallback = onProgress || data.onProgress;
+    const abortSignal = signal || data.signal;
 
     const response = await apiClient.post<FileApiResponse>(endpoint, data.file, {
         headers: {
@@ -296,6 +298,7 @@ export const uploadFile = async (
             "Content-Type": data.file.type || "application/octet-stream",
         },
         timeout: 0,
+        signal: abortSignal,
         onUploadProgress: (progressEvent) => {
             if (!progressEvent.total) return;
             const progress = Math.round(

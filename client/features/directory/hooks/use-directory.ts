@@ -630,6 +630,32 @@ export function useDirectory(id?: string): UseDirectoryReturn {
         return;
       }
 
+      // File Upload: Add file directly into current directory without loading skeleton
+      if (event.type === "upload" && event.file) {
+        const file = event.file;
+        const fileId = (file.id || file._id || "").toString();
+        const currentDirId = id || undefined;
+        const fileParentId = file.parentDirId || file.parentFolderId;
+
+        // Check if destination matches this directory view
+        const isMatch = (!currentDirId && (!fileParentId || fileParentId === "root")) ||
+          (currentDirId && fileParentId && fileParentId.toString() === currentDirId.toString());
+
+        if (isMatch) {
+          setDirectory((prev) => {
+            if (!prev) return prev;
+            if (prev.files && prev.files.some((f) => (f.id || f._id || "").toString() === fileId)) {
+              return prev;
+            }
+            return {
+              ...prev,
+              files: [file, ...(prev.files || [])],
+            };
+          });
+        }
+        return;
+      }
+
       // File Deletion
       if (event.type === "delete" && event.fileId) {
         setDirectory((prev) => {

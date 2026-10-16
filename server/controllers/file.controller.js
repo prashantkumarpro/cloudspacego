@@ -43,6 +43,13 @@ export const createFile = async (req, res) => {
     }
 
     // 3. Determine if Content-Length header is provided
+    if (req.headers['content-length'] !== undefined) {
+      const parsed = Number(req.headers['content-length'])
+      if (Number.isNaN(parsed) || parsed < 0) {
+        return res.status(400).json({ error: 'Invalid Content-Length header' })
+      }
+    }
+
     const contentLength = req.headers['content-length']
       ? Number(req.headers['content-length'])
       : undefined
@@ -84,8 +91,9 @@ export const createFile = async (req, res) => {
       reservedSize = contentLength
     }
 
-    // 5. Get filename and extension
-    const filename = req.headers.filename || 'untitled'
+    // 5. Get sanitized filename and extension
+    const rawFilename = req.headers.filename || 'untitled.txt'
+    const filename = path.basename(rawFilename).trim() || 'untitled.txt'
     const extension = path.extname(filename)
 
     // 6. Generate MongoDB ObjectId and storage key
@@ -232,8 +240,13 @@ export const createFile = async (req, res) => {
       }
     }
 
+    // Check if the client cancelled or disconnected before we save metadata
+    if (!req.complete || (res.socket && res.socket.destroyed)) {
+      throw new Error('Upload aborted by client connection termination')
+    }
+
     // 11. Save file metadata in MongoDB
-    await File.create({
+    const createdFile = await File.create({
       _id: fileId,
       extension,
       name: filename,
@@ -244,9 +257,15 @@ export const createFile = async (req, res) => {
     })
     isMetadataCreated = true
 
+    const fileDoc = createdFile.toObject ? createdFile.toObject() : createdFile
     return res.status(201).json({
       message: 'File Uploaded',
       size: actualSize,
+      file: {
+        ...fileDoc,
+        id: fileId.toString(),
+        _id: fileId.toString(),
+      },
     })
   } catch (error) {
     console.error('File upload error:', error)
@@ -272,8 +291,8 @@ export const createFile = async (req, res) => {
       }
     }
 
-    // Cleanup storage file if partially uploaded
-    if (isUploadedToStorage && storageKey) {
+    // Cleanup storage file if partially uploaded or allocated
+    if (storageKey) {
       try {
         await deleteStoredFile(storageKey)
       } catch (cleanupErr) {
@@ -290,9 +309,11 @@ export const createFile = async (req, res) => {
       }
     }
 
-    return res.status(500).json({
-      message: 'Could not Upload File',
-    })
+    if (!res.headersSent && !res.writableEnded) {
+      return res.status(500).json({
+        message: 'Could not Upload File',
+      })
+    }
   }
 }
 
