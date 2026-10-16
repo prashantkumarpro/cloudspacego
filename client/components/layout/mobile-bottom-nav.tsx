@@ -3,7 +3,7 @@
 import React from 'react'
 import { useApp } from '@/providers/app-provider'
 import { SidebarSection } from '@/types'
-import { Home, Star, Users, Folder } from 'lucide-react'
+import { Home, Star, Users, Folder, Clock } from 'lucide-react'
 
 import { PAGE_HORIZONTAL_PADDING } from '@/lib/constants/layout'
 import { cn } from '@/lib/utils/cn'
@@ -21,6 +21,16 @@ const navItems: BottomNavItem[] = [
     icon: Home,
   },
   {
+    name: 'My Files',
+    label: 'Files',
+    icon: Folder,
+  },
+  {
+    name: 'Recent',
+    label: 'Recent',
+    icon: Clock,
+  },
+  {
     name: 'Starred',
     label: 'Starred',
     icon: Star,
@@ -29,11 +39,6 @@ const navItems: BottomNavItem[] = [
     name: 'Shared',
     label: 'Shared',
     icon: Users,
-  },
-  {
-    name: 'My Files',
-    label: 'Files',
-    icon: Folder,
   },
 ]
 
@@ -51,7 +56,7 @@ export function MobileBottomNav() {
     <nav
       aria-label='Mobile bottom navigation'
       className={cn(
-        'w-full shrink-0 md:hidden bg-card-bg border-t border-card-border select-none z-20',
+        'fixed bottom-0 left-0 right-0 z-30 w-full md:hidden bg-card-bg border-t border-card-border select-none',
         PAGE_HORIZONTAL_PADDING
       )}
       style={{

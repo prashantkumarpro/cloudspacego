@@ -10,7 +10,6 @@ import { AuthGuard } from '@/components/auth/auth-gaurd'
 import { PAGE_HORIZONTAL_PADDING } from '@/lib/constants/layout'
 import { useFiles } from '@/features/files/hooks/use-files'
 import { useApp } from '@/providers/app-provider'
-import { useToast } from '@/providers/toast-provider'
 import { Upload } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
@@ -25,7 +24,6 @@ export default function DashboardLayout({
 
   const { upload } = useFiles()
   const { activeFolderId } = useApp()
-  const toast = useToast()
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -75,7 +73,7 @@ export default function DashboardLayout({
         console.error('Drag drop upload error:', err)
       }
     },
-    [upload, activeFolderId, toast]
+    [upload, activeFolderId]
   )
 
   return (
@@ -101,7 +99,7 @@ export default function DashboardLayout({
           {/* Dashboard Inner Scrollable Body */}
           <main 
             className={cn(
-              'flex-1 overflow-y-auto py-5 pb-28 sm:py-6 md:py-6 flex flex-col rounded-l-none',
+              'flex-1 overflow-y-auto py-5 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] sm:py-6 md:py-6 md:pb-6 flex flex-col rounded-l-none',
               PAGE_HORIZONTAL_PADDING
             )}
             style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
