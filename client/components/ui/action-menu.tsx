@@ -20,8 +20,9 @@ interface ActionMenuProps {
   onOpenChange?: (isOpen: boolean) => void
 }
 
-export function ActionMenu ({ items, className, triggerClassName, align = 'right', placement = 'bottom', onOpenChange }: ActionMenuProps) {
+export function ActionMenu ({ items, className, triggerClassName, placement = 'bottom', onOpenChange }: ActionMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({})
   const containerRef = useRef<HTMLDivElement>(null)
 
   const toggle = () => {
@@ -32,12 +33,42 @@ export function ActionMenu ({ items, className, triggerClassName, align = 'right
     }
   }
 
-  const close = () => {
+  const close = React.useCallback(() => {
     setIsOpen(false)
     if (onOpenChange) {
       onOpenChange(false)
     }
-  }
+  }, [onOpenChange])
+
+  // Ensure menu stays within viewport bounds on narrow devices and multi-column grids
+  useEffect(() => {
+    if (!isOpen || !containerRef.current) {
+      setMenuStyle({})
+      return
+    }
+
+    const adjustPosition = () => {
+      if (!containerRef.current) return
+      const rect = containerRef.current.getBoundingClientRect()
+      const menuWidth = 192 // w-48 = 12rem = 192px
+      const padding = 10
+      const style: React.CSSProperties = {}
+
+      // If right-0 would cause the menu to overflow the left viewport edge
+      if (rect.right - menuWidth < padding) {
+        const shift = padding - (rect.right - menuWidth)
+        style.right = `-${shift}px`
+        style.left = 'auto'
+      } else if (rect.left + menuWidth > window.innerWidth - padding && placement === 'bottom-left') {
+        style.right = '0px'
+        style.left = 'auto'
+      }
+
+      setMenuStyle(style)
+    }
+
+    adjustPosition()
+  }, [isOpen, placement])
 
   // Close when clicking outside
   useEffect(() => {
@@ -52,7 +83,7 @@ export function ActionMenu ({ items, className, triggerClassName, align = 'right
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [isOpen])
+  }, [isOpen, close])
 
   return (
     <div className={cn('relative inline-block text-left', className)} ref={containerRef}>
@@ -78,6 +109,7 @@ export function ActionMenu ({ items, className, triggerClassName, align = 'right
 
       {/* Context menu dropdown overlay */}
       <div
+        style={menuStyle}
         className={cn(
           'absolute w-48 bg-card-bg rounded-xl shadow-lg border border-card-border py-1.5 z-50 divide-y divide-card-border/40 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]',
           placement === 'top' && 'bottom-9 right-0 origin-bottom-right',

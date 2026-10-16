@@ -55,15 +55,12 @@ export function MobileBottomNav() {
   return (
     <nav
       aria-label='Mobile bottom navigation'
-      className={cn(
-        'fixed bottom-0 left-0 right-0 z-30 w-full md:hidden bg-card-bg border-t border-card-border select-none',
-        PAGE_HORIZONTAL_PADDING
-      )}
+      className='fixed bottom-0 left-0 right-0 z-30 w-full md:hidden bg-card-bg border-t border-card-border select-none'
       style={{
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       }}
     >
-      <div className='flex items-center justify-between w-full h-16'>
+      <div className={cn('w-full h-16 flex items-center justify-between', PAGE_HORIZONTAL_PADDING)}>
         {navItems.map(item => {
           const isActive = currentSection === item.name
           const Icon = item.icon
