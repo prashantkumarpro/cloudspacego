@@ -2,21 +2,24 @@
 
 import React, { useMemo, useState } from 'react'
 import { useApp } from '@/providers/app-provider'
-import { useToast } from '@/providers/toast-provider'
 import { FolderCard } from './folder-card'
-import { useDirectory, subscribeDirectoryChanged } from '../hooks/use-directory'
+import {
+  useDirectory,
+  subscribeDirectoryChanged,
+  isFolderDeleting
+} from '../hooks/use-directory'
 import { getDirectory } from '../api'
 import { RenameModal } from '@/features/files/components/rename-modal'
 import { MoveModal } from '@/features/files/components/move-modal'
 import { FileDetailsModal } from '@/features/files/components/file-details-modal'
-import type { DirectoryItem, RenameDirectoryData } from '../types'
+import type { DirectoryItem, RemoveDirectoryOptions, RenameDirectoryData } from '../types'
 import type { UnifiedFileItem } from '@/features/files/components/file-list'
 
 interface FolderGridProps {
   folders?: DirectoryItem[]
   isLoading?: boolean
   onRename?: (id: string, data: RenameDirectoryData) => Promise<void>
-  onDelete?: (id: string) => Promise<void>
+  onDelete?: (id: string, options?: RemoveDirectoryOptions) => Promise<void>
 }
 
 export function FolderGrid ({
@@ -35,7 +38,6 @@ export function FolderGrid ({
     moveFile
   } = useApp()
 
-  const toast = useToast()
   const hookResult = useDirectory(activeFolderId ?? undefined)
 
   const [renameTarget, setRenameTarget] = useState<DirectoryItem | null>(null)
@@ -55,11 +57,17 @@ export function FolderGrid ({
   React.useEffect(() => {
     let isMounted = true
     if (folders.length > 0) {
+      const foldersToFetch = folders.filter(
+        f =>
+          !f.id?.startsWith('temp-') &&
+          !f.isOptimistic &&
+          !isFolderDeleting(f.id) &&
+          folderCounts[f.id] === undefined
+      )
+      if (foldersToFetch.length === 0) return
+
       Promise.all(
-        folders.map(async f => {
-          if (f.id?.startsWith('temp-') || f.isOptimistic) {
-            return { id: f.id, count: 0 }
-          }
+        foldersToFetch.map(async f => {
           try {
             const subDir = await getDirectory(f.id)
             return { id: f.id, count: subDir.files ? subDir.files.length : 0 }
@@ -81,9 +89,9 @@ export function FolderGrid ({
     return () => {
       isMounted = false
     }
-  }, [folders])
+  }, [folders, folderCounts])
 
-  // Synchronize counts on optimistic folder creation / settlement
+  // Synchronize counts on optimistic folder creation / deletion / settlement
   React.useEffect(() => {
     const unsubscribe = subscribeDirectoryChanged((event) => {
       if (!event || !event.type) return
@@ -107,6 +115,17 @@ export function FolderGrid ({
           delete next[tempId]
           return next
         })
+      } else if (
+        (event.type === 'delete-folder' || event.type === 'delete-folder-optimistic') &&
+        (event.folderId || event.folder?.id)
+      ) {
+        const folderId = (event.folderId || event.folder?.id || '').toString()
+        setFolderCounts(prev => {
+          if (!(folderId in prev)) return prev
+          const next = { ...prev }
+          delete next[folderId]
+          return next
+        })
       }
     })
     return () => unsubscribe()
@@ -126,19 +145,19 @@ export function FolderGrid ({
 
   const handleDeleteFolder = async (folder: DirectoryItem) => {
     try {
-      if (propOnDelete) {
-        await propOnDelete(folder.id)
-      } else {
-        await hookResult.remove(folder.id)
+      const originalIndex = folders.findIndex(f => f.id === folder.id)
+      const options = {
+        folder,
+        originalIndex: originalIndex >= 0 ? originalIndex : undefined,
+        parentDirId: activeFolderId ?? null
       }
-
-      toast.success(
-        'Moved to Trash',
-        `"${folder.name}" was moved to Trash.`
-      )
+      if (propOnDelete) {
+        await propOnDelete(folder.id, options)
+      } else {
+        await hookResult.remove(folder.id, options)
+      }
     } catch (err) {
       console.error('Failed to delete folder:', err)
-      toast.error('Failed to delete', `Could not delete "${folder.name}".`)
     }
   }
 

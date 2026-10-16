@@ -39,8 +39,8 @@ export function DeleteConfirmModal({
   }
 
   const handleConfirm = async () => {
-    if (!isPermanent) {
-      // Soft deletion (moving to trash): close dialog immediately (<16ms) and run delete in background
+    if (!isPermanent || itemType === 'folder') {
+      // Soft deletion or optimistic folder deletion: close dialog immediately (<16ms) and run delete in background
       handleClose()
       try {
         await onConfirm()

@@ -10,7 +10,11 @@ import { SectionAction } from '@/components/ui/section-action'
 import { useAuth } from '@/features/auth/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Folder, ChevronRight, Eye, Edit3, Share2, Trash2, FolderPlus } from 'lucide-react'
-import { useDirectory, subscribeDirectoryChanged } from '@/features/directory/hooks/use-directory'
+import {
+  useDirectory,
+  subscribeDirectoryChanged,
+  isFolderDeleting
+} from '@/features/directory/hooks/use-directory'
 import { getDirectory } from '@/features/directory/api'
 import type { DirectoryItem, FileItem } from '@/features/directory/types'
 import { ActionMenuItem } from '@/components/ui/action-menu'
@@ -61,11 +65,17 @@ export default function DashboardOverview() {
   React.useEffect(() => {
     let isMounted = true
     if (folders.length > 0) {
+      const foldersToFetch = folders.filter(
+        folder =>
+          !folder.id?.startsWith('temp-') &&
+          !folder.isOptimistic &&
+          !isFolderDeleting(folder.id) &&
+          !folderContents[folder.id]
+      )
+      if (foldersToFetch.length === 0) return
+
       Promise.all(
-        folders.map(async folder => {
-          if (folder.id?.startsWith('temp-') || folder.isOptimistic) {
-            return { id: folder.id, filesCount: 0, files: [] }
-          }
+        foldersToFetch.map(async folder => {
           try {
             const subDir = await getDirectory(folder.id)
             return {
@@ -91,9 +101,9 @@ export default function DashboardOverview() {
     return () => {
       isMounted = false
     }
-  }, [folders])
+  }, [folders, folderContents])
 
-  // Synchronize folder contents with targeted directory creation / settlement events
+  // Synchronize folder contents with targeted directory creation / settlement / deletion events
   React.useEffect(() => {
     const unsubscribe = subscribeDirectoryChanged((event) => {
       if (!event || !event.type) return
@@ -120,6 +130,30 @@ export default function DashboardOverview() {
           const next = { ...prev }
           delete next[tempId]
           return next
+        })
+      } else if (
+        (event.type === 'delete-folder' || event.type === 'delete-folder-optimistic') &&
+        (event.folderId || event.folder?.id)
+      ) {
+        const folderId = (event.folderId || event.folder?.id || '').toString()
+        setFolderContents((prev) => {
+          if (!(folderId in prev)) return prev
+          const next = { ...prev }
+          delete next[folderId]
+          return next
+        })
+      } else if (
+        (event.type === 'rollback-delete-folder' || event.type === 'restore-folder') &&
+        event.folder
+      ) {
+        const folder = event.folder as DirectoryItem
+        const folderId = (folder.id || folder._id || '').toString()
+        setFolderContents((prev) => {
+          if (folderId in prev) return prev
+          return {
+            ...prev,
+            [folderId]: { filesCount: 0, files: [] }
+          }
         })
       }
     })
@@ -203,14 +237,14 @@ export default function DashboardOverview() {
 
   const handlePerformDeleteFolder = async (folder: DirectoryItem) => {
     try {
-      await removeDir(folder.id)
-      toast.success(
-        'Moved to Trash',
-        `"${folder.name}" was moved to Trash.`
-      )
+      const originalIndex = folders.findIndex(f => f.id === folder.id)
+      await removeDir(folder.id, {
+        folder,
+        originalIndex: originalIndex >= 0 ? originalIndex : undefined,
+        parentDirId: null
+      })
     } catch (err) {
       console.error('Failed to delete directory:', err)
-      toast.error('Failed to delete', `Could not delete "${folder.name}".`)
     }
   }
 

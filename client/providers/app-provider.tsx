@@ -7,6 +7,7 @@ import { ToastProvider } from './toast-provider';
 import { UploadProvider } from './upload-provider';
 import { getStorageQuota, type StorageQuotaResponse } from '@/features/storage/api';
 import { subscribeFilesChanged, notifyFilesChanged } from '@/features/files/hooks/use-files';
+import { subscribeDirectoryChanged } from '@/features/directory/hooks/use-directory';
 import { toggleStarFile } from '@/features/files/api';
 
 export interface SelectedShareFile {
@@ -172,9 +173,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     refreshStorageQuota();
-    const unsubscribe = subscribeFilesChanged(refreshStorageQuota);
+    const unsubscribeFiles = subscribeFilesChanged(refreshStorageQuota);
+    const unsubscribeDir = subscribeDirectoryChanged((event) => {
+      if (event?.type === 'delete-folder-success' || event?.type === 'refresh') {
+        refreshStorageQuota();
+      }
+    });
     return () => {
-      unsubscribe();
+      unsubscribeFiles();
+      unsubscribeDir();
     };
   }, [refreshStorageQuota]);
 
