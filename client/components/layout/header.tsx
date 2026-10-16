@@ -14,11 +14,12 @@ import { PAGE_HORIZONTAL_PADDING } from '@/lib/constants/layout'
 interface HeaderProps {
   onMenuToggle?: () => void
   className?: string
+  isVisible?: boolean
 }
 
-export function Header({ onMenuToggle, className }: HeaderProps) {
-  const { currentSection, setCurrentSection, setActiveModal } = useApp()
-  const { user, logout } = useAuth()
+export function Header({ onMenuToggle, className, isVisible = true }: HeaderProps) {
+  const { setCurrentSection, setActiveModal } = useApp()
+  const { logout } = useAuth()
   const [isAccountDetailsOpen, setIsAccountDetailsOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
 
@@ -42,7 +43,8 @@ export function Header({ onMenuToggle, className }: HeaderProps) {
     <>
       <header
         className={cn(
-          'h-16 w-full bg-card-bg border-b border-card-border flex items-center text-foreground select-none relative transition-all duration-200 shrink-0 z-20 rounded-l-none shadow-none',
+          'h-16 w-full bg-card-bg border-b border-card-border flex items-center text-foreground select-none fixed top-0 left-0 right-0 md:static shrink-0 z-20 rounded-l-none shadow-none transition-transform duration-300 ease-in-out md:transition-none',
+          isVisible ? 'translate-y-0' : '-translate-y-full md:translate-y-0',
           className
         )}
         style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}

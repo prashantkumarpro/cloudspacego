@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { Sidebar } from '@/components/layout/sidebar'
 import { Header } from '@/components/layout/header'
 import { MobileNav } from '@/components/layout/mobile-nav'
@@ -20,10 +20,112 @@ export default function DashboardLayout({
 }) {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true)
   const dragCounter = useRef(0)
+  const mainRef = useRef<HTMLElement>(null)
+  const lastScrollTopRef = useRef(0)
+  const scrollStopTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const rafIdRef = useRef<number | null>(null)
 
   const { upload } = useFiles()
-  const { activeFolderId } = useApp()
+  const { activeFolderId, currentSection, activeModal } = useApp()
+
+  const [prevNavigationKey, setPrevNavigationKey] = useState(`${currentSection}-${activeFolderId}`)
+  const navigationKey = `${currentSection}-${activeFolderId}`
+  if (navigationKey !== prevNavigationKey) {
+    setPrevNavigationKey(navigationKey)
+    setIsHeaderVisible(true)
+  }
+
+  // Reset scroll container position when switching sections or navigating folders
+  useEffect(() => {
+    if (scrollStopTimerRef.current) {
+      clearTimeout(scrollStopTimerRef.current)
+    }
+    if (mainRef.current) {
+      mainRef.current.scrollTop = 0
+    }
+    lastScrollTopRef.current = 0
+  }, [currentSection, activeFolderId])
+
+  // Always keep header visible when drawer or modal is open
+  const shouldShowHeader = isHeaderVisible || isMobileNavOpen || Boolean(activeModal)
+
+  // Scroll-aware mobile header: hide on scroll down, show on scroll stop / scroll up
+  useEffect(() => {
+    const mainEl = mainRef.current
+
+    const handleScroll = () => {
+      // Apply only on mobile (< 768px). On desktop and tablet (>= 768px), keep header visible.
+      if (typeof window !== 'undefined' && window.innerWidth >= 768) {
+        setIsHeaderVisible(true)
+        return
+      }
+
+      if (rafIdRef.current !== null) {
+        return
+      }
+
+      rafIdRef.current = requestAnimationFrame(() => {
+        rafIdRef.current = null
+
+        const currentScrollTop = mainEl
+          ? mainEl.scrollTop
+          : (window.scrollY || document.documentElement.scrollTop || 0)
+
+        // Ignore negative scroll values (iOS rubber-band effect at the top)
+        const safeScrollTop = Math.max(0, currentScrollTop)
+        const delta = safeScrollTop - lastScrollTopRef.current
+
+        // Always show header when at or near top of the page (within 20px)
+        if (safeScrollTop <= 20) {
+          setIsHeaderVisible(true)
+        } else if (delta > 6 && safeScrollTop > 64) {
+          // Scrolling down: smoothly hide header
+          setIsHeaderVisible(false)
+        } else if (delta < -6) {
+          // Scrolling up: show header promptly
+          setIsHeaderVisible(true)
+        }
+
+        lastScrollTopRef.current = safeScrollTop
+
+        // When scrolling stops, show the header again after a short, reasonable delay (~850ms)
+        if (scrollStopTimerRef.current) {
+          clearTimeout(scrollStopTimerRef.current)
+        }
+        scrollStopTimerRef.current = setTimeout(() => {
+          setIsHeaderVisible(true)
+        }, 850)
+      })
+    }
+
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsHeaderVisible(true)
+      }
+    }
+
+    if (mainEl) {
+      mainEl.addEventListener('scroll', handleScroll, { passive: true })
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('resize', handleResize, { passive: true })
+
+    return () => {
+      if (mainEl) {
+        mainEl.removeEventListener('scroll', handleScroll)
+      }
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', handleResize)
+      if (scrollStopTimerRef.current) {
+        clearTimeout(scrollStopTimerRef.current)
+      }
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current)
+      }
+    }
+  }, [])
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -94,12 +196,17 @@ export default function DashboardLayout({
           style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
         >
           {/* Top Header */}
-          <Header onMenuToggle={() => setIsMobileNavOpen(true)} className='rounded-l-none' />
+          <Header
+            onMenuToggle={() => setIsMobileNavOpen(true)}
+            className='rounded-l-none'
+            isVisible={shouldShowHeader}
+          />
 
           {/* Dashboard Inner Scrollable Body */}
           <main 
+            ref={mainRef}
             className={cn(
-              'flex-1 overflow-y-auto py-5 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] sm:py-6 md:py-6 md:pb-6 flex flex-col rounded-l-none',
+              'flex-1 overflow-y-auto pt-[5.25rem] sm:pt-[5.5rem] pb-[calc(7rem+env(safe-area-inset-bottom,0px))] md:pt-6 md:pb-6 flex flex-col rounded-l-none',
               PAGE_HORIZONTAL_PADDING
             )}
             style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
