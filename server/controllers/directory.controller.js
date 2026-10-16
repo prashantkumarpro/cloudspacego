@@ -61,20 +61,36 @@ export const getDirectory = async (req, res) => {
   })
 }
 
-export const updateDirectory = async (req, res) => {
+export const updateDirectory = async (req, res, next) => {
   const user = req.user
   const { id } = req.params
   const { newDirName } = req.body
 
+  if (!newDirName || !newDirName.trim()) {
+    return res.status(400).json({ error: 'newDirName is required' })
+  }
+
   try {
-    await Directory.findOneAndUpdate(
+    const updated = await Directory.findOneAndUpdate(
       {
         _id: id,
         userId: user._id
       },
-      { $set: { name: newDirName } }
-    )
-    res.status(200).json({ message: 'Directory Renamed!' })
+      { $set: { name: newDirName.trim() } },
+      { new: true }
+    ).lean()
+
+    if (!updated) {
+      return res.status(404).json({ error: 'Directory not found!' })
+    }
+
+    return res.status(200).json({
+      message: 'Directory Renamed!',
+      directory: {
+        ...updated,
+        id: updated._id.toString()
+      }
+    })
   } catch (err) {
     next(err)
   }

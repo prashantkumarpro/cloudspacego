@@ -89,8 +89,9 @@ export const createDirectory = async (
 export const renameDirectory = async (
     id: string,
     data: RenameDirectoryData
-): Promise<void> => {
-    await apiClient.patch(`/directory/${id}`, data);
+): Promise<{ message?: string; directory?: DirectoryItem }> => {
+    const response = await apiClient.patch<{ message?: string; directory?: DirectoryItem }>(`/directory/${id}`, data);
+    return response.data;
 };
 
 export const deleteDirectory = async (

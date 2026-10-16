@@ -47,6 +47,13 @@ export interface RenameDirectoryData {
     newDirName: string;
 }
 
+export interface RenameDirectoryOptions {
+    originalName?: string;
+    parentDirId?: string | null;
+    skipToast?: boolean;
+    awaitCompletion?: boolean;
+}
+
 export interface RemoveDirectoryOptions {
     folder?: DirectoryItem;
     originalIndex?: number;
@@ -61,6 +68,9 @@ export type DirectoryMutationType =
     | 'create-folder-success'
     | 'create-folder-error'
     | 'rename-folder'
+    | 'rename-folder-optimistic'
+    | 'rename-folder-success'
+    | 'rollback-rename-folder'
     | 'delete-folder'
     | 'delete-folder-optimistic'
     | 'delete-folder-success'
@@ -75,6 +85,10 @@ export interface DirectoryMutationEvent {
     folder?: DirectoryItem;
     parentDirId?: string | null;
     originalIndex?: number;
+    newName?: string;
+    newDirName?: string;
+    originalName?: string;
+    version?: number;
     error?: unknown;
     [key: string]: unknown;
 }

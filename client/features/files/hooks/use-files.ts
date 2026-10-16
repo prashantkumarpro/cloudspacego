@@ -19,7 +19,15 @@ import {
   toggleStarFile,
   uploadFile,
 } from "../api";
-import type { FileItem, RenameFileData, UploadFileData, FileMutationEvent, FileEventListener } from "../types";
+import type {
+  FileItem,
+  RenameFileData,
+  RenameFileOptions,
+  UploadFileData,
+  FileMutationEvent,
+  FileEventListener,
+} from "../types";
+import { invalidateSearchCache } from "@/features/search/api";
 import { notifyDirectoryChanged } from "@/features/directory/hooks/use-directory";
 import { useUpload } from "@/providers/upload-provider";
 
@@ -54,9 +62,11 @@ export interface RemoveFileOptions {
   parentDirId?: string | null;
 }
 
-// Global sets to track in-flight file deletions and restores across all hook instances
+// Global sets to track in-flight file operations across all hook instances
 const inFlightFileDeletions = new Set<string>();
 const inFlightFileRestorations = new Set<string>();
+const inFlightFileRenames = new Set<string>();
+const fileRenameVersions = new Map<string, number>();
 
 export const isFileDeleting = (id?: string | null): boolean => {
   if (!id) return false;
@@ -66,6 +76,15 @@ export const isFileDeleting = (id?: string | null): boolean => {
 export const isFileRestoring = (id?: string | null): boolean => {
   if (!id) return false;
   return inFlightFileRestorations.has(id.toString());
+};
+
+export const isFileRenaming = (id?: string | null): boolean => {
+  if (!id) return false;
+  const idStr = id.toString();
+  for (const key of inFlightFileRenames) {
+    if (key.startsWith(`${idStr}:`)) return true;
+  }
+  return false;
 };
 
 interface UseFilesReturn {
@@ -81,7 +100,8 @@ interface UseFilesReturn {
   ) => Promise<void>;
   rename: (
     id: string,
-    data: RenameFileData
+    data: RenameFileData,
+    options?: RenameFileOptions
   ) => Promise<void>;
   remove: (id: string, options?: RemoveFileOptions) => Promise<void>;
   download: (
@@ -133,24 +153,132 @@ export function useFiles(): UseFilesReturn {
   const rename = useCallback(
     async (
       id: string,
-      data: RenameFileData
+      data: RenameFileData,
+      options?: RenameFileOptions
     ): Promise<void> => {
+      if (!id) return;
+      const fileIdStr = id.toString();
+      const trimmedName = (data?.newFilename || "").trim();
+
+      if (!trimmedName) {
+        const msg = "Please enter a file name";
+        setError(msg);
+        if (!options?.skipToast && toast) {
+          toast.error("Rename failed", msg);
+        }
+        throw new Error(msg);
+      }
+
+      // If name is unchanged, no-op
+      if (options?.originalName && trimmedName === options.originalName.trim()) {
+        return;
+      }
+
+      // Prevent duplicate in-flight requests for same file and name
+      const inFlightKey = `${fileIdStr}:${trimmedName}`;
+      if (inFlightFileRenames.has(inFlightKey)) {
+        return;
+      }
+
+      inFlightFileRenames.add(inFlightKey);
+      setIsRenaming(true);
+      setError(null);
+
+      // Sequence versioning to reject stale or out-of-order network responses
+      const version = (fileRenameVersions.get(fileIdStr) || 0) + 1;
+      fileRenameVersions.set(fileIdStr, version);
+
+      // 1. Immediately update UI optimistically (<16ms)
+      notifyFilesChanged({
+        type: "rename-file-optimistic",
+        fileId: fileIdStr,
+        newFilename: trimmedName,
+        newName: trimmedName,
+        originalName: options?.originalName,
+        parentDirId: options?.parentDirId,
+        version,
+      });
+
       try {
-        setIsRenaming(true);
-        setError(null);
+        invalidateSearchCache();
+      } catch {}
 
-        await renameFile(id, data);
+      // 2. Perform backend request in background
+      const handleSettlement = async () => {
+        try {
+          const res = await renameFile(fileIdStr, { newFilename: trimmedName });
+          inFlightFileRenames.delete(inFlightKey);
+          setIsRenaming(inFlightFileRenames.size > 0);
 
-        notifyFilesChanged();
-      } catch (err) {
-        console.error("Failed to rename file:", err);
-        setError("Failed to rename file.");
-        throw err;
-      } finally {
-        setIsRenaming(false);
+          // Check if superseded by a newer rename attempt
+          if (fileRenameVersions.get(fileIdStr) !== version) {
+            return;
+          }
+
+          // Authoritative reconciliation
+          const authoritative = res?.file;
+          notifyFilesChanged({
+            type: "rename-file-success",
+            fileId: fileIdStr,
+            newFilename: authoritative?.name || trimmedName,
+            newName: authoritative?.name || trimmedName,
+            file: authoritative,
+            version,
+          });
+
+          try {
+            invalidateSearchCache();
+          } catch {}
+        } catch (err: unknown) {
+          inFlightFileRenames.delete(inFlightKey);
+          setIsRenaming(inFlightFileRenames.size > 0);
+
+          // Check if superseded by a newer rename attempt
+          if (fileRenameVersions.get(fileIdStr) !== version) {
+            return;
+          }
+
+          // Safe rollback to original filename
+          const originalName = options?.originalName;
+          if (originalName) {
+            notifyFilesChanged({
+              type: "rollback-rename-file",
+              fileId: fileIdStr,
+              originalName,
+              newFilename: originalName,
+              newName: originalName,
+              version,
+            });
+          }
+
+          let errMsg = "Failed to rename file. Please try again.";
+          if (err && typeof err === "object") {
+            const errObj = err as { response?: { data?: { error?: string } }; message?: string };
+            if (errObj.response?.data?.error) {
+              errMsg = errObj.response.data.error;
+            } else if (typeof errObj.message === "string") {
+              errMsg = errObj.message;
+            }
+          }
+
+          setError(errMsg);
+          if (!options?.skipToast && toast) {
+            toast.error("Rename failed", errMsg);
+          }
+
+          if (options?.awaitCompletion) {
+            throw err;
+          }
+        }
+      };
+
+      if (options?.awaitCompletion) {
+        await handleSettlement();
+      } else {
+        handleSettlement();
       }
     },
-    []
+    [toast]
   );
 
   const remove = useCallback(
@@ -744,7 +872,41 @@ export function useInfiniteFiles(
         }
       }
 
-      // Fallback for upload, rename, etc.
+      // 5. File Rename events: update file name in-memory immediately without network refetch
+      if (
+        (event.type === 'rename-file-optimistic' ||
+          event.type === 'rename-file-success' ||
+          event.type === 'rollback-rename-file' ||
+          event.type === 'rename') &&
+        event.fileId
+      ) {
+        const fileIdStr = event.fileId.toString();
+        const targetName =
+          event.type === 'rollback-rename-file'
+            ? (event.originalName || event.newName || event.newFilename || event.file?.name)
+            : (event.newFilename || event.newName || event.file?.name);
+
+        if (targetName) {
+          setFiles((prev) => {
+            if (!prev.some((f) => (f.id || f._id || '').toString() === fileIdStr)) {
+              return prev;
+            }
+            return prev.map((f) => {
+              if ((f.id || f._id || '').toString() === fileIdStr) {
+                return {
+                  ...f,
+                  name: targetName,
+                  ...(event.file ? { ...event.file, name: targetName } : {}),
+                };
+              }
+              return f;
+            });
+          });
+          return;
+        }
+      }
+
+      // Fallback for upload, refresh, etc.
       fetchInitial();
     };
 

@@ -12,13 +12,18 @@ import { getDirectory } from '../api'
 import { RenameModal } from '@/features/files/components/rename-modal'
 import { MoveModal } from '@/features/files/components/move-modal'
 import { FileDetailsModal } from '@/features/files/components/file-details-modal'
-import type { DirectoryItem, RemoveDirectoryOptions, RenameDirectoryData } from '../types'
+import type {
+  DirectoryItem,
+  RemoveDirectoryOptions,
+  RenameDirectoryData,
+  RenameDirectoryOptions,
+} from '../types'
 import type { UnifiedFileItem } from '@/features/files/components/file-list'
 
 interface FolderGridProps {
   folders?: DirectoryItem[]
   isLoading?: boolean
-  onRename?: (id: string, data: RenameDirectoryData) => Promise<void>
+  onRename?: (id: string, data: RenameDirectoryData, options?: RenameDirectoryOptions) => Promise<void>
   onDelete?: (id: string, options?: RemoveDirectoryOptions) => Promise<void>
 }
 
@@ -147,12 +152,17 @@ export function FolderGrid ({
 
   const handlePerformRename = async (newName: string) => {
     if (!renameTarget) return
-    if (propOnRename) {
-      await propOnRename(renameTarget.id, { newDirName: newName })
-    } else {
-      await hookResult.rename(renameTarget.id, { newDirName: newName })
-    }
+    const target = renameTarget
     setRenameTarget(null)
+    const options: RenameDirectoryOptions = {
+      originalName: target.name,
+      parentDirId: activeFolderId ?? null,
+    }
+    if (propOnRename) {
+      await propOnRename(target.id, { newDirName: newName }, options)
+    } else {
+      await hookResult.rename(target.id, { newDirName: newName }, options)
+    }
   }
 
   const handleDeleteFolder = async (folder: DirectoryItem) => {

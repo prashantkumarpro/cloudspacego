@@ -19,6 +19,7 @@ import { getDirectory } from '@/features/directory/api'
 import type { DirectoryItem, FileItem } from '@/features/directory/types'
 import { ActionMenuItem } from '@/components/ui/action-menu'
 import { subscribeFilesChanged } from '@/features/files/hooks/use-files'
+import type { FileMutationEvent } from '@/features/files/types'
 
 function deriveFileType(filename: string, ext?: string): string {
   const extension = (ext || filename.split('.').pop() || '')
@@ -207,6 +208,42 @@ export default function DashboardOverview() {
             }
           })
         }
+      } else if (
+        (event.type === 'rename-file-optimistic' ||
+          event.type === 'rename-file-success' ||
+          event.type === 'rollback-rename-file' ||
+          event.type === 'rename') &&
+        'fileId' in event &&
+        event.fileId
+      ) {
+        const fileEvt = event as FileMutationEvent
+        const fileId = (fileEvt.fileId || '').toString()
+        const targetName =
+          fileEvt.type === 'rollback-rename-file'
+            ? (fileEvt.originalName || fileEvt.newName || fileEvt.newFilename || fileEvt.file?.name)
+            : (fileEvt.newFilename || fileEvt.newName || fileEvt.file?.name)
+
+        if (targetName) {
+          setFolderContents((prev) => {
+            let hasChange = false
+            const next = { ...prev }
+            for (const [folderId, content] of Object.entries(next)) {
+              if (content.files.some((f) => (f.id || f._id || '').toString() === fileId)) {
+                hasChange = true
+                next[folderId] = {
+                  ...content,
+                  files: content.files.map((f) => {
+                    if ((f.id || f._id || '').toString() === fileId) {
+                      return { ...f, name: targetName }
+                    }
+                    return f
+                  }),
+                }
+              }
+            }
+            return hasChange ? next : prev
+          })
+        }
       }
     })
 
@@ -227,9 +264,17 @@ export default function DashboardOverview() {
 
   const handlePerformRenameFolder = async (newName: string) => {
     if (!renameFolderTarget) return
+    const target = renameFolderTarget
+    setRenameFolderTarget(null)
     try {
-      await renameDir(renameFolderTarget.id, { newDirName: newName })
-      setRenameFolderTarget(null)
+      await renameDir(
+        target.id,
+        { newDirName: newName },
+        {
+          originalName: target.name,
+          parentDirId: null,
+        }
+      )
     } catch (err) {
       console.error('Failed to rename directory:', err)
       throw err

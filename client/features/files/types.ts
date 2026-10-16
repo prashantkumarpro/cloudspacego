@@ -139,6 +139,13 @@ export interface RenameFileData {
     newFilename: string;
 }
 
+export interface RenameFileOptions {
+    originalName?: string;
+    parentDirId?: string | null;
+    skipToast?: boolean;
+    awaitCompletion?: boolean;
+}
+
 export interface FileApiResponse {
     message?: string;
     error?: string;
@@ -153,15 +160,22 @@ export type FileMutationType =
     | 'empty-trash'
     | 'upload'
     | 'rename'
+    | 'rename-file-optimistic'
+    | 'rename-file-success'
+    | 'rollback-rename-file'
     | 'star'
     | 'refresh';
 
 export interface FileMutationEvent {
-    type: FileMutationType;
+    type: FileMutationType | string;
     fileId?: string;
     file?: FileItem | any;
     originalIndex?: number;
     parentDirId?: string | null;
+    newFilename?: string;
+    newName?: string;
+    originalName?: string;
+    version?: number;
     [key: string]: any;
 }
 

@@ -968,7 +968,7 @@ export const updateFile = async (req, res, next) => {
   const { id } = req.params
   const { newFilename } = req.body
 
-  if (!newFilename) {
+  if (!newFilename || !newFilename.trim()) {
     return res.status(400).json({
       error: 'newFilename is required'
     })
@@ -1000,9 +1000,15 @@ export const updateFile = async (req, res, next) => {
       }
     }
 
-    fileData.name = newFilename
+    fileData.name = newFilename.trim()
     await fileData.save()
-    return res.status(200).json({ message: 'Renamed' })
+    return res.status(200).json({
+      message: 'Renamed',
+      file: {
+        ...fileData.toObject(),
+        id: fileData._id.toString()
+      }
+    })
   } catch (err) {
     err.status = 500
     next(err)

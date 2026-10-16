@@ -317,10 +317,18 @@ export function FileList({
 
   const handlePerformRename = async (newName: string) => {
     if (!renameTarget) return
-    const fileId = renameTarget.id || renameTarget._id
+    const target = renameTarget
+    const fileId = target.id || target._id
+    setRenameTarget(null)
     if (fileId) {
-      await rename(fileId, { newFilename: newName })
-      setRenameTarget(null)
+      await rename(
+        fileId,
+        { newFilename: newName },
+        {
+          originalName: target.name,
+          parentDirId: target.parentDirId,
+        }
+      )
     }
   }
 

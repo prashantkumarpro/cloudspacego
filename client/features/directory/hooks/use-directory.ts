@@ -11,9 +11,11 @@ import type {
   CreateDirectoryData,
   Directory,
   DirectoryItem,
+  FileItem,
   DirectoryMutationEvent,
   RemoveDirectoryOptions,
   RenameDirectoryData,
+  RenameDirectoryOptions,
 } from "../types";
 import type { FileMutationEvent } from "@/features/files/types";
 import { invalidateSearchCache } from "@/features/search/api";
@@ -34,9 +36,24 @@ const activeOptimisticFolderIds = new Set<string>();
 // Set to track in-flight folder deletions to prevent duplicate submissions
 const inFlightDeletions = new Set<string>();
 
+// Set to track in-flight folder renames to prevent duplicate submissions
+const inFlightFolderRenames = new Set<string>();
+
+// Map to track sequence versioning per folder to reject stale or out-of-order network responses
+const folderRenameVersions = new Map<string, number>();
+
 export const isFolderDeleting = (id?: string | null): boolean => {
   if (!id) return false;
   return inFlightDeletions.has(id.toString());
+};
+
+export const isFolderRenaming = (id?: string | null): boolean => {
+  if (!id) return false;
+  const idStr = id.toString();
+  for (const key of inFlightFolderRenames) {
+    if (key.startsWith(`${idStr}:`)) return true;
+  }
+  return false;
 };
 
 export const getInFlightCreationKey = (
@@ -88,7 +105,8 @@ interface UseDirectoryReturn {
   ) => Promise<DirectoryItem | void>;
   rename: (
     id: string,
-    data: RenameDirectoryData
+    data: RenameDirectoryData,
+    options?: RenameDirectoryOptions
   ) => Promise<void>;
   remove: (id: string, options?: RemoveDirectoryOptions) => Promise<void>;
 }
@@ -293,26 +311,132 @@ export function useDirectory(id?: string): UseDirectoryReturn {
   const rename = useCallback(
     async (
       directoryId: string,
-      data: RenameDirectoryData
+      data: RenameDirectoryData,
+      options?: RenameDirectoryOptions
     ): Promise<void> => {
+      if (!directoryId) return;
+      const folderIdStr = directoryId.toString();
+      const trimmedName = (data?.newDirName || "").trim();
+
+      if (!trimmedName) {
+        const msg = "Please enter a folder name";
+        setError(msg);
+        if (!options?.skipToast && toast) {
+          toast.error("Rename failed", msg);
+        }
+        throw new Error(msg);
+      }
+
+      // If name is unchanged, no-op
+      if (options?.originalName && trimmedName === options.originalName.trim()) {
+        return;
+      }
+
+      // Prevent duplicate in-flight requests for same folder and name
+      const inFlightKey = `${folderIdStr}:${trimmedName}`;
+      if (inFlightFolderRenames.has(inFlightKey)) {
+        return;
+      }
+
+      inFlightFolderRenames.add(inFlightKey);
+      setIsRenaming(true);
+      setError(null);
+
+      // Sequence versioning to reject stale or out-of-order network responses
+      const version = (folderRenameVersions.get(folderIdStr) || 0) + 1;
+      folderRenameVersions.set(folderIdStr, version);
+
+      // 1. Immediately update UI optimistically (<16ms)
+      notifyDirectoryChanged({
+        type: "rename-folder-optimistic",
+        folderId: folderIdStr,
+        newDirName: trimmedName,
+        newName: trimmedName,
+        originalName: options?.originalName,
+        parentDirId: options?.parentDirId,
+        version,
+      });
+
       try {
-        setIsRenaming(true);
-        setError(null);
+        invalidateSearchCache();
+      } catch {}
 
-        await renameDirectory(directoryId, data);
+      // 2. Perform backend request in background
+      const handleSettlement = async () => {
+        try {
+          const res = await renameDirectory(folderIdStr, { newDirName: trimmedName });
+          inFlightFolderRenames.delete(inFlightKey);
+          setIsRenaming(inFlightFolderRenames.size > 0);
 
-        notifyDirectoryChanged({
-          type: "refresh",
-        });
-      } catch (error) {
-        console.error("Failed to rename directory:", error);
-        setError("Failed to rename directory.");
-        throw error;
-      } finally {
-        setIsRenaming(false);
+          // Check if superseded by a newer rename attempt
+          if (folderRenameVersions.get(folderIdStr) !== version) {
+            return;
+          }
+
+          // Authoritative reconciliation
+          const authoritative = res?.directory;
+          notifyDirectoryChanged({
+            type: "rename-folder-success",
+            folderId: folderIdStr,
+            newDirName: authoritative?.name || trimmedName,
+            newName: authoritative?.name || trimmedName,
+            folder: authoritative,
+            version,
+          });
+
+          try {
+            invalidateSearchCache();
+          } catch {}
+        } catch (err: unknown) {
+          inFlightFolderRenames.delete(inFlightKey);
+          setIsRenaming(inFlightFolderRenames.size > 0);
+
+          // Check if superseded by a newer rename attempt
+          if (folderRenameVersions.get(folderIdStr) !== version) {
+            return;
+          }
+
+          // Safe rollback to original folder name
+          const originalName = options?.originalName;
+          if (originalName) {
+            notifyDirectoryChanged({
+              type: "rollback-rename-folder",
+              folderId: folderIdStr,
+              originalName,
+              newDirName: originalName,
+              newName: originalName,
+              version,
+            });
+          }
+
+          let errMsg = "Failed to rename folder. Please try again.";
+          if (err && typeof err === "object") {
+            const errObj = err as { response?: { data?: { error?: string } }; message?: string };
+            if (errObj.response?.data?.error) {
+              errMsg = errObj.response.data.error;
+            } else if (typeof errObj.message === "string") {
+              errMsg = errObj.message;
+            }
+          }
+
+          setError(errMsg);
+          if (!options?.skipToast && toast) {
+            toast.error("Rename failed", errMsg);
+          }
+
+          if (options?.awaitCompletion) {
+            throw err;
+          }
+        }
+      };
+
+      if (options?.awaitCompletion) {
+        await handleSettlement();
+      } else {
+        handleSettlement();
       }
     },
-    []
+    [toast]
   );
 
   const remove = useCallback(
@@ -778,6 +902,101 @@ export function useDirectory(id?: string): UseDirectoryReturn {
           };
         });
         return;
+      }
+
+      // Folder Rename / Reconciliation / Rollback: update in-memory without network refetch
+      if (
+        event.type === "rename-folder-optimistic" ||
+        event.type === "rename-folder-success" ||
+        event.type === "rollback-rename-folder" ||
+        event.type === "rename-folder"
+      ) {
+        const dirEvt = event as DirectoryMutationEvent;
+        const folderId = (dirEvt.folderId || dirEvt.folder?.id || "").toString();
+        const targetName =
+          dirEvt.type === "rollback-rename-folder"
+            ? (dirEvt.originalName || dirEvt.newName || dirEvt.newDirName || dirEvt.folder?.name)
+            : (dirEvt.newName || dirEvt.newDirName || dirEvt.folder?.name);
+
+        if (folderId && targetName) {
+          const authoritative = dirEvt.folder;
+          setDirectory((prev) => {
+            if (!prev) return prev;
+            let changed = false;
+
+            // 1. If this directory itself is the renamed folder (e.g. current view / breadcrumbs)
+            const currentDirId = (prev.id || prev._id || id || "").toString();
+            let newName = prev.name;
+            if (currentDirId && currentDirId === folderId) {
+              newName = targetName;
+              changed = true;
+            }
+
+            // 2. If one of child folders matches
+            const dirs = prev.directories || [];
+            let updatedDirs = dirs;
+            if (dirs.some((d) => (d.id || d._id || "").toString() === folderId)) {
+              changed = true;
+              updatedDirs = dirs.map((d) => {
+                if ((d.id || d._id || "").toString() === folderId) {
+                  return {
+                    ...d,
+                    name: targetName,
+                    ...(authoritative ? { ...authoritative, name: targetName } : {}),
+                  };
+                }
+                return d;
+              });
+            }
+
+            if (!changed) return prev;
+            return {
+              ...prev,
+              name: newName,
+              directories: updatedDirs,
+            };
+          });
+          return;
+        }
+      }
+
+      // File Rename / Reconciliation / Rollback inside directory: update in-memory without network refetch
+      if (
+        event.type === "rename-file-optimistic" ||
+        event.type === "rename-file-success" ||
+        event.type === "rollback-rename-file" ||
+        event.type === "rename"
+      ) {
+        const fileEvt = event as FileMutationEvent;
+        const fileId = (fileEvt.fileId || fileEvt.file?.id || fileEvt.file?._id || "").toString();
+        const targetName =
+          fileEvt.type === "rollback-rename-file"
+            ? (fileEvt.originalName || fileEvt.newName || fileEvt.newFilename || fileEvt.file?.name)
+            : (fileEvt.newFilename || fileEvt.newName || fileEvt.file?.name);
+
+        if (fileId && targetName) {
+          const authoritative = fileEvt.file as FileItem | undefined;
+          setDirectory((prev) => {
+            if (!prev || !prev.files) return prev;
+            if (!prev.files.some((f) => (f.id || f._id || "").toString() === fileId)) {
+              return prev;
+            }
+            return {
+              ...prev,
+              files: prev.files.map((f) => {
+                if ((f.id || f._id || "").toString() === fileId) {
+                  return {
+                    ...f,
+                    name: targetName,
+                    ...(authoritative ? { ...authoritative, name: targetName } : {}),
+                  };
+                }
+                return f;
+              }),
+            };
+          });
+          return;
+        }
       }
 
       fetchDirectory();
