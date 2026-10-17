@@ -45,7 +45,7 @@ export const addUser = async (req, res, next) => {
       { session }
     )
 
-    session.commitTransaction()
+    await session.commitTransaction()
 
     res.status(201).json({ message: 'User Registered' })
   } catch (err) {

@@ -1,18 +1,34 @@
 import Directory from '../models/directory.model.js'
 import File from '../models/file.model.js'
 import User from '../models/user.model.js'
+import mongoose from 'mongoose'
 import { deleteFile as deleteStoredFile } from '../services/storage.service.js'
 import { rm } from 'fs/promises'
 
 export const createDirectory = async (req, res, next) => {
   const user = req.user
 
+  const isRoot = !req.params.parentDirId || (user.rootDirId && req.params.parentDirId === user.rootDirId.toString())
   const parentDirId = req.params.parentDirId || user.rootDirId
   const dirname = req.headers.dirname || 'New Folder'
   try {
-    const parentDir = await Directory.findOne({
+    let parentDir = await Directory.findOne({
       _id: parentDirId
     })
+
+    if (!parentDir && isRoot) {
+      const rootId = user.rootDirId || new mongoose.Types.ObjectId()
+      if (!user.rootDirId || user.rootDirId.toString() !== rootId.toString()) {
+        await User.updateOne({ _id: user._id }, { $set: { rootDirId: rootId } })
+        user.rootDirId = rootId
+      }
+      parentDir = await Directory.create({
+        _id: rootId,
+        name: `root-${user.email || user._id}`,
+        parentDirId: null,
+        userId: user._id
+      })
+    }
 
     if (!parentDir)
       return res
@@ -39,26 +55,49 @@ export const createDirectory = async (req, res, next) => {
   }
 }
 
-export const getDirectory = async (req, res) => {
+export const getDirectory = async (req, res, next) => {
   const user = req.user
+  const isRoot = !req.params.id || (user.rootDirId && req.params.id === user.rootDirId.toString())
   const _id = req.params.id || user.rootDirId
 
-  const directoryData = await Directory.findOne({ _id })
+  try {
+    let directoryData = await Directory.findOne({ _id })
 
-  if (!directoryData) {
-    return res
-      .status(404)
-      .json({ error: 'Directory not found or you do not have access to it!' })
+    if (!directoryData && isRoot) {
+      const rootId = user.rootDirId || new mongoose.Types.ObjectId()
+      if (!user.rootDirId || user.rootDirId.toString() !== rootId.toString()) {
+        await User.updateOne({ _id: user._id }, { $set: { rootDirId: rootId } })
+        user.rootDirId = rootId
+      }
+      directoryData = await Directory.create({
+        _id: rootId,
+        name: `root-${user.email || user._id}`,
+        parentDirId: null,
+        userId: user._id
+      })
+    }
+
+    if (!directoryData) {
+      return res
+        .status(404)
+        .json({ error: 'Directory not found or you do not have access to it!' })
+    }
+
+    const files = await File.find({ parentDirId: directoryData._id, isTrash: { $ne: true } }).lean()
+    const directories = await Directory.find({ parentDirId: directoryData._id }).lean()
+
+    const dirObj = directoryData && typeof directoryData.toObject === 'function' ? directoryData.toObject() : directoryData
+
+    return res.status(200).json({
+      ...dirObj,
+      id: (dirObj?._id || dirObj?.id || '').toString(),
+      files: files.map(dir => ({ ...dir, id: dir._id })),
+      directories: directories.map(dir => ({ ...dir, id: dir._id }))
+    })
+  } catch (err) {
+    if (next) return next(err)
+    return res.status(500).json({ error: 'Failed to fetch directory' })
   }
-
-  const files = await File.find({ parentDirId: directoryData._id, isTrash: { $ne: true } }).lean()
-  const directories = await Directory.find({ parentDirId: _id }).lean()
-
-  return res.status(200).json({
-    ...directoryData,
-    files: files.map(dir => ({ ...dir, id: dir._id })),
-    directories: directories.map(dir => ({ ...dir, id: dir._id }))
-  })
 }
 
 export const updateDirectory = async (req, res, next) => {
@@ -99,6 +138,10 @@ export const updateDirectory = async (req, res, next) => {
 export const deleteDriectory = async (req, res, next) => {
   const { id } = req.params
   try {
+    if (req.user.rootDirId && id === req.user.rootDirId.toString()) {
+      return res.status(400).json({ error: 'Cannot delete root directory!' })
+    }
+
     const directoryData = await Directory.findOne(
       {
         _id: id,

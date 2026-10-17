@@ -27,14 +27,32 @@ export const createFile = async (req, res) => {
 
   try {
     // 1. Get parent directory
+    const isRoot = !req.params.parentDirId || (req.user.rootDirId && req.params.parentDirId === req.user.rootDirId.toString())
     const parentDirId =
       req.params.parentDirId || req.user.rootDirId
 
     // 2. Check parent directory belongs to current user
-    const parentsDirData = await Directory.findOne({
+    let parentsDirData = await Directory.findOne({
       _id: parentDirId,
       userId: req.user._id,
     }).lean()
+
+    if (!parentsDirData && isRoot) {
+      const rootId = req.user.rootDirId || new mongoose.Types.ObjectId()
+      if (!req.user.rootDirId || req.user.rootDirId.toString() !== rootId.toString()) {
+        await User.updateOne({ _id: req.user._id }, { $set: { rootDirId: rootId } })
+        req.user.rootDirId = rootId
+      }
+      parentsDirData = await Directory.create({
+        _id: rootId,
+        name: `root-${req.user.email || req.user._id}`,
+        parentDirId: null,
+        userId: req.user._id
+      })
+      if (parentsDirData && typeof parentsDirData.toObject === 'function') {
+        parentsDirData = parentsDirData.toObject()
+      }
+    }
 
     if (!parentsDirData) {
       return res.status(404).json({
