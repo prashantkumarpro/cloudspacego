@@ -138,3 +138,5 @@ export function FolderCard({
     </div>
   )
 }
+
+export { FolderCardSkeleton } from '@/components/ui/skeleton'

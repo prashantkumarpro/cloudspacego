@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from 'react'
 import { useApp } from '@/providers/app-provider'
-import { FolderCard } from './folder-card'
+import { FolderCard, FolderCardSkeleton } from './folder-card'
 import {
   useDirectory,
   subscribeDirectoryChanged,
@@ -189,7 +189,7 @@ export function FolderGrid ({
     setMoveTarget(null)
   }
 
-  if (isLoading) {
+  if (isLoading && folders.length === 0) {
     return (
       <div className='flex flex-col gap-3 select-none'>
         <h4 className='text-[10px] font-bold uppercase tracking-[1px] text-text-muted'>
@@ -197,16 +197,7 @@ export function FolderGrid ({
         </h4>
         <div className='grid grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-2.5 sm:gap-4'>
           {[1, 2, 3, 4].map(idx => (
-            <div
-              key={idx}
-              className='h-16 bg-card-bg/60 border border-card-border rounded-xl animate-pulse p-2.5 xs:p-3 sm:p-3.5 flex items-center gap-2.5 sm:gap-3'
-            >
-              <div className='w-7 h-7 bg-input-bg rounded-lg shrink-0' />
-              <div className='flex-1 flex flex-col gap-1.5'>
-                <div className='h-3 bg-input-bg rounded w-3/4' />
-                <div className='h-2 bg-input-bg rounded w-1/2' />
-              </div>
-            </div>
+            <FolderCardSkeleton key={`folder-grid-skeleton-${idx}`} />
           ))}
         </div>
       </div>

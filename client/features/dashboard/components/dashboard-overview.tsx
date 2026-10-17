@@ -4,6 +4,7 @@ import React, { useMemo, useState } from 'react'
 import { useApp } from '@/providers/app-provider'
 import { useToast } from '@/providers/toast-provider'
 import { FolderCard } from '@/features/directory/components/folder-card'
+import { FolderCardSkeleton, ContinueCardSkeleton } from '@/components/ui/skeleton'
 import { FileList } from '@/features/files/components/file-list'
 import { RenameModal } from '@/features/files/components/rename-modal'
 import { SectionAction } from '@/components/ui/section-action'
@@ -393,7 +394,9 @@ export default function DashboardOverview() {
         </p>
 
         {/* Compact Continue where you left off row */}
-        {recentFolder && (
+        {isDirectoryLoading && folders.length === 0 ? (
+          <ContinueCardSkeleton />
+        ) : recentFolder ? (
           <div
             onClick={() => {
               setCurrentSection('My Files')
@@ -422,7 +425,7 @@ export default function DashboardOverview() {
               <ChevronRight className='w-3.5 h-3.5' />
             </div>
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Your folders Section */}
@@ -442,19 +445,10 @@ export default function DashboardOverview() {
         </div>
 
         {/* Folders Presentation: Loading / Error / Content */}
-        {isDirectoryLoading ? (
+        {isDirectoryLoading && folders.length === 0 ? (
           <div className='grid grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-2.5 sm:gap-4'>
             {[1, 2, 3, 4].map(idx => (
-              <div
-                key={idx}
-                className='h-16 bg-card-bg/60 border border-card-border rounded-xl animate-pulse p-2.5 xs:p-3 sm:p-3.5 flex items-center gap-2.5 sm:gap-3'
-              >
-                <div className='w-7 h-7 bg-input-bg rounded-lg shrink-0' />
-                <div className='flex-1 flex flex-col gap-1.5'>
-                  <div className='h-3 bg-input-bg rounded w-3/4' />
-                  <div className='h-2 bg-input-bg rounded w-1/2' />
-                </div>
-              </div>
+              <FolderCardSkeleton key={`folder-skeleton-${idx}`} />
             ))}
           </div>
         ) : directoryError ? (
@@ -517,6 +511,7 @@ export default function DashboardOverview() {
       <div className='mt-7 sm:mt-8'>
         <FileList
           files={displayedFiles}
+          isLoading={isDirectoryLoading && displayedFiles.length === 0}
           title='Recently Opened'
           showViewToggle={true}
           showViewAll={allRecentFiles.length > 8}

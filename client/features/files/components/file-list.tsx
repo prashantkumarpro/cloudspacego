@@ -8,6 +8,7 @@ import { FilePreview } from './file-preview'
 import { FilePreviewModal } from './file-preview-modal'
 import { FileGrid } from './file-grid'
 import { FileTable } from './file-table'
+import { FileCardSkeleton, FileTableSkeleton, FileTableRowSkeleton } from '@/components/ui/skeleton'
 import { RenameModal } from './rename-modal'
 import { MoveModal } from './move-modal'
 import { FileDetailsModal } from './file-details-modal'
@@ -503,7 +504,7 @@ export function FileList({
           )}
 
           <div className='flex items-center gap-2 shrink-0'>
-            {showViewToggle && displayList.length > 0 && (
+            {showViewToggle && (displayList.length > 0 || isLoading) && (
               <ViewToggle
                 viewMode={activeViewMode}
                 onViewModeChange={handleViewModeChange}
@@ -517,22 +518,16 @@ export function FileList({
       {isLoading && displayList.length === 0 ? (
         activeViewMode === 'grid' ? (
           <div className='grid grid-cols-1 min-[380px]:grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-3 sm:gap-4'>
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className='h-44 bg-card-bg/60 border border-card-border rounded-xl animate-pulse p-3'
-              />
+            {Array.from({ length: limit || 8 }).map((_, i) => (
+              <FileCardSkeleton key={`file-grid-skeleton-${i}`} />
             ))}
           </div>
         ) : (
-          <div className='w-full flex flex-col gap-2 py-2'>
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={i}
-                className='h-12 w-full bg-card-bg/60 border border-card-border rounded-lg animate-pulse'
-              />
-            ))}
-          </div>
+          <FileTableSkeleton
+            showHeader={showHeader}
+            count={limit || 6}
+            dateLabel={dateLabel}
+          />
         )
       ) : displayList.length === 0 ? (
         <div className='w-full py-12 flex flex-col items-center justify-center text-center select-none bg-card-bg border border-dashed border-card-border p-6 rounded-xl'>
@@ -592,35 +587,15 @@ export function FileList({
           {/* Bottom Pagination Skeletons matching active view */}
           {isLoadingMore && (
             activeViewMode === 'grid' ? (
-              <div className='grid grid-cols-1 min-[380px]:grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-3 sm:gap-4 mt-1'>
+              <div className='grid grid-cols-1 min-[380px]:grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-3 sm:gap-4 mt-3 sm:mt-4'>
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <div
-                    key={`pagination-grid-skeleton-${i}`}
-                    className='h-44 bg-card-bg/60 border border-card-border/60 rounded-xl animate-pulse p-3 flex flex-col justify-between select-none'
-                  >
-                    <div className='w-full aspect-[16/10] bg-input-bg/70 rounded-lg' />
-                    <div className='flex items-center gap-2 mt-2.5'>
-                      <div className='h-3.5 bg-input-bg rounded w-3/4' />
-                    </div>
-                  </div>
+                  <FileCardSkeleton key={`pagination-grid-skeleton-${i}`} />
                 ))}
               </div>
             ) : (
-              <div className='flex flex-col divide-y divide-card-border/30 border-b border-card-border/40 select-none'>
+              <div className='flex flex-col divide-y divide-card-border/40 border-b border-card-border/40 select-none'>
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <div
-                    key={`pagination-row-skeleton-${i}`}
-                    className='flex items-center justify-between px-3 sm:px-4 h-[54px] animate-pulse bg-input-bg/20'
-                  >
-                    <div className='flex items-center gap-3.5 flex-1 pr-6'>
-                      <div className='w-9 h-9 rounded-lg bg-input-bg/80 shrink-0' />
-                      <div className='h-3.5 bg-input-bg/80 rounded w-48' />
-                    </div>
-                    <div className='hidden md:block w-24 h-3 bg-input-bg/60 rounded pr-4' />
-                    <div className='hidden sm:block w-32 h-3 bg-input-bg/60 rounded pr-4' />
-                    <div className='hidden sm:block w-20 h-3 bg-input-bg/60 rounded pr-4' />
-                    <div className='w-8 h-8 rounded-lg bg-input-bg/40 shrink-0' />
-                  </div>
+                  <FileTableRowSkeleton key={`pagination-row-skeleton-${i}`} />
                 ))}
               </div>
             )

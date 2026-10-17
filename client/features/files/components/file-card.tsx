@@ -224,3 +224,5 @@ export function FileCard({
     </div>
   )
 }
+
+export { FileCardSkeleton } from '@/components/ui/skeleton'

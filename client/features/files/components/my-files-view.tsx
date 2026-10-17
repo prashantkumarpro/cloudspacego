@@ -96,7 +96,7 @@ export default function MyFilesView () {
     return [...missingDirFiles, ...mappedInf]
   }, [activeFolderId, directory?.files, infiniteFiles])
   const isListLoading = activeFolderId
-    ? isDirLoading
+    ? (isDirLoading && filesToDisplay.length === 0)
     : (isFilesLoading && filesToDisplay.length === 0)
 
   return (

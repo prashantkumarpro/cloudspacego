@@ -9,6 +9,7 @@ import { FileTable } from '@/features/files/components/file-table'
 import { DeleteConfirmModal } from '@/features/files/components/delete-confirm-modal'
 import { Dialog } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { FileCardSkeleton, FileTableSkeleton, FileTableRowSkeleton } from '@/components/ui/skeleton'
 import { ViewToggle } from '@/components/ui/view-toggle'
 import { ActionMenuItem } from '@/components/ui/action-menu'
 import { UnifiedFileItem } from '@/features/files/components/file-list'
@@ -165,27 +166,33 @@ export function TrashView() {
   // Initial loading skeleton
   if (isLoading && trashFiles.length === 0) {
     return (
-      <div className='w-full flex flex-col gap-4 select-none'>
-        <div className='flex items-center justify-between gap-3'>
-          <div className='h-6 w-32 bg-input-bg rounded-md animate-pulse' />
-          <div className='h-8 w-24 bg-input-bg rounded-lg animate-pulse' />
+      <div className='w-full flex flex-col gap-3.5 min-w-0 select-none'>
+        <div className='flex items-center justify-between gap-3 select-none flex-wrap'>
+          <div className='flex items-center gap-2.5'>
+            <div className='h-5 sm:h-6 w-24 bg-input-bg rounded animate-pulse' />
+            <div className='h-5 w-16 bg-input-bg rounded-full animate-pulse' />
+          </div>
+          <div className='flex items-center gap-2'>
+            <ViewToggle
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+            />
+          </div>
         </div>
-        <div className='flex flex-col divide-y divide-card-border/40 border-b border-card-border/40'>
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div
-              key={`trash-skeleton-${i}`}
-              className='flex items-center justify-between px-3 sm:px-4 h-[54px] animate-pulse bg-input-bg/20'
-            >
-              <div className='flex items-center gap-3.5 flex-1 pr-6'>
-                <div className='w-9 h-9 rounded-lg bg-input-bg/80 shrink-0' />
-                <div className='h-3.5 bg-input-bg/80 rounded w-48' />
-              </div>
-              <div className='hidden sm:block w-32 h-3 bg-input-bg/60 rounded pr-4' />
-              <div className='hidden sm:block w-20 h-3 bg-input-bg/60 rounded pr-4' />
-              <div className='w-8 h-8 rounded-lg bg-input-bg/40 shrink-0' />
-            </div>
-          ))}
-        </div>
+
+        {viewMode === 'grid' ? (
+          <div className='grid grid-cols-1 min-[380px]:grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-3 sm:gap-4'>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <FileCardSkeleton key={`trash-grid-skeleton-${i}`} />
+            ))}
+          </div>
+        ) : (
+          <FileTableSkeleton
+            showHeader={true}
+            count={6}
+            dateLabel='Date deleted'
+          />
+        )}
       </div>
     )
   }
@@ -280,6 +287,23 @@ export function TrashView() {
       {/* Sentinel for Infinite Scrolling */}
       {hasMore && (
         <div ref={observerTarget} className='h-4 w-full shrink-0' />
+      )}
+
+      {/* Bottom Pagination Skeletons matching active view */}
+      {isLoadingMore && (
+        viewMode === 'grid' ? (
+          <div className='grid grid-cols-1 min-[380px]:grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-3 sm:gap-4 mt-3 sm:mt-4'>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <FileCardSkeleton key={`trash-pagination-grid-skeleton-${i}`} />
+            ))}
+          </div>
+        ) : (
+          <div className='flex flex-col divide-y divide-card-border/40 border-b border-card-border/40 select-none'>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <FileTableRowSkeleton key={`trash-pagination-row-skeleton-${i}`} />
+            ))}
+          </div>
+        )
       )}
 
       {/* Loading More Indicator */}
