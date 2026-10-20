@@ -6,11 +6,12 @@ import { FolderGrid } from '@/features/directory/components/folder-grid'
 import { FileList } from '@/features/files/components/file-list'
 import { useDirectory } from '@/features/directory/hooks/use-directory'
 import { useInfiniteFiles } from '@/features/files/hooks/use-files'
-import { AlertCircle, RefreshCw } from 'lucide-react'
+import { AlertCircle, RefreshCw, FolderOpen, FileText } from 'lucide-react'
+import { EmptyState } from '@/components/ui/empty-state'
 import { cn } from '@/lib/utils/cn'
 
 export default function MyFilesView () {
-  const { activeFolderId, setActiveFolderId } = useApp()
+  const { activeFolderId, setActiveFolderId, searchQuery } = useApp()
   const { directory, isLoading: isDirLoading, error: dirError, refresh: refreshDir, rename, remove } = useDirectory(activeFolderId ?? undefined)
   const {
     files: infiniteFiles,
@@ -133,6 +134,15 @@ export default function MyFilesView () {
     )
   }
 
+  const currentFolders = directory?.directories || []
+  const hasFolders = currentFolders.length > 0
+  const hasFiles = filesToDisplay.length > 0
+  const isInitialLoading = activeFolderId
+    ? (isDirLoading && filesToDisplay.length === 0 && currentFolders.length === 0)
+    : ((isDirLoading || isFilesLoading) && filesToDisplay.length === 0 && currentFolders.length === 0)
+
+  const isBothEmpty = !isInitialLoading && !hasFolders && !hasFiles && !searchQuery
+
   return (
     <div className='flex flex-col gap-6 w-full min-w-0'>
       {/* Current Location Header Breadcrumb & Actions */}
@@ -166,25 +176,54 @@ export default function MyFilesView () {
         </h1>
       </div>
 
+      {isBothEmpty ? (
+        <div className='flex-1 w-full flex flex-col items-center justify-center text-center py-16 sm:py-24 px-4 select-none animate-in fade-in duration-200'>
+          <div className='w-12 h-12 rounded-xl bg-input-bg border border-card-border/60 flex items-center justify-center text-text-muted mb-4 shadow-2xs'>
+            <FolderOpen className='w-6 h-6 text-text-secondary' strokeWidth={1.8} />
+          </div>
+          <h3 className='text-base sm:text-lg font-bold text-foreground tracking-tight'>
+            {activeFolderId ? 'This folder is empty' : 'Your space is ready'}
+          </h3>
+          <p className='text-xs sm:text-sm text-text-secondary mt-1.5 max-w-sm leading-relaxed font-normal'>
+            {activeFolderId
+              ? "You haven't uploaded any files or created any subfolders in this folder yet."
+              : "You haven't uploaded any files or created any folders yet."}
+          </p>
+          <p className='text-xs text-text-muted mt-2 max-w-sm leading-relaxed font-normal'>
+            Use the <span className='font-semibold text-foreground'>+</span> button above to upload files or create a folder.
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Folders block */}
+          <FolderGrid
+            folders={directory?.directories}
+            isLoading={isDirLoading}
+            onRename={rename}
+            onDelete={remove}
+          />
 
-
-      {/* Folders block */}
-      <FolderGrid
-        folders={directory?.directories}
-        isLoading={isDirLoading}
-        onRename={rename}
-        onDelete={remove}
-      />
-
-      {/* Files block with real cursor pagination & infinite scrolling */}
-      <FileList
-        files={filesToDisplay}
-        isLoading={isListLoading}
-        isLoadingMore={isLoadingMore}
-        hasMore={!activeFolderId && hasMore}
-        onLoadMore={loadMore}
-        title='Files'
-      />
+          {/* Files block with real cursor pagination & infinite scrolling */}
+          <FileList
+            files={filesToDisplay}
+            isLoading={isListLoading}
+            isLoadingMore={isLoadingMore}
+            hasMore={!activeFolderId && hasMore}
+            onLoadMore={loadMore}
+            title={hasFolders || hasFiles ? 'Files' : undefined}
+            emptyState={
+              hasFolders && !hasFiles ? (
+                <EmptyState
+                  icon={FileText}
+                  title={activeFolderId ? 'No files in this folder' : 'No files yet'}
+                  description='Files you add will appear here.'
+                  className='py-8 sm:py-10'
+                />
+              ) : undefined
+            }
+          />
+        </>
+      )}
     </div>
   )
 }

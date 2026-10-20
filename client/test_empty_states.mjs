@@ -23,12 +23,13 @@ describe('CloudSpaceGo Standardized Empty States Test Suite', () => {
     if (currentSection === 'My Files') {
       return {
         icon: 'FolderOpen',
-        title: activeFolderId ? 'This folder is empty' : 'No files yet',
-        description: 'Upload a file or create a folder to get started.',
-        hasPrimaryAction: true,
-        primaryActionLabel: 'Upload files',
-        hasSecondaryAction: true,
-        secondaryActionLabel: 'Create folder',
+        title: activeFolderId ? 'This folder is empty' : 'Your space is ready',
+        description: activeFolderId
+          ? "You haven't uploaded any files or created any subfolders in this folder yet."
+          : "You haven't uploaded any files or created any folders yet.",
+        helperText: 'Use the + button above to upload files or create a folder.',
+        hasPrimaryAction: false,
+        hasSecondaryAction: false,
         targetFolderId: activeFolderId
       }
     }
@@ -76,10 +77,19 @@ describe('CloudSpaceGo Standardized Empty States Test Suite', () => {
     if (currentSection === 'Dashboard-RecentlyOpened') {
       return {
         icon: 'Clock',
-        title: 'No recent files',
+        title: 'Nothing here yet',
         description: 'Files you open, preview, or upload will appear here.',
-        hasPrimaryAction: true,
-        primaryActionLabel: 'Upload files',
+        hasPrimaryAction: false,
+        hasSecondaryAction: false
+      }
+    }
+
+    if (currentSection === 'Dashboard-YourFolders') {
+      return {
+        icon: 'Folder',
+        title: 'No folders yet',
+        description: 'Create a folder to keep your files organized.',
+        hasPrimaryAction: false,
         hasSecondaryAction: false
       }
     }
@@ -95,35 +105,42 @@ describe('CloudSpaceGo Standardized Empty States Test Suite', () => {
     }
   }
 
-  it('1. Home Recently Opened: provides Clock icon and direct Upload files action', () => {
+  it('1. Home Recently Opened: displays Clock icon and "Nothing here yet" without upload action', () => {
     const config = getEmptyStateConfig({ currentSection: 'Dashboard-RecentlyOpened' })
     assert.equal(config.icon, 'Clock')
-    assert.equal(config.title, 'No recent files')
-    assert.equal(config.hasPrimaryAction, true)
-    assert.equal(config.primaryActionLabel, 'Upload files')
+    assert.equal(config.title, 'Nothing here yet')
+    assert.equal(config.description, 'Files you open, preview, or upload will appear here.')
+    assert.equal(config.hasPrimaryAction, false)
     assert.equal(config.hasSecondaryAction, false)
   })
 
-  it('2. My Files (root): displays No files yet, Upload files (primary) and Create folder (secondary)', () => {
+  it('1b. Home Your Folders: displays Folder icon and "No folders yet" without create button', () => {
+    const config = getEmptyStateConfig({ currentSection: 'Dashboard-YourFolders' })
+    assert.equal(config.icon, 'Folder')
+    assert.equal(config.title, 'No folders yet')
+    assert.equal(config.description, 'Create a folder to keep your files organized.')
+    assert.equal(config.hasPrimaryAction, false)
+    assert.equal(config.hasSecondaryAction, false)
+  })
+
+  it('2. My Files (root): displays "Your space is ready" without upload or create folder buttons', () => {
     const config = getEmptyStateConfig({ currentSection: 'My Files', activeFolderId: null })
     assert.equal(config.icon, 'FolderOpen')
-    assert.equal(config.title, 'No files yet')
-    assert.equal(config.hasPrimaryAction, true)
-    assert.equal(config.primaryActionLabel, 'Upload files')
-    assert.equal(config.hasSecondaryAction, true)
-    assert.equal(config.secondaryActionLabel, 'Create folder')
+    assert.equal(config.title, 'Your space is ready')
+    assert.equal(config.description, "You haven't uploaded any files or created any folders yet.")
+    assert.equal(config.helperText, 'Use the + button above to upload files or create a folder.')
+    assert.equal(config.hasPrimaryAction, false)
+    assert.equal(config.hasSecondaryAction, false)
     assert.equal(config.targetFolderId, null)
   })
 
-  it('3. Empty folder: displays This folder is empty and preserves destination folderId for uploads', () => {
+  it('3. Empty folder: displays "This folder is empty" without action buttons', () => {
     const config = getEmptyStateConfig({ currentSection: 'My Files', activeFolderId: 'folder-sub-888' })
     assert.equal(config.icon, 'FolderOpen')
     assert.equal(config.title, 'This folder is empty')
-    assert.equal(config.hasPrimaryAction, true)
-    assert.equal(config.primaryActionLabel, 'Upload files')
+    assert.equal(config.hasPrimaryAction, false)
+    assert.equal(config.hasSecondaryAction, false)
     assert.equal(config.targetFolderId, 'folder-sub-888')
-    assert.equal(config.hasSecondaryAction, true)
-    assert.equal(config.secondaryActionLabel, 'Create folder')
   })
 
   it('4. Shared with me: shows relevant message and no irrelevant upload action', () => {

@@ -497,18 +497,6 @@ export function FileList({
           icon={FolderOpen}
           title={activeFolderId ? 'This folder is empty' : 'No files yet'}
           description='Upload a file or create a folder to get started.'
-          primaryAction={{
-            label: 'Upload files',
-            onClick: triggerUpload,
-            icon: Upload,
-            extraNode: hiddenFileInput
-          }}
-          secondaryAction={{
-            label: 'Create folder',
-            onClick: () => setActiveModal('create-folder'),
-            icon: FolderPlus,
-            variant: 'soft'
-          }}
         />
       )
     }

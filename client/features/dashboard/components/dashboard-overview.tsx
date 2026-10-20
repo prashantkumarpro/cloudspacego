@@ -9,10 +9,8 @@ import { FileList } from '@/features/files/components/file-list'
 import { RenameModal } from '@/features/files/components/rename-modal'
 import { SectionAction } from '@/components/ui/section-action'
 import { useAuth } from '@/features/auth/hooks/use-auth'
-import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
-import { useDirectUpload } from '@/features/files/hooks/use-direct-upload'
-import { Folder, ChevronRight, Eye, Edit3, Share2, Trash2, FolderPlus, Upload, Clock } from 'lucide-react'
+import { Folder, ChevronRight, Eye, Edit3, Share2, Trash2, Clock } from 'lucide-react'
 import {
   useDirectory,
   subscribeDirectoryChanged,
@@ -48,7 +46,6 @@ export default function DashboardOverview() {
   } = useApp()
   const { user } = useAuth()
   const toast = useToast()
-  const { triggerUpload, hiddenFileInput } = useDirectUpload()
 
   const {
     directory,
@@ -470,30 +467,18 @@ export default function DashboardOverview() {
             </button>
           </div>
         ) : folders.length === 0 ? (
-          <div className='w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:px-4 sm:py-3 bg-card-bg border border-card-border rounded-xl select-none shadow-2xs'>
-            <div className='flex items-center gap-3 min-w-0'>
-              <div className='w-8 h-8 rounded-lg bg-input-bg border border-card-border/60 flex items-center justify-center text-text-muted shrink-0'>
-                <Folder className='w-4 h-4 text-text-muted' />
-              </div>
-              <div className='flex flex-col min-w-0'>
-                <h4 className='text-xs sm:text-sm font-semibold text-foreground leading-tight'>
-                  No folders yet
-                </h4>
-                <p className='text-[11px] sm:text-xs text-text-secondary mt-0.5 leading-normal font-normal'>
-                  Create a folder to organize your files.
-                </p>
-              </div>
+          <div className='w-full flex items-center gap-3 p-3.5 sm:px-4 sm:py-3 bg-card-bg border border-card-border rounded-xl select-none shadow-2xs'>
+            <div className='w-8 h-8 rounded-lg bg-input-bg border border-card-border/60 flex items-center justify-center text-text-muted shrink-0'>
+              <Folder className='w-4 h-4 text-text-muted' />
             </div>
-            <Button
-              type='button'
-              variant='soft'
-              size='sm'
-              onClick={() => setActiveModal('create-folder')}
-              className='shrink-0 h-8 px-3 text-xs font-semibold self-start sm:self-auto flex items-center gap-1.5'
-            >
-              <FolderPlus className='w-3.5 h-3.5 text-[#6E60EE]' />
-              <span>Create folder</span>
-            </Button>
+            <div className='flex flex-col min-w-0 text-left'>
+              <h4 className='text-xs sm:text-sm font-semibold text-foreground leading-tight'>
+                No folders yet
+              </h4>
+              <p className='text-[11px] sm:text-xs text-text-secondary mt-0.5 leading-normal font-normal'>
+                Create a folder to keep your files organized.
+              </p>
+            </div>
           </div>
         ) : (
           <div className='grid grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-4 gap-2.5 sm:gap-4'>
@@ -533,14 +518,9 @@ export default function DashboardOverview() {
           emptyState={
             <EmptyState
               icon={Clock}
-              title='No recent files'
+              title='Nothing here yet'
               description='Files you open, preview, or upload will appear here.'
-              primaryAction={{
-                label: 'Upload files',
-                onClick: triggerUpload,
-                icon: Upload,
-                extraNode: hiddenFileInput
-              }}
+              className='py-8 sm:py-10'
             />
           }
         />
