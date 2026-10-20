@@ -6,16 +6,22 @@ import { FolderGrid } from '@/features/directory/components/folder-grid'
 import { FileList } from '@/features/files/components/file-list'
 import { useDirectory } from '@/features/directory/hooks/use-directory'
 import { useInfiniteFiles } from '@/features/files/hooks/use-files'
+import { useDirectUpload } from '@/features/files/hooks/use-direct-upload'
+import { Button } from '@/components/ui/button'
+import { Upload, AlertCircle, RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
 export default function MyFilesView () {
   const { activeFolderId, setActiveFolderId } = useApp()
-  const { directory, isLoading: isDirLoading, rename, remove } = useDirectory(activeFolderId ?? undefined)
+  const { directory, isLoading: isDirLoading, error: dirError, refresh: refreshDir, rename, remove } = useDirectory(activeFolderId ?? undefined)
+  const { triggerUpload, hiddenFileInput } = useDirectUpload()
   const {
     files: infiniteFiles,
     isLoading: isFilesLoading,
     isLoadingMore,
     hasMore,
+    error: filesError,
+    refresh: refreshFiles,
     loadMore
   } = useInfiniteFiles({
     enabled: !activeFolderId
@@ -99,11 +105,42 @@ export default function MyFilesView () {
     ? (isDirLoading && filesToDisplay.length === 0)
     : (isFilesLoading && filesToDisplay.length === 0)
 
+  const currentError = activeFolderId ? dirError : (dirError || filesError)
+  if (currentError && filesToDisplay.length === 0 && (!directory?.directories || directory.directories.length === 0)) {
+    return (
+      <div className='w-full flex flex-col items-center justify-center p-12 bg-card-bg border border-card-border rounded-xl text-center select-none shadow-xs'>
+        <div className='w-12 h-12 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center mb-3'>
+          <AlertCircle className='w-6 h-6' />
+        </div>
+        <h4 className='text-sm sm:text-base font-bold text-foreground'>
+          Failed to load files
+        </h4>
+        <p className='text-xs text-text-secondary mt-1 max-w-sm'>
+          {currentError || 'An error occurred while retrieving files.'}
+        </p>
+        <button
+          onClick={() => {
+            if (activeFolderId) {
+              refreshDir()
+            } else {
+              refreshDir()
+              refreshFiles()
+            }
+          }}
+          className='mt-4 px-4 py-2 bg-[#6E60EE] hover:bg-[#5D50DE] text-white text-xs font-semibold rounded-lg flex items-center gap-2 cursor-pointer transition-colors shadow-xs'
+        >
+          <RefreshCw className='w-3.5 h-3.5' />
+          Try Again
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className='flex flex-col gap-6 w-full min-w-0'>
-      {/* Current Location Header Breadcrumb */}
-      <div className='flex items-center justify-between border-b border-card-border pb-3 shrink-0 select-none min-w-0'>
-        <h1 className='text-lg sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0'>
+      {/* Current Location Header Breadcrumb & Actions */}
+      <div className='flex items-center justify-between border-b border-card-border pb-3 shrink-0 select-none min-w-0 gap-3'>
+        <h1 className='text-lg sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0 flex-1'>
           {breadcrumbs.map((crumb, idx) => {
             const isLast = idx === breadcrumbs.length - 1
             return (
@@ -130,6 +167,18 @@ export default function MyFilesView () {
             )
           })}
         </h1>
+
+        <Button
+          type='button'
+          variant='primary'
+          size='sm'
+          onClick={triggerUpload}
+          className='h-8.5 px-3.5 text-xs font-semibold bg-[#6E60EE] hover:bg-[#6052E6] text-white shadow-xs flex items-center gap-1.5 shrink-0'
+        >
+          <Upload className='w-3.5 h-3.5' />
+          <span>Upload files</span>
+        </Button>
+        {hiddenFileInput}
       </div>
 
 

@@ -20,6 +20,8 @@ import { formatBytes, formatDate } from '../../../lib/utils/format'
 import { FileType } from '../../../types'
 import type { FileItem as BackendFileItem } from '../types'
 import { cn } from '../../../lib/utils/cn'
+import { EmptyState } from '@/components/ui/empty-state'
+import { useDirectUpload } from '@/features/files/hooks/use-direct-upload'
 import {
   Folder,
   FileText,
@@ -39,7 +41,11 @@ import {
   Search,
   Inbox,
   ArrowUp,
-  Info
+  Info,
+  Upload,
+  FolderPlus,
+  FolderOpen,
+  Clock
 } from 'lucide-react'
 
 export type UnifiedFileItem = {
@@ -76,6 +82,7 @@ export interface FileListProps {
   defaultViewMode?: 'grid' | 'list'
   emptyMessage?: string
   emptySubtitle?: string
+  emptyState?: React.ReactNode
   dateLabel?: string
   onFileClick?: (file: UnifiedFileItem) => void
   onFolderClick?: (folderId: string) => void
@@ -115,6 +122,7 @@ export function FileList({
   defaultViewMode,
   emptyMessage,
   emptySubtitle,
+  emptyState,
   dateLabel,
   onFileClick,
   onFolderClick,
@@ -145,6 +153,7 @@ export function FileList({
 
   const toast = useToast()
   const { download, rename, remove } = useFiles()
+  const { triggerUpload, hiddenFileInput } = useDirectUpload({ folderId: activeFolderId })
   const [previewFile, setPreviewFile] = useState<UnifiedFileItem | null>(null)
   const [renameTarget, setRenameTarget] = useState<UnifiedFileItem | null>(null)
   const [moveTarget, setMoveTarget] = useState<UnifiedFileItem | null>(null)
@@ -467,25 +476,93 @@ export function FileList({
     ]
   }
 
-  const defaultEmptyTitle =
-    emptyMessage ||
-    (searchQuery
-      ? 'No results found'
-      : currentSection === 'Shared'
-      ? 'No files shared'
-      : currentSection === 'Starred'
-      ? 'No starred files'
-      : 'No files found')
+  const renderEmptyState = () => {
+    if (emptyState && !searchQuery) {
+      return emptyState
+    }
 
-  const defaultEmptySubtitle =
-    emptySubtitle ||
-    (searchQuery
-      ? `We couldn't find any matches for "${searchQuery}". Try checking your spelling.`
-      : currentSection === 'Shared'
-      ? 'Files shared with you will appear here.'
-      : currentSection === 'Starred'
-      ? 'Files and folders you star will appear here for quick access.'
-      : 'Upload a file or folder to get started.')
+    if (searchQuery) {
+      return (
+        <EmptyState
+          icon={Search}
+          title='No results found'
+          description={`We couldn't find any matches for "${searchQuery}". Try checking your spelling.`}
+        />
+      )
+    }
+
+    if (currentSection === 'My Files') {
+      return (
+        <EmptyState
+          icon={FolderOpen}
+          title={activeFolderId ? 'This folder is empty' : 'No files yet'}
+          description='Upload a file or create a folder to get started.'
+          primaryAction={{
+            label: 'Upload files',
+            onClick: triggerUpload,
+            icon: Upload,
+            extraNode: hiddenFileInput
+          }}
+          secondaryAction={{
+            label: 'Create folder',
+            onClick: () => setActiveModal('create-folder'),
+            icon: FolderPlus,
+            variant: 'soft'
+          }}
+        />
+      )
+    }
+
+    if (currentSection === 'Shared') {
+      return (
+        <EmptyState
+          icon={Users}
+          title={emptyMessage || 'No files shared with you'}
+          description={emptySubtitle || 'Files shared with you by others will appear here.'}
+        />
+      )
+    }
+
+    if (currentSection === 'Recent') {
+      return (
+        <EmptyState
+          icon={Clock}
+          title={emptyMessage || 'No recent files'}
+          description={emptySubtitle || 'Files you open, preview, or download will appear here.'}
+        />
+      )
+    }
+
+    if (currentSection === 'Starred') {
+      return (
+        <EmptyState
+          icon={Star}
+          title={emptyMessage || 'No starred files'}
+          description={emptySubtitle || 'Star files you want to easily find later.'}
+        />
+      )
+    }
+
+    return (
+      <EmptyState
+        icon={Inbox}
+        title={emptyMessage || 'No files found'}
+        description={emptySubtitle || 'Upload a file or folder to get started.'}
+        primaryAction={{
+          label: 'Upload files',
+          onClick: triggerUpload,
+          icon: Upload,
+          extraNode: hiddenFileInput
+        }}
+        secondaryAction={{
+          label: 'Create folder',
+          onClick: () => setActiveModal('create-folder'),
+          icon: FolderPlus,
+          variant: 'soft'
+        }}
+      />
+    )
+  }
 
   const isDashboardOrRecent =
     currentSection === 'Dashboard' || currentSection === 'Recent'
@@ -530,21 +607,7 @@ export function FileList({
           />
         )
       ) : displayList.length === 0 ? (
-        <div className='w-full py-12 flex flex-col items-center justify-center text-center select-none bg-card-bg border border-dashed border-card-border p-6 rounded-xl'>
-          <div className='w-10 h-10 rounded-full bg-input-bg flex items-center justify-center text-text-muted mb-2.5'>
-            {searchQuery ? (
-              <Search className='w-5 h-5' />
-            ) : (
-              <Inbox className='w-5 h-5' />
-            )}
-          </div>
-          <h4 className='text-xs sm:text-sm font-bold text-foreground'>
-            {defaultEmptyTitle}
-          </h4>
-          <p className='text-xs text-text-secondary mt-1 max-w-[260px] leading-normal font-normal'>
-            {defaultEmptySubtitle}
-          </p>
-        </div>
+        renderEmptyState()
       ) : (
         <>
           {activeViewMode === 'grid' ? (

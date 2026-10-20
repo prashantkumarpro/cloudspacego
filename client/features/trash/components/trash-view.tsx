@@ -13,6 +13,7 @@ import { FileCardSkeleton, FileTableSkeleton, FileTableRowSkeleton } from '@/com
 import { ViewToggle } from '@/components/ui/view-toggle'
 import { ActionMenuItem } from '@/components/ui/action-menu'
 import { UnifiedFileItem } from '@/features/files/components/file-list'
+import { EmptyState } from '@/components/ui/empty-state'
 import { RotateCcw, Trash, Trash2, Search, AlertCircle, AlertTriangle, RefreshCw } from 'lucide-react'
 
 export function TrashView() {
@@ -201,31 +202,19 @@ export function TrashView() {
   if (deletedFiles.length === 0) {
     if (searchQuery) {
       return (
-        <div className='bg-card-bg border border-card-border rounded-xl p-16 flex flex-col items-center justify-center text-center select-none shadow-xs'>
-          <div className='w-10 h-10 rounded-full bg-input-bg flex items-center justify-center text-text-muted mb-2.5'>
-            <Search className='w-5 h-5' />
-          </div>
-          <h4 className='text-xs sm:text-sm font-bold text-foreground'>
-            No results found
-          </h4>
-          <p className='text-xs text-text-secondary mt-1 max-w-[240px] leading-normal font-normal'>
-            We couldn&apos;t find any matches in trash for &ldquo;{searchQuery}&rdquo;.
-          </p>
-        </div>
+        <EmptyState
+          icon={Search}
+          title="No results found"
+          description={`We couldn't find any matches in trash for "${searchQuery}".`}
+        />
       )
     }
     return (
-      <div className='bg-card-bg border border-card-border rounded-xl p-16 flex flex-col items-center justify-center text-center select-none shadow-xs'>
-        <div className='w-12 h-12 rounded-full bg-input-bg flex items-center justify-center text-text-muted mb-3'>
-          <Trash2 className='w-6 h-6 text-text-secondary' />
-        </div>
-        <h4 className='text-xs sm:text-sm font-bold text-foreground'>
-          Trash is empty
-        </h4>
-        <p className='text-xs text-text-secondary mt-1 max-w-[260px] leading-normal font-normal'>
-          Deleted files will appear here until they are permanently removed or you empty your trash.
-        </p>
-      </div>
+      <EmptyState
+        icon={Trash2}
+        title="Trash is empty"
+        description="Deleted files will appear here until they are permanently removed or you empty your trash."
+      />
     )
   }
 

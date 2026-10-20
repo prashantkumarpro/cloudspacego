@@ -4,19 +4,23 @@ import React from 'react'
 import { useApp } from '@/providers/app-provider'
 import { CloudUpload, FolderPlus } from 'lucide-react'
 
+import { useDirectUpload } from '@/features/files/hooks/use-direct-upload'
+
 export default function QuickActions () {
   const { setActiveModal } = useApp()
+  const { triggerUpload, hiddenFileInput } = useDirectUpload()
 
   return (
     <div className='flex flex-wrap items-center gap-3 select-none w-full shrink-0 mt-1.5'>
       {/* Action 1: Upload Files */}
       <button
-        onClick={() => setActiveModal('upload-file')}
+        onClick={triggerUpload}
         className='inline-flex items-center gap-2 px-4.5 py-2.5 bg-[#6E60EE]/10 text-[#6E60EE] hover:bg-[#6E60EE]/15 border border-[#6E60EE]/20 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer focus:outline-none shadow-xs active:scale-95'
       >
         <CloudUpload className='w-4 h-4 shrink-0' />
         <span>Upload Files</span>
       </button>
+      {hiddenFileInput}
 
       {/* Action 2: New Folder */}
       <button
