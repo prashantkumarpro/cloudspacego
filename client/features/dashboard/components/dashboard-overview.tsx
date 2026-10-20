@@ -433,20 +433,6 @@ export default function DashboardOverview() {
               <ChevronRight className='w-3.5 h-3.5' />
             </div>
           </div>
-        ) : isNewUser ? (
-          <div className='mt-3.5 flex items-center gap-2.5'>
-            <Button
-              type='button'
-              variant='primary'
-              size='sm'
-              onClick={triggerUpload}
-              className='h-8.5 px-3.5 text-xs font-semibold bg-[#6E60EE] hover:bg-[#6052E6] text-white shadow-xs flex items-center gap-1.5'
-            >
-              <Upload className='w-3.5 h-3.5' />
-              <span>Upload files</span>
-            </Button>
-            {hiddenFileInput}
-          </div>
         ) : null}
       </div>
 

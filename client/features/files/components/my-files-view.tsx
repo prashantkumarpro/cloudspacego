@@ -6,15 +6,12 @@ import { FolderGrid } from '@/features/directory/components/folder-grid'
 import { FileList } from '@/features/files/components/file-list'
 import { useDirectory } from '@/features/directory/hooks/use-directory'
 import { useInfiniteFiles } from '@/features/files/hooks/use-files'
-import { useDirectUpload } from '@/features/files/hooks/use-direct-upload'
-import { Button } from '@/components/ui/button'
-import { Upload, AlertCircle, RefreshCw } from 'lucide-react'
+import { AlertCircle, RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
 export default function MyFilesView () {
   const { activeFolderId, setActiveFolderId } = useApp()
   const { directory, isLoading: isDirLoading, error: dirError, refresh: refreshDir, rename, remove } = useDirectory(activeFolderId ?? undefined)
-  const { triggerUpload, hiddenFileInput } = useDirectUpload()
   const {
     files: infiniteFiles,
     isLoading: isFilesLoading,
@@ -167,18 +164,6 @@ export default function MyFilesView () {
             )
           })}
         </h1>
-
-        <Button
-          type='button'
-          variant='primary'
-          size='sm'
-          onClick={triggerUpload}
-          className='h-8.5 px-3.5 text-xs font-semibold bg-[#6E60EE] hover:bg-[#6052E6] text-white shadow-xs flex items-center gap-1.5 shrink-0'
-        >
-          <Upload className='w-3.5 h-3.5' />
-          <span>Upload files</span>
-        </Button>
-        {hiddenFileInput}
       </div>
 
 
